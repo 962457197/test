@@ -1,0 +1,29 @@
+{
+  "m_list": {
+    "15": {
+      "ID": 15,
+      "IconName": "element_common_red",
+      "IconShadow": null
+    },
+    "16": {
+      "ID": 16,
+      "IconName": "element_common_green",
+      "IconShadow": null
+    },
+    "17": {
+      "ID": 17,
+      "IconName": "element_common_blue",
+      "IconShadow": null
+    },
+    "18": {
+      "ID": 18,
+      "IconName": "element_common_yellow",
+      "IconShadow": null
+    },
+    "19": {
+      "ID": 19,
+      "IconName": "element_common_purple",
+      "IconShadow": null
+    }
+  }
+}
