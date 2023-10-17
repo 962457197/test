@@ -15,7 +15,7 @@ enum LIMIT
     MOVES,
 }
 
-enum DropDataType {
+export enum DropDataType {
     Common,
 }
 
@@ -949,7 +949,7 @@ class LevelTargetData extends LevelBaseData {
     }
 }
 
-class LevelDropData extends LevelBaseData {
+export class LevelDropData extends LevelBaseData {
     id: number = 0;
     type: DropDataType = DropDataType.Common;
     genMax: number = 0;
@@ -1534,7 +1534,7 @@ class GiftBoxData extends LevelBaseData {
     }
 }
 
-class LevelDropColorData extends LevelBaseData {
+export class LevelDropColorData extends LevelBaseData {
     id: number = 0;
     colorlst: number[] = [];
     enterlst: number[] = [];

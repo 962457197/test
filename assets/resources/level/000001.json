@@ -1,5 +1,5 @@
 {
-  "MyVersion": 26,
+  "MyVersion": 29,
   "customizeItemAction": false,
   "levelNum": 1,
   "limitType": 0,
@@ -10,7 +10,7 @@
     20000,
     30000
   ],
-  "randomSeed": 1405554510,
+  "randomSeed": 297284596,
   "maxCols": 9,
   "maxRows": 9,
   "realRows": 8,
@@ -54,7 +54,7 @@
       "direction": 1,
       "blockDataList": [
         {
-          "id": 9
+          "id": 8
         }
       ],
       "borderDataList": [],
@@ -304,7 +304,7 @@
       "direction": 1,
       "blockDataList": [
         {
-          "id": 11
+          "id": 23
         }
       ],
       "borderDataList": [],
@@ -1061,7 +1061,11 @@
     {
       "type": 2,
       "direction": 1,
-      "blockDataList": [],
+      "blockDataList": [
+        {
+          "id": 26
+        }
+      ],
       "borderDataList": [],
       "recylceList": [],
       "IsEnterPoint": false,
@@ -1254,7 +1258,11 @@
     {
       "type": 2,
       "direction": 1,
-      "blockDataList": [],
+      "blockDataList": [
+        {
+          "id": 26
+        }
+      ],
       "borderDataList": [],
       "recylceList": [],
       "IsEnterPoint": false,
@@ -1938,13 +1946,17 @@
     {
       "BlockId": 70,
       "SplitNum": 3
+    },
+    {
+      "BlockId": 172,
+      "SplitNum": 3
     }
   ],
   "CantAsGreedyTargetList": [],
   "ColorLimitList": [
-    9,
-    10,
     8,
+    10,
+    9,
     11
   ],
   "CantAsBubbleTargetList": [],

@@ -24,6 +24,31 @@
       "ID": 19,
       "IconName": "element_common_purple",
       "IconShadow": null
+    },
+    "22": {
+      "ID": 22,
+      "IconName": "element_common_rocket",
+      "IconShadow": null
+    },
+    "26": {
+      "ID": 26,
+      "IconName": "element_line_horizental",
+      "IconShadow": null
+    },
+    "27": {
+      "ID": 27,
+      "IconName": "element_common_line_vertical",
+      "IconShadow": null
+    },
+    "28": {
+      "ID": 28,
+      "IconName": "element_common_bomb",
+      "IconShadow": null
+    },
+    "29": {
+      "ID": 29,
+      "IconName": "element_common_colorbomb",
+      "IconShadow": null
     }
   }
 }

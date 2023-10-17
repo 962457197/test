@@ -2,7 +2,6 @@ import Game from "../Game";
 import { BlockerID } from "../level/blocker/BlockerManager";
 import { Direction } from "../level/data/LevelScriptableData";
 import { FSM } from "../level/fsm/FSM";
-import { NormalTiled } from "../level/tiledmap/NormalTiled";
 import { Tiled } from "../level/tiledmap/Tiled";
 import { TiledMap } from "../level/tiledmap/TiledMap";
 import { CameraManager } from "./CameraManager";
@@ -32,7 +31,7 @@ export class TiledMapTouchHandler
 
     // 玩家点击的位置
     private touchStartPos: cc.Vec2 = cc.Vec2.ZERO;
-    m_ClickedTiled: NormalTiled = null
+    m_ClickedTiled: Tiled = null
     m_ChooseGuid: number = -1;
 
     // 玩家操作检测
@@ -42,6 +41,11 @@ export class TiledMapTouchHandler
             cc.warn("event  = " + event.currentTarget.group + " touchStartPos = " + this.touchStartPos);
             // 玩家触摸开始时的操作
 
+            // if (event.currentTarget.group != Game.GROUP_BLOCK)
+            // {
+            //     return;
+            // }
+
             const { row, col } = CameraManager.getInstance().ScreenPosToTiledPos(this.touchStartPos);
             this.m_ClickedTiled = TiledMap.getInstance().GetTiled(row, col);
             if (this.m_ClickedTiled == null)
@@ -49,7 +53,7 @@ export class TiledMapTouchHandler
                 return;
             }
 
-            cc.error("this.m_ClickedTiled != null row = " + row + " col = " + col);
+            cc.error(`this.m_ClickedTiled != null ${this.m_ChooseGuid == -1} ${this.CheckClickTiledCanMove()} ${this.m_ChooseGuid != this.m_ClickedTiled.Guid}`);
 
             if (this.m_ChooseGuid == -1 && this.CheckClickTiledCanMove())
             {
@@ -71,6 +75,11 @@ export class TiledMapTouchHandler
         if (Game.IsPlayState()) {
             // 玩家触摸移动时的操作
 
+            // if (event.currentTarget.group != Game.GROUP_BLOCK)
+            // {
+            //     return;
+            // }
+
             if (this.m_ChooseGuid !== -1 && this.touchStartPos !== event.getLocation() && this.m_ClickedTiled !== null) {
                 let offsetX = event.getLocation().x - this.touchStartPos.x;
                 let offsetY = event.getLocation().y - this.touchStartPos.y;
@@ -86,6 +95,8 @@ export class TiledMapTouchHandler
                 } else if (Math.abs(offsetX) < Math.abs(offsetY) && offsetY < 0) {
                     moveDirection = Direction.Down;
                 }
+
+                cc.error("offsetY = " + offsetY + " offsetX = " + offsetX);
         
                 if (Math.abs(offsetY) > 30 || Math.abs(offsetX) > 25) {
                     this.EndChooseEffect();
@@ -100,6 +111,12 @@ export class TiledMapTouchHandler
 
     private onTouchEnd(event: cc.Event.EventTouch) {
         if (Game.IsPlayState()) {
+
+            // if (event.currentTarget.group != Game.GROUP_BLOCK)
+            // {
+            //     return;
+            // }
+
             // 玩家触摸结束时的操作
             this.checkTiledEndDrag();
         }
@@ -111,6 +128,18 @@ export class TiledMapTouchHandler
 
     private checkTiledEndDrag() {
         // 在这里处理触摸结束时的操作
+
+        const { row, col } = CameraManager.getInstance().ScreenPosToTiledPos(this.touchStartPos);
+        this.m_ClickedTiled = TiledMap.getInstance().GetTiled(row, col);
+        if (this.m_ClickedTiled == null)
+        {
+            return;
+        }
+
+        if (this.CheckClickTiledCanMove() && this.IsCheckDoubleClick(this.m_ClickedTiled.CanMoveBlocker.ID))
+        {
+            FSM.getInstance().OnDoubleClick(row, col);
+        }
     }
 
     OnChooseEffect() {
@@ -150,8 +179,11 @@ export class TiledMapTouchHandler
     }
 
     private CheckClickTiledCanMove(): boolean {
-        if (this.m_ClickedTiled.CanMoveBlocker !== null && this.m_ClickedTiled.CanMoveBlocker.IsCanSwitch() && this.m_ClickedTiled.CanMove()) {
-            return true;
+        if (this.m_ClickedTiled.CanMoveBlocker !== null) {
+            if (this.m_ClickedTiled.CanMoveBlocker.IsCanSwitch() && this.m_ClickedTiled.CanMove())
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -161,8 +193,8 @@ export class TiledMapTouchHandler
             BlockerID.horizontal,
             BlockerID.vertical,
             BlockerID.squareid,
-            BlockerID.package,
-            BlockerID.multicolor
+            BlockerID.area,
+            BlockerID.samecolor
         ];
     
         return allowedIds.includes(blockerId);

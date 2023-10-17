@@ -1,6 +1,5 @@
 
 import { Direction } from "../data/LevelScriptableData";
-import { NormalTiled } from "../tiledmap/NormalTiled";
 import { TiledMap } from "../tiledmap/TiledMap";
 import { FSM, FSStartType, FSStateType } from "./FSM";
 import { FSCheckData, FSDataBase, FSPrepareData, FSSwitchData } from "./FSData";
@@ -11,6 +10,8 @@ import { EffectController, EffectType } from "../effect/EffectController";
 import { EffectData } from "../effect/EffectBase";
 import { EffectControllerFactory } from "../effect/EffectControllerFactory";
 import { Tiled } from "../tiledmap/Tiled";
+import { FallingManager } from "../drop/FallingManager";
+import { TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
 
 export class FSBase {
     public PreState: FSBase | null = null;
@@ -47,6 +48,20 @@ export class FSBase {
         this.m_isStop = true;
     }
 
+    OnFinish()
+    {
+        this.Stop();
+        if (this.PreState !== null) {
+            const state = this.PreState;
+            this.PreState = null;
+            state.OnFinish();
+        }
+
+        if (this.StateType !== FSStateType.enPrepare && this.StateType !== FSStateType.enFSM) {
+            StateFactory.Instance.Recycle(this);
+        }
+    }
+
     public BackMove(data: FSDataBase): void {
         this.Stop();
         if (this.PreState !== null) {
@@ -76,7 +91,7 @@ export class FSPrepare extends FSBase {
         this.m_data.Reset();
     }
 
-    private CallBack(tiled: NormalTiled, neighbor: NormalTiled, direction: Direction): void {
+    private CallBack(tiled: Tiled, neighbor: Tiled, direction: Direction): void {
         if (
             !tiled.CanMove() ||
             !tiled.CanMoveBlocker?.CanMove() ||
@@ -114,7 +129,7 @@ export class FSPrepare extends FSBase {
     public Start(pre: FSBase): void {
         super.Start(pre);
         if (this.m_data.startType === FSStartType.enNormal) {
-            const tiled: NormalTiled | null = TiledMap.getInstance().GetTiled(this.m_data.curPos.x, this.m_data.curPos.y);
+            const tiled  = TiledMap.getInstance().GetTiled(this.m_data.curPos.x, this.m_data.curPos.y);
 
             if (!tiled?.CanMoveBlocker?.IsCanSwitch()) {
                 this.BackMove(this.m_data);
@@ -124,38 +139,34 @@ export class FSPrepare extends FSBase {
             this.OnCheckNormal(tiled);
 
         } else if (this.m_data.startType === FSStartType.enDoubleClick) {
-            // const tiled: NormalTiled | null = TiledMap.getInstance().GetTiled(this.m_data.curPos.x, this.m_data.curPos.y);
+            const tiled = TiledMap.getInstance().GetTiled(this.m_data.curPos.x, this.m_data.curPos.y);
 
-            // if (
-            //         !tiled?.CanMoveBlocker?.IsCanSwitch() ||
-            //         tiled.IsLocked() ||
-            //         !tiled.isValidTiled() ||
-            //         !tiled.CanMove() ||
-            //         (tiled.CanMoveBlocker?.IsSameColor() &&
-            //             !LevelManager.Instance.Map.IsHaveSameColorCanDestroyBlocker()) ||
-            //         (tiled.CanMoveBlocker?.SubType !== BlockSubType.Special)
-            //     ) {
-            //         this.BackMove(this.m_data);
-            //         return;
-            //     }
+            if (
+                    !tiled?.CanMoveBlocker?.IsCanSwitch() ||
+                    tiled.IsLocked() ||
+                    !tiled.IsValidTiled() ||
+                    !tiled.CanMove() ||
+                    /*(tiled.CanMoveBlocker?.IsSameColor() && !LevelManager.Instance.Map.IsHaveSameColorCanDestroyBlocker()) || */
+                    (tiled.CanMoveBlocker?.TableData.Data.SubType !== BlockSubType.Special)
+                ) 
+            {
+                this.BackMove(this.m_data);
+                return;
+            }
 
-            // if (User.Instance.PlayMode === PlayMode.Normal) {
-                
-            // }
-
-            // this.NextState = StateFactory.Instance.Create(FSStateType.enCheck);
-            // const nextData: FSCheckData | null = this.NextState.GetData() as FSCheckData | null;
-            // if (nextData) {
-            //     nextData.isMain = true;
-            //     nextData.src = tiled;
-            //     nextData.isTriggerEffect = true;
-            //     nextData.startType = this.m_data.startType;
-            //     this.NextState.Start(this);
-            // }
+            this.NextState = StateFactory.Instance.Create(FSStateType.enCheck);
+            const nextData: FSCheckData | null = this.NextState.GetData() as FSCheckData | null;
+            if (nextData) {
+                nextData.isMain = true;
+                nextData.src = tiled;
+                nextData.isTriggerEffect = true;
+                nextData.startType = this.m_data.startType;
+                this.NextState.Start(this);
+            }
         }
     }
 
-    private OnCheckNormal(tiled: NormalTiled): void {
+    private OnCheckNormal(tiled: Tiled): void {
         if (this.m_data.Neighbor == null) {
             if (this.m_data.Direction === Direction.Left) {
                 this.m_data.Neighbor = tiled.GetNeighborLeft();
@@ -200,7 +211,7 @@ export class FSPrepare extends FSBase {
         }
     }
 
-    private PlayCanNotSwitchAnimationIfNeeded(srcTiled: NormalTiled, dstTiled: NormalTiled, movedir: Direction): boolean {
+    private PlayCanNotSwitchAnimationIfNeeded(srcTiled: Tiled, dstTiled: Tiled, movedir: Direction): boolean {
         if (dstTiled === null || srcTiled === null) {
             return false;
         }
@@ -234,7 +245,7 @@ export class FSPrepare extends FSBase {
         // }
 
         // const dstTiledMatchBlocker = dstTiled.MatchBlocker;
-        // if (dstTiledMatchBlocker !== null && dstTiledMatchBlocker.SubType !== BlockSubType.HideMiddle) {
+        // if (dstTiledMatchBlocker !== null && dstTiledMatchBlocker.TableData.Data.SubType !== BlockSubType.HideMiddle) {
         //     if (!srcTiled.IsCanSwitchNoMatchBlocker() && (!srcTiled.CanSwitch() || !srcTiled.SwitchDirectionHaveBorderBlocker(movedir))) {
         //         if (operation === Operation.LeftMove || operation === Operation.RightMove) {
         //             dstTiled.CanMoveBlocker?.PlayForbidSwitchAnim(12 - operation);
@@ -342,64 +353,64 @@ export class FSSwitch extends FSBase {
                     this.m_data.dest.CanMoveBlocker.IsSwitching = false;
                 }
 
-                FSM.getInstance().MovingCanMatch = true;
-
-                // if (this.m_data.src.CanMoveBlocker && !this.m_data.src.CanMoveBlocker.IsDestroy || !this.m_data.src.CanMoveBlocker) {
+                if (this.m_data.src.CanMoveBlocker && !this.m_data.src.CanMoveBlocker.IsDestroy || !this.m_data.src.CanMoveBlocker) {
                     
-                //     if (!this.m_data.src.CanMoveBlocker) {
-                //         EventDispatcher.Notify(GCEventType.TriggerFalling, this.m_data.src);
-                //     } else {
-                //         this.m_data.src.CanMoveBlocker.Marked = false;
-                //         this.m_data.src.CanMoveBlocker.DelayCheck(0.2);
-                //     }
+                    if (this.m_data.src.CanMoveBlocker != null) {
+                        this.m_data.src.CanMoveBlocker.Marked = false;
+                        this.m_data.src.CanMoveBlocker.DelayCheck(0.2);
+                    }
 
-                //     if (this.m_data.src.GetNextTiled() && this.m_data.src.GetNextTiled().CanArrive(this.m_data.src)) {
-                //         EventDispatcher.Notify(GCEventType.TriggerFalling, this.m_data.src.GetNextTiled());
-                //     } else {
-                //         const slantTiled = this.m_data.src.CheckSlantArrvieTiled();
+                    this.m_data.src.CheckTriggerFall();
+                }
 
-                //         if (slantTiled) {
-                //             EventDispatcher.Notify(GCEventType.TriggerFalling, slantTiled);
-                //         }
-                //     }
-                // }
+                if (this.m_data.dest.CanMoveBlocker && !this.m_data.dest.CanMoveBlocker.IsDestroy || !this.m_data.dest.CanMoveBlocker) {
+                    if (this.m_data.dest.CanMoveBlocker != null) {
+                        this.m_data.dest.CanMoveBlocker.Marked = false;
+                        this.m_data.dest.CanMoveBlocker.DelayCheck(0.2);
+                    }
 
-                // if (this.m_data.dest.CanMoveBlocker && !this.m_data.dest.CanMoveBlocker.IsDestroy || !this.m_data.dest.CanMoveBlocker) {
-                //     if (!this.m_data.dest.CanMoveBlocker) {
-                //         EventDispatcher.Notify(GCEventType.TriggerFalling, this.m_data.dest);
-                //     } else {
-                //         this.m_data.dest.CanMoveBlocker.Marked = false;
-                //         this.m_data.dest.CanMoveBlocker.DelayCheck(0.2);
-                //     }
-
-                //     if (this.m_data.dest.GetNextTiled() && this.m_data.dest.GetNextTiled().CanArrive(this.m_data.dest)) {
-                //         EventDispatcher.Notify(GCEventType.TriggerFalling, this.m_data.dest.GetNextTiled());
-                //     } else {
-                //         const slantTiled = this.m_data.dest.CheckSlantArrvieTiled();
-
-                //         if (slantTiled) {
-                //             EventDispatcher.Notify(GCEventType.TriggerFalling, slantTiled);
-                //         }
-                //     }
-                // }
+                    this.m_data.dest.CheckTriggerFall();
+                }
 
                 super.BackMove(data);
             }, true);
         }
     }
 
+    MoveTime: number = 0.35;
+
     private OnPlaySwitchAnimation(fsdata: FSSwitchData, action: () => void, isBackMove: boolean = false): void {
 
-        cc.log(" OnPlaySwitchAnimation src row = " + fsdata.src.Row + " col = " + fsdata.src.Col + "dest row = " + fsdata.dest.Row + " col = " + fsdata.dest.Col);
+        let m_srcTiledPlaySwitch = true;
+        if (fsdata.src != null && fsdata.src.CanMoveBlocker != null && fsdata.src.CanMoveBlocker.TableData.Data.SubType == BlockSubType.Special
+            && fsdata.dest != null && fsdata.dest.CanMoveBlocker != null && fsdata.dest.CanMoveBlocker.TableData.Data.SubType == BlockSubType.Special)
+        {
+            m_srcTiledPlaySwitch = false;
+        }
 
-        cc.tween(fsdata.src.CanMoveBlocker.m_blocker)
-        .to(0.5, { position : cc.v3(fsdata.dest.CanMoveBlocker.m_blocker.position.x, fsdata.dest.CanMoveBlocker.m_blocker.position.y, 0)})
-        .start();
+        if (fsdata.src.CanMoveBlocker != null && m_srcTiledPlaySwitch)
+        {
+            cc.tween(fsdata.src.CanMoveBlocker.m_blocker)
+            .to(this.MoveTime, { position : cc.v3(fsdata.src.LocalPosition.x, fsdata.src.LocalPosition.y, 0)})
+            .start();
+        }
+        
+        if (fsdata.dest.CanMoveBlocker != null)
+        {
+            cc.tween(fsdata.dest.CanMoveBlocker.m_blocker)
+            .to(this.MoveTime, { position : cc.v3(fsdata.dest.LocalPosition.x, fsdata.dest.LocalPosition.y, 0)})
+            .start();
+        }
 
-        cc.tween(fsdata.dest.CanMoveBlocker.m_blocker)
-        .to(0.5, { position : cc.v3(fsdata.src.CanMoveBlocker.m_blocker.position.x, fsdata.src.CanMoveBlocker.m_blocker.position.y, 0)})
-        .call(action)
-        .start();
+        let timeData = new TimerData();
+        timeData.objthis = this;
+        timeData.type = TimerType.enOnce;
+        timeData.interval = this.MoveTime;
+        timeData.body = ()=>
+        {
+            action();
+        };
+        TimerManager.Instance.CreateTimer(timeData);
 
         // BaseOperate.Instance.ExchangeBlockers(fsdata.src, fsdata.dest, action, AppFacade.Instance.GameCfg.switchAnimSpeed, isBackMove);
     }
@@ -438,39 +449,40 @@ export class FSCheck extends FSBase {
         //     LevelManager.Instance.FindLightBlockersOn();
         // }
         if (this.m_data.src !== null && this.m_data.dest !== null) {
-            if (this.CheckSwitchMatch(this.ExecuteEffectBefore)) {
+            if (this.CheckSwitchMatch(this.ExecuteEffectBefore.bind(this))) {
                 return;
             }
         }
 
         if (this.m_data.isTriggerEffect) {
-            if (this.m_data.src !== null && this.m_data.src.CanMoveBlocker !== null && !this.m_data.src.CanMoveBlocker.CrushState) {
+            if (this.m_data.src !== null && this.m_data.src.CanMoveBlocker != null && !this.m_data.src.CanMoveBlocker.CrushState) {
                 // this.m_data.src.IsExpandGrapeJuice = this.m_data.src.IsHaveGrapeJuice();
-                this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
+                this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
 
-                // if (this.m_data.src.CanMoveBlocker.IsLineBlocker()) {
-                //     this.m_ctrl.CreateEffect(EffectType.LineCrush, this.m_data.src, this.m_effData, this.m_data.dest);
-                // } else if (this.m_data.src.CanMoveBlocker.IsAreaBlocker()) {
-                //     this.m_data.src.CanMoveBlocker.DisableSameColorCrushAnim();
-                //     this.m_ctrl.CreateEffect(EffectType.AreaCrush, this.m_data.src, this.m_effData);
-                // } else if (this.m_data.src.CanMoveBlocker.IsSameColor()) {
-                //     this.m_ctrl.CreateEffect(EffectType.SameColorBase, this.m_data.src, this.m_effData);
-                // } else if (this.m_data.src.CanMoveBlocker.IsSquareBlocker()) {
-                //     this.m_ctrl.CreateEffect(EffectType.SquareCrush, this.m_data.src, this.m_effData);
-                // }
+                if (this.m_data.src.CanMoveBlocker.IsLineBlocker()) {
+                    this.m_ctrl.CreateEffect(EffectType.LineCrush, this.m_data.src, this.m_effData, this.m_data.dest);
+                } else if (this.m_data.src.CanMoveBlocker.IsAreaBlocker()) {
+                    // this.m_data.src.CanMoveBlocker.DisableSameColorCrushAnim();
+                    this.m_ctrl.CreateEffect(EffectType.AreaCrush, this.m_data.src, this.m_effData);
+                } else if (this.m_data.src.CanMoveBlocker.IsSameColor()) {
+                    this.m_ctrl.CreateEffect(EffectType.SameColorBase, this.m_data.src, this.m_effData);
+                } else if (this.m_data.src.CanMoveBlocker.IsSquareBlocker()) {
+                    this.m_ctrl.CreateEffect(EffectType.SquareCrush, this.m_data.src, this.m_effData);
+                }
+
                 this.m_ctrl.Execute();
             } else {
                 this.BackMove(this.m_data);
             }
         } else {
-            this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
+            this.m_ctrl = EffectControllerFactory.Instance.PopController(()=> { this.OnEffectCtrlCallback.bind(this) });
             // 3 match
-            if (this.m_data.src !== null && this.m_data.src.CanMoveBlocker !== null && this.m_data.src.CanMoveBlocker.CanMatch()) {
+            if (this.m_data.src !== null && this.m_data.src.CanMoveBlocker != null && this.m_data.src.CanMoveBlocker.CanMatch()) {
                 // this.m_data.src.IsExpandGrapeJuice = this.m_data.src.IsHaveGrapeJuice();
                 this.m_ctrl.CreateEffect(EffectType.BaseCrush, this.m_data.src, this.m_effData);
             }
 
-            if (this.m_data.dest !== null && this.m_data.dest.CanMoveBlocker !== null && this.m_data.dest.CanMoveBlocker.CanMatch()) {
+            if (this.m_data.dest !== null && this.m_data.dest.CanMoveBlocker != null && this.m_data.dest.CanMoveBlocker.CanMatch()) {
                 // this.m_data.dest.IsExpandGrapeJuice = this.m_data.dest.IsHaveGrapeJuice();
                 this.m_ctrl.CreateEffect(EffectType.BaseCrush, this.m_data.dest, this.m_effData);
             }
@@ -480,9 +492,9 @@ export class FSCheck extends FSBase {
     }
 
     private DeductLimit(): void {
-        // if (this.m_data.startType === FSStartType.enNormal) {
-        //     this.m_isDeductLimited = true;
-        // }
+        if (this.m_data.startType === FSStartType.enNormal) {
+            this.m_isDeductLimited = true;
+        }
     }
 
     // private SetIsExpandGrapeJuice(): void {
@@ -507,207 +519,207 @@ export class FSCheck extends FSBase {
                 return false;
             }
 
-            // if (srcBlocker !== null) {
-            //     if (srcBlocker.IsSameColor() || destBlocker.IsSameColor()) {
-            //         // 彩球+基本元素
-            //         if (srcBlocker.SubType === BlockSubType.none || destBlocker.SubType === BlockSubType.none) {
-            //             if (srcBlocker.CanMatch() && destBlocker.CanMatch()) {
-            //                 const blocker = (srcBlocker.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
-            //                 if (blocker.TableData.type === BlockType.BaseBlock || blocker.TableData.type === BlockType.SpecialBlock || blocker.IsHasAttribute(BlockerAttribute.canSwitchWithSameColor)) {
-            //                     this.DeductLimit();
-            //                     const spblocker = (srcBlocker.SubType !== BlockSubType.none) ? srcBlocker : destBlocker;
-            //                     executeEffectBefore();
-            //                     this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //                     this.m_ctrl.CreateEffect(EffectType.SameColorBase, spblocker.SelfTiled, this.m_effData, blocker);
-            //                     this.m_ctrl.Execute();
-            //                     return true;
-            //                 }
-            //             }
-            //             this.BackMove(this.m_data);
-            //             return true;
-            //         }
-            //         // 彩球+横/竖条纹
-            //         else if (srcBlocker.IsLineBlocker() || destBlocker.IsLineBlocker()) {
-            //             this.DeductLimit();
-            //             LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SameColorLine);
-            //             executeEffectBefore();
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             this.m_ctrl.CreateEffect(EffectType.SameColorLine, this.m_data.dest, this.m_effData, srcBlocker);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //         // 彩球+包装
-            //         else if (srcBlocker.IsAreaBlocker() || destBlocker.IsAreaBlocker()) {
-            //             this.DeductLimit();
-            //             LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SameColorArea);
-            //             executeEffectBefore();
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             this.m_ctrl.CreateEffect(EffectType.SameColorArea, this.m_data.dest, this.m_effData, srcBlocker);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //         // 彩球+彩球
-            //         else if (srcBlocker.IsSameColor() && destBlocker.IsSameColor()) {
-            //             this.DeductLimit();
-            //             LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SameColor);
-            //             executeEffectBefore();
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             this.m_ctrl.CreateEffect(EffectType.SameColor, this.m_data.dest, this.m_effData, srcBlocker);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //         // 彩球+田字消
-            //         else if (srcBlocker.IsSquareBlocker() || destBlocker.IsSquareBlocker()) {
-            //             this.DeductLimit();
-            //             LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SameColorSquare);
-            //             executeEffectBefore();
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             this.m_ctrl.CreateEffect(EffectType.SameColorSquare, this.m_data.dest, this.m_effData, srcBlocker);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
+            if (srcBlocker !== null) {
+                if (srcBlocker.IsSameColor() || destBlocker.IsSameColor()) {
+                    // 彩球+基本元素
+                    if (srcBlocker.TableData.Data.SubType === BlockSubType.none || destBlocker.TableData.Data.SubType === BlockSubType.none) {
+                        if (srcBlocker.CanMatch() && destBlocker.CanMatch()) {
+                            const blocker = (srcBlocker.TableData.Data.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
+                            if (blocker.TableData.Data.Type === BlockType.BaseBlock || blocker.TableData.Data.Type === BlockType.SpecialBlock || blocker.TableData.IsHasAttribute(BlockerAttribute.canSwitchWithSameColor)) {
+                                this.DeductLimit();
+                                const spblocker = (srcBlocker.TableData.Data.SubType !== BlockSubType.none) ? srcBlocker : destBlocker;
+                                executeEffectBefore();
+                                this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                                this.m_ctrl.CreateEffect(EffectType.SameColorBase, spblocker.SelfTiled, this.m_effData, blocker);
+                                this.m_ctrl.Execute();
+                                return true;
+                            }
+                        }
+                        this.BackMove(this.m_data);
+                        return true;
+                    }
+                    // 彩球+横/竖条纹
+                    else if (srcBlocker.IsLineBlocker() || destBlocker.IsLineBlocker()) {
+                        this.DeductLimit();
+                        // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SameColorLine);
+                        executeEffectBefore();
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        this.m_ctrl.CreateEffect(EffectType.SameColorLine, this.m_data.dest, this.m_effData, srcBlocker);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                    // 彩球+包装
+                    else if (srcBlocker.IsAreaBlocker() || destBlocker.IsAreaBlocker()) {
+                        this.DeductLimit();
+                        // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SameColorArea);
+                        executeEffectBefore();
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        this.m_ctrl.CreateEffect(EffectType.SameColorArea, this.m_data.dest, this.m_effData, srcBlocker);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                    // 彩球+彩球
+                    else if (srcBlocker.IsSameColor() && destBlocker.IsSameColor()) {
+                        this.DeductLimit();
+                        // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SameColor);
+                        executeEffectBefore();
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        this.m_ctrl.CreateEffect(EffectType.SameColorAndSameColor, this.m_data.dest, this.m_effData, srcBlocker);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                    // 彩球+田字消
+                    else if (srcBlocker.IsSquareBlocker() || destBlocker.IsSquareBlocker()) {
+                        this.DeductLimit();
+                        // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SameColorSquare);
+                        executeEffectBefore();
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        this.m_ctrl.CreateEffect(EffectType.SameColorSquare, this.m_data.dest, this.m_effData, srcBlocker);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
 
-            //         this.BackMove(this.m_data);
-            //         return true;
-            //     }
-            //     else if (BlockSubType.Special === srcBlocker.SubType && BlockSubType.Special === destBlocker.SubType) {
-            //         // 包装
-            //         if (srcBlocker.IsAreaBlocker() || destBlocker.IsAreaBlocker()) {
-            //             // 包装+横/竖条纹
-            //             if (srcBlocker.IsLineBlocker() || destBlocker.IsLineBlocker()) {
-            //                 this.DeductLimit();
-            //                 LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.AreaLine);
-            //                 executeEffectBefore();
-            //                 this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //                 this.m_ctrl.CreateEffect(EffectType.AreaLine, this.m_data.dest, this.m_effData, this.m_data.src);
-            //                 this.m_ctrl.Execute();
-            //                 return true;
-            //             }
-            //             // 包装+包装
-            //             else if (srcBlocker.IsAreaBlocker() && destBlocker.IsAreaBlocker()) {
-            //                 this.DeductLimit();
-            //                 LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.AreaAndArea);
-            //                 executeEffectBefore();
-            //                 this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //                 this.m_ctrl.CreateEffect(EffectType.AreaAndArea, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
-            //                 this.m_ctrl.Execute();
-            //                 return true;
-            //             }
-            //             else if (srcBlocker.IsSquareBlocker() || destBlocker.IsSquareBlocker()) {
-            //                 this.DeductLimit();
-            //                 LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SquareAreaCompose);
-            //                 executeEffectBefore();
-            //                 this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //                 this.m_ctrl.CreateEffect(EffectType.SquareAreaCompose, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
-            //                 this.m_ctrl.Execute();
-            //                 return true;
-            //             }
-            //         }
-            //         // 竖条纹+横条纹/横条纹+竖条纹
-            //         else if (srcBlocker.IsLineBlocker() && destBlocker.IsLineBlocker()) {
-            //             this.DeductLimit();
-            //             LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.LineLine);
-            //             executeEffectBefore();
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             this.m_ctrl.CreateEffect(EffectType.LineLine, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //         else if (srcBlocker.IsSquareBlocker() && destBlocker.IsSquareBlocker()) {
-            //             this.DeductLimit();
-            //             LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SquareAndSquare);
-            //             executeEffectBefore();
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             this.m_ctrl.CreateEffect(EffectType.SquareAndSquare, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //         else if (srcBlocker.IsSquareBlocker() || destBlocker.IsSquareBlocker()) {
-            //             if (srcBlocker.IsLineBlocker() || destBlocker.IsLineBlocker()) {
-            //                 this.DeductLimit();
-            //                 LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SquareLineCompose);
-            //                 executeEffectBefore();
-            //                 this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //                 this.m_ctrl.CreateEffect(EffectType.SquareLineCompose, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
-            //                 this.m_ctrl.Execute();
-            //                 return true;
-            //             }
-            //         }
-            //     }
-            //     else if ((srcBlocker.SubType === BlockSubType.Special && destBlocker.SubType === BlockSubType.none) || (srcBlocker.SubType === BlockSubType.none && destBlocker.SubType === BlockSubType.Special)) {
-            //         if (srcBlocker.IsAreaBlocker() || destBlocker.IsAreaBlocker()) {
-            //             this.DeductLimit();
-            //             executeEffectBefore();
-            //             const packageBlocker = srcBlocker.IsAreaBlocker() ? srcBlocker : destBlocker;
-            //             const normalBlocker = (srcBlocker.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             if (normalBlocker.CanMatch()) {
-            //                 this.m_ctrl.CreateEffect(EffectType.BaseCrush, normalBlocker.SelfTiled, this.m_effData);
-            //             }
-            //             this.m_ctrl.CreateEffect(EffectType.AreaCrush, packageBlocker.SelfTiled, this.m_effData);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //         if (srcBlocker.IsLineBlocker() || destBlocker.IsLineBlocker()) {
-            //             this.DeductLimit();
-            //             executeEffectBefore();
-            //             const lineBlocker = (srcBlocker.SubType === BlockSubType.none) ? destBlocker : srcBlocker;
-            //             const normalBlocker = (srcBlocker.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             if (normalBlocker.CanMatch()) {
-            //                 this.m_ctrl.CreateEffect(EffectType.BaseCrush, normalBlocker.SelfTiled, this.m_effData);
-            //             }
-            //             normalBlocker.Marked = false;
-            //             this.m_ctrl.CreateEffect(EffectType.LineCrush, lineBlocker.SelfTiled, this.m_effData, normalBlocker.SelfTiled);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //         // 田字消
-            //         if (srcBlocker.IsSquareBlocker() || destBlocker.IsSquareBlocker()) {
-            //             this.DeductLimit();
-            //             executeEffectBefore();
-            //             const squareBlocker = (srcBlocker.SubType === BlockSubType.none) ? destBlocker : srcBlocker;
-            //             const normalBlocker = (srcBlocker.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             if (normalBlocker.CanMatch()) {
-            //                 this.m_ctrl.CreateEffect(EffectType.BaseCrush, normalBlocker.SelfTiled, this.m_effData);
-            //             }
-            //             normalBlocker.Marked = false;
-            //             this.m_ctrl.CreateEffect(EffectType.SquareCrush, squareBlocker.SelfTiled, this.m_effData);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //     }
-            // }
-            // else {
-            //     if (destBlocker.SubType === BlockSubType.Special) {
-            //         if (destBlocker.IsAreaBlocker()) {
-            //             this.DeductLimit();
-            //             executeEffectBefore();
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             this.m_ctrl.CreateEffect(EffectType.AreaCrush, destBlocker.SelfTiled, this.m_effData);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //         if (destBlocker.IsLineBlocker()) {
-            //             this.DeductLimit();
-            //             executeEffectBefore();
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             this.m_ctrl.CreateEffect(EffectType.LineCrush, destBlocker.SelfTiled, this.m_effData, destBlocker.ID);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //         // 田字消
-            //         if (destBlocker.IsSquareBlocker()) {
-            //             this.DeductLimit();
-            //             executeEffectBefore();
-            //             this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback);
-            //             this.m_ctrl.CreateEffect(EffectType.SquareCrush, destBlocker.SelfTiled, this.m_effData);
-            //             this.m_ctrl.Execute();
-            //             return true;
-            //         }
-            //     }
-            // }
+                    this.BackMove(this.m_data);
+                    return true;
+                }
+                else if (BlockSubType.Special === srcBlocker.TableData.Data.SubType && BlockSubType.Special === destBlocker.TableData.Data.SubType) {
+                    // 包装
+                    if (srcBlocker.IsAreaBlocker() || destBlocker.IsAreaBlocker()) {
+                        // 包装+横/竖条纹
+                        if (srcBlocker.IsLineBlocker() || destBlocker.IsLineBlocker()) {
+                            this.DeductLimit();
+                            // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.AreaLine);
+                            executeEffectBefore();
+                            this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                            this.m_ctrl.CreateEffect(EffectType.AreaLine, this.m_data.dest, this.m_effData, this.m_data.src);
+                            this.m_ctrl.Execute();
+                            return true;
+                        }
+                        // 包装+包装
+                        else if (srcBlocker.IsAreaBlocker() && destBlocker.IsAreaBlocker()) {
+                            this.DeductLimit();
+                            // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.AreaAndArea);
+                            executeEffectBefore();
+                            this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                            this.m_ctrl.CreateEffect(EffectType.AreaAndArea, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
+                            this.m_ctrl.Execute();
+                            return true;
+                        }
+                        else if (srcBlocker.IsSquareBlocker() || destBlocker.IsSquareBlocker()) {
+                            this.DeductLimit();
+                            // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SquareAreaCompose);
+                            executeEffectBefore();
+                            this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                            this.m_ctrl.CreateEffect(EffectType.SquareAreaCompose, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
+                            this.m_ctrl.Execute();
+                            return true;
+                        }
+                    }
+                    // 竖条纹+横条纹/横条纹+竖条纹
+                    else if (srcBlocker.IsLineBlocker() && destBlocker.IsLineBlocker()) {
+                        this.DeductLimit();
+                        // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.LineLine);
+                        executeEffectBefore();
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        this.m_ctrl.CreateEffect(EffectType.LineLine, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                    else if (srcBlocker.IsSquareBlocker() && destBlocker.IsSquareBlocker()) {
+                        this.DeductLimit();
+                        // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SquareAndSquare);
+                        executeEffectBefore();
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        this.m_ctrl.CreateEffect(EffectType.SquareAndSquare, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                    else if (srcBlocker.IsSquareBlocker() || destBlocker.IsSquareBlocker()) {
+                        if (srcBlocker.IsLineBlocker() || destBlocker.IsLineBlocker()) {
+                            this.DeductLimit();
+                            // LevelManager.Instance.Collector.SetLevelAutomaticEffect(EffectType.SquareLineCompose);
+                            executeEffectBefore();
+                            this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                            this.m_ctrl.CreateEffect(EffectType.SquareLineCompose, destBlocker.SelfTiled, this.m_effData, srcBlocker.SelfTiled);
+                            this.m_ctrl.Execute();
+                            return true;
+                        }
+                    }
+                }
+                else if ((srcBlocker.TableData.Data.SubType === BlockSubType.Special && destBlocker.TableData.Data.SubType === BlockSubType.none) || (srcBlocker.TableData.Data.SubType === BlockSubType.none && destBlocker.TableData.Data.SubType === BlockSubType.Special)) {
+                    if (srcBlocker.IsAreaBlocker() || destBlocker.IsAreaBlocker()) {
+                        this.DeductLimit();
+                        executeEffectBefore();
+                        const packageBlocker = srcBlocker.IsAreaBlocker() ? srcBlocker : destBlocker;
+                        const normalBlocker = (srcBlocker.TableData.Data.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        if (normalBlocker.CanMatch()) {
+                            this.m_ctrl.CreateEffect(EffectType.BaseCrush, normalBlocker.SelfTiled, this.m_effData);
+                        }
+                        this.m_ctrl.CreateEffect(EffectType.AreaCrush, packageBlocker.SelfTiled, this.m_effData);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                    if (srcBlocker.IsLineBlocker() || destBlocker.IsLineBlocker()) {
+                        this.DeductLimit();
+                        executeEffectBefore();
+                        const lineBlocker = (srcBlocker.TableData.Data.SubType === BlockSubType.none) ? destBlocker : srcBlocker;
+                        const normalBlocker = (srcBlocker.TableData.Data.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        if (normalBlocker.CanMatch()) {
+                            this.m_ctrl.CreateEffect(EffectType.BaseCrush, normalBlocker.SelfTiled, this.m_effData);
+                        }
+                        normalBlocker.Marked = false;
+                        this.m_ctrl.CreateEffect(EffectType.LineCrush, lineBlocker.SelfTiled, this.m_effData, normalBlocker.SelfTiled);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                    // 田字消
+                    if (srcBlocker.IsSquareBlocker() || destBlocker.IsSquareBlocker()) {
+                        this.DeductLimit();
+                        executeEffectBefore();
+                        const squareBlocker = (srcBlocker.TableData.Data.SubType === BlockSubType.none) ? destBlocker : srcBlocker;
+                        const normalBlocker = (srcBlocker.TableData.Data.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        if (normalBlocker.CanMatch()) {
+                            this.m_ctrl.CreateEffect(EffectType.BaseCrush, normalBlocker.SelfTiled, this.m_effData);
+                        }
+                        normalBlocker.Marked = false;
+                        this.m_ctrl.CreateEffect(EffectType.SquareCrush, squareBlocker.SelfTiled, this.m_effData);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                }
+            }
+            else {
+                if (destBlocker.TableData.Data.SubType === BlockSubType.Special) {
+                    if (destBlocker.IsAreaBlocker()) {
+                        this.DeductLimit();
+                        executeEffectBefore();
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        this.m_ctrl.CreateEffect(EffectType.AreaCrush, destBlocker.SelfTiled, this.m_effData);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                    if (destBlocker.IsLineBlocker()) {
+                        this.DeductLimit();
+                        executeEffectBefore();
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        this.m_ctrl.CreateEffect(EffectType.LineCrush, destBlocker.SelfTiled, this.m_effData, destBlocker.ID);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                    // 田字消
+                    if (destBlocker.IsSquareBlocker()) {
+                        this.DeductLimit();
+                        executeEffectBefore();
+                        this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
+                        this.m_ctrl.CreateEffect(EffectType.SquareCrush, destBlocker.SelfTiled, this.m_effData);
+                        this.m_ctrl.Execute();
+                        return true;
+                    }
+                }
+            }
 
             let first = this.m_data.src;
             let second = this.m_data.dest;
@@ -718,7 +730,7 @@ export class FSCheck extends FSBase {
             }
             if ((first.CanMoveBlocker != null && first.CanMoveBlocker.CanMatch()) || (second.CanMoveBlocker != null && second.CanMoveBlocker.CanMatch())) {
                 executeEffectBefore();
-                this.m_ctrl = EffectControllerFactory.Instance.PopController(()=> {this.OnEffectCtrlCallback} );
+                this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
                 if (first.CanMoveBlocker != null && first.CanMoveBlocker.CanMatch()) {
                     this.m_ctrl.CreateEffect(EffectType.BaseCrush, first, this.m_effData);
                 }
@@ -736,7 +748,7 @@ export class FSCheck extends FSBase {
     }
 
     public OnEffectCtrlCallback() {
-        cc.log("this.m_effData = " + this.m_effData);
+        
         const issucced = this.m_effData.IsSuccess;
         this.m_effData.IsSuccess = false;
         // if (this.m_data.isUseItem) {
@@ -759,21 +771,27 @@ export class FSCheck extends FSBase {
                 // this.m_data.dest.RecyleIngredients();
                 if (this.m_data.startType === FSStartType.enNormal) {
                     
+                    if (!this.m_isDeductLimited)
+                    {
+                        this.m_isDeductLimited = true;
+                        FSM.getInstance().MovingCanMatch = true;
+                        TiledMap.getInstance().CurrentLevelLimit--;
+                    }
+                    
                     if ((this.m_data.src.CanMoveBlocker != null && !this.m_data.src.CanMoveBlocker.IsDestroy) || this.m_data.src.CanMoveBlocker == null) {
                         if (this.m_data.src.CanMoveBlocker != null) {
                             this.m_data.src.CanMoveBlocker.Marked = false;
                         }
 
-                        // EventDispatcher.Notify(GCEventType.TriggerFalling, this.m_data.src);
-                        // if (this.m_data.src.GetNextTiled() != null && this.m_data.src.GetNextTiled().CanArrive(this.m_data.src)) {
-                        //     EventDispatcher.Notify(GCEventType.TriggerFalling, this.m_data.src.GetNextTiled());
-                        // }
-                        // else {
-                        //     const slantTiled = this.m_data.src.CheckSlantArrvieTiled();
-                        //     if (slantTiled != null) {
-                        //         EventDispatcher.Notify(GCEventType.TriggerFalling, slantTiled);
-                        //     }
-                        // }
+                        this.m_data.src.CheckTriggerFall();
+                    }
+
+                    if ((this.m_data.dest.CanMoveBlocker != null && !this.m_data.dest.CanMoveBlocker.IsDestroy) || this.m_data.dest.CanMoveBlocker == null) {
+                        if (this.m_data.dest.CanMoveBlocker != null) {
+                            this.m_data.dest.CanMoveBlocker.Marked = false;
+                        }
+
+                        this.m_data.dest.CheckTriggerFall();
                     }
                 }
             }
@@ -781,10 +799,185 @@ export class FSCheck extends FSBase {
     }
 }
 
-export class FSAdpater extends FSBase
-{
-    StartByTiled(tiled: Tiled)
-    {
+class EffectAdapter {
+    m_wraps: FSAdpater[] = [];
+    m_callback: () => void;
 
+    constructor(cb: () => void) {
+        this.m_callback = cb;
+    }
+
+    Reset() {
+        this.m_wraps = [];
+    }
+
+    CreateEffect(tiled: Tiled) {
+        const Wrap: FSAdpater | null = StateFactory.Instance.Create(FSStateType.enAdpater) as FSAdpater;
+
+        if (Wrap) {
+            this.m_wraps.push(Wrap);
+            Wrap.StartTriggerEffect(tiled, this.OnEffectCallback.bind(this));
+        }
+    }
+
+    OnEffectCallback(wrap: FSAdpater) {
+        const index: number = this.m_wraps.indexOf(wrap);
+
+        if (index !== -1) {
+            this.m_wraps.splice(index, 1);
+
+            if (this.m_wraps.length <= 0) {
+                this.m_callback();
+            }
+        }
+    }
+}
+
+export class IntervalExecEffect {
+    m_blockers: Tiled[];
+    m_callback: () => void;
+    m_adapter: EffectAdapter;
+    m_isRet: boolean = false;
+    private m_isCheckOver: boolean = false;
+
+    constructor(blockers: Tiled[], handle: () => void) {
+        this.m_blockers = blockers;
+        this.m_callback = handle;
+        this.m_isRet = true;
+        this.m_adapter = new EffectAdapter(this.OnAdapterCallback.bind(this));
+    }
+
+    OnAdapterCallback() {
+        this.m_isRet = true;
+        this.OnFinish();
+    }
+
+    Start() {
+        this.OnStartStepExecute();
+    }
+
+    private OnStartStepExecute() {
+        // Sort by Guid, assuming TiledMap.QuickSortTildByGuid is defined
+        TiledMap.QuickSortTildByGuid(this.m_blockers, 0, this.m_blockers.length - 1);
+        this.OnStepByStepExecute();
+    }
+
+    private OnStepByStepExecute() {
+        if (this.m_blockers.length <= 0) {
+            this.TryFinish();
+            return;
+        }
+
+        const tiled = this.m_blockers[0];
+        this.m_blockers.shift();
+
+        if (tiled && tiled.CanMoveBlocker && tiled.CanMoveBlocker.TableData.Data.SubType == BlockSubType.Special) {
+            if (!tiled.CanMoveBlocker.Falling && tiled.CanMoveBlocker.IsNotTriggerMatched()) {
+                this.m_isRet = false;
+                this.m_adapter.CreateEffect(tiled);
+
+                let timerData = new TimerData();
+                timerData.objthis = this;
+                timerData.type = TimerType.enOnce;
+                timerData.interval = 0.25;
+                timerData.body = this.OnStepByStepExecute.bind(this);
+                TimerManager.Instance.CreateTimer(timerData);
+
+            } else {
+                this.OnStepByStepExecute();
+            }
+        } else {
+            this.OnStepByStepExecute();
+        }
+    }
+
+    TryFinish() {
+        this.m_isCheckOver = true;
+        if (!this.m_isRet) {
+            return;
+        }
+        this.OnFinish();
+    }
+
+    OnFinish() {
+        if (this.m_isCheckOver) {
+            this.m_callback();
+        }
+    }
+}
+
+export class FSAdpater extends FSBase {
+    private m_tiled: Tiled | null;
+    private m_action: (wrap: FSAdpater) => void | null;
+
+    constructor() {
+        super(FSStateType.enAdpater);
+        FallingManager.Instance.AdpaterStates.push(this);
+    }
+
+    public Reset() {
+        this.m_tiled = null;
+        this.m_action = null;
+        FallingManager.Instance.AdpaterStates.push(this);
+    }
+
+    public StartTriggerEffect(tiled: Tiled, action: (wrap: FSAdpater) => void): void;
+    public StartTriggerEffect(tiled: Tiled): void;
+
+    public StartTriggerEffect(tiled: Tiled, action?: (wrap: FSAdpater) => void): void {
+        if (action != null) {
+            this.m_action = action;
+        }
+        this.m_tiled = tiled;
+        // this.m_tiled.IsExpandGrapeJuice = this.m_tiled.IsHaveGrapeJuice();
+        this.NextState = StateFactory.Instance.Create(FSStateType.enCheck);
+        const checkData = this.NextState.GetData() as FSCheckData;
+        checkData.src = this.m_tiled;
+        checkData.isTriggerEffect = true;
+        this.NextState.Start(this);
+    }
+
+    public StartTriggerTiled(tiled: Tiled) {
+        this.m_tiled = tiled;
+        this.NextState = StateFactory.Instance.Create(FSStateType.enCheck);
+        const checkData = this.NextState.GetData() as FSCheckData;
+        checkData.src = this.m_tiled;
+        this.NextState.Start(this);
+    }
+
+    // public StartExecuteEffect(type: EffectType, tiled: NormalTiled, isExpand: boolean) {
+    //     this.m_tiled = tiled;
+    //     // this.m_tiled.IsExpandGrapeJuice = isExpand;
+    //     this.NextState = StateFactory.Instance.Create(FSStateType.enExecuteEffect);
+    //     const checkData = this.NextState.GetData() as FSExecuteEffectData;
+    //     checkData.src = this.m_tiled;
+    //     checkData.effectType = type;
+    //     this.NextState.start(this);
+    // }
+
+    public BackMove(data: FSDataBase) {
+        FallingManager.Instance.AdpaterStates.splice(FallingManager.Instance.AdpaterStates.indexOf(this), 1);
+        if (this.m_action != null) {
+            this.m_action(this);
+        }
+        if (this.m_tiled !== null && this.m_tiled.GetNextTiled() !== null) {
+            if (this.m_tiled.GetNextTiled().CanMoveBlocker === null && this.m_tiled.GetNextTiled().CheckCanArriveFromLineTiled(this.m_tiled)) {
+                FallingManager.Instance.OnTriggerFalling(this.m_tiled.GetNextTiled());
+            }
+        }
+        super.BackMove(data);
+    }
+
+    public OnFinish() {
+        FallingManager.Instance.AdpaterStates.splice(FallingManager.Instance.AdpaterStates.indexOf(this), 1);
+        if (this.m_action != null) {
+            this.m_action(this);
+        }
+        if (this.m_tiled !== null && this.m_tiled.GetNextTiled() !== null) {
+            if (this.m_tiled.GetNextTiled().CanMoveBlocker === null && this.m_tiled.GetNextTiled().CheckCanArriveFromLineTiled(this.m_tiled)) {
+                FallingManager.Instance.OnTriggerFalling(this.m_tiled.GetNextTiled());
+            }
+        }
+        super.OnFinish();
     }
 }

@@ -1,6 +1,5 @@
 import { Blocker } from "../level/blocker/Blocker";
 import { BlockSubType, BlockerID } from "../level/blocker/BlockerManager";
-import { NormalTiled } from "../level/tiledmap/NormalTiled";
 import { Tiled } from "../level/tiledmap/Tiled";
 
 export class MatchHelper {
@@ -13,14 +12,14 @@ export class MatchHelper {
     static m_tempOtherBlockerList: Blocker[] = [];
     static FallingWaitCount: number = 0;
 
-    static IsValidNeighbor(curTiled: NormalTiled, neighborTiled: NormalTiled): boolean {
+    static IsValidNeighbor(curTiled: Tiled, neighborTiled: Tiled): boolean {
         return (
             Math.abs(curTiled.Row - neighborTiled.Row) === 1 && curTiled.Col === neighborTiled.Col ||
             Math.abs(curTiled.Col - neighborTiled.Col) === 1 && curTiled.Row === neighborTiled.Row
         );
     }
 
-    static CheckSquare(orignTiled: NormalTiled): Blocker[] {
+    static CheckSquare(orignTiled: Tiled): Blocker[] {
         this.m_tempOtherBlockerList = [];
         this.m_tempOtherBlockerList.push(orignTiled.CanMoveBlocker);
 
@@ -81,7 +80,7 @@ export class MatchHelper {
         return this.m_tempOtherBlockerList;
     }
 
-    static IsSameColorNeighbor(orignTiled: NormalTiled, neighbor: NormalTiled): boolean {
+    static IsSameColorNeighbor(orignTiled: Tiled, neighbor: Tiled): boolean {
         if (!neighbor || !neighbor.IsValidTiled() || !neighbor.CanMatchCrush()) {
             return false;
         }
@@ -92,7 +91,7 @@ export class MatchHelper {
         }
 
         const topb = orignTiled.TopBlocker();
-        if (topb !== null && topb.TableData.SubType == BlockSubType.HideMiddle) {
+        if (topb !== null && topb.TableData.Data.SubType == BlockSubType.HideMiddle) {
             return false;
         }
 
@@ -162,7 +161,7 @@ export class MatchHelper {
     }
 
     static IsExistFalling(blk: Blocker): boolean {
-        let frontTiled = blk.SelfTiled as NormalTiled;
+        let frontTiled = blk.SelfTiled;
         let pre = blk.SelfTiled?.GetPrevTiled();
         while (pre !== null) {
             if (pre.IsCanSwitchNoMatchBlocker()) {
@@ -176,7 +175,7 @@ export class MatchHelper {
                 }
 
                 let preTopBlocker = pre.TopBlocker();
-                if (preTopBlocker !== null && preTopBlocker.TableData.SubType == BlockSubType.HideMiddle) {
+                if (preTopBlocker !== null && preTopBlocker.TableData.Data.SubType == BlockSubType.HideMiddle) {
                     break;
                 }
 
@@ -201,7 +200,7 @@ export class MatchHelper {
             }
         }
 
-        frontTiled = blk.SelfTiled as NormalTiled;
+        frontTiled = blk.SelfTiled;
         let leftTiled = frontTiled?.GetNeighborLeft();
         if (leftTiled !== null && leftTiled.CanMoveBlocker !== null && !leftTiled.CanMoveBlocker.Marked && leftTiled.CanMoveBlocker.Color === blk.Color && this.IsValidNeighbor(frontTiled, leftTiled)
             && leftTiled.MiddleBlocker() === null && leftTiled.TopTopBlocker() === null &&
@@ -240,21 +239,11 @@ export class MatchHelper {
     }
 
     static ClearRowBlockerDic() {
-        for (const key in this.m_rowBlockerDic) {
-            if (this.m_rowBlockerDic.hasOwnProperty(key)) {
-                this.m_rowBlockerDic[key].length = 0;
-            }
-        }
+        this.m_rowBlockerDic.clear();
     }
 
     static ClearMatchResultDic() {
-        for (const key in this.m_matchResultDic) {
-            if (this.m_matchResultDic.hasOwnProperty(key)) {
-                for (let i = 0; i < this.m_matchResultDic[key].length; i++) {
-                    this.m_matchResultDic[key][i].length = 0;
-                }
-            }
-        }
+        this.m_matchResultDic.clear();
     }
 
     private static MakeSpecialBlock(blockerId: BlockerID): Blocker[] {
@@ -299,7 +288,7 @@ export class MatchHelper {
             newBlockerList.length = 0;
             newBlockerList.push(...this.m_rowBlockerList);
 
-            if (this.m_rowBlockerList.length > this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) {
+            if (this.m_rowBlockerList.length > this.m_rowBlockerDic.get(this.m_maxCountRow).length) {
                 this.m_maxCountRow = this.m_columnBlockerList[i].SelfTiled.Row;
             }
         }
@@ -315,53 +304,53 @@ export class MatchHelper {
             this.GetPerRowDataAndMaxCountRow();
 
             if (this.m_columnBlockerList.length < 3) {
-                if (this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0 >= 5) {
-                    const multiColorList = this.MakeSpecialBlock(BlockerID.multicolor);
-                    multiColorList.push(...this.m_rowBlockerDic.get(this.m_maxCountRow) || []);
+                if (this.m_rowBlockerDic.get(this.m_maxCountRow).length >= 5) {
+                    const multiColorList = this.MakeSpecialBlock(BlockerID.samecolor);
+                    multiColorList.push(...this.m_rowBlockerDic.get(this.m_maxCountRow) );
                     removeList = multiColorList;
-                } else if (this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0 >= 4) {
+                } else if (this.m_rowBlockerDic.get(this.m_maxCountRow).length >= 4) {
                     const verticalList = this.MakeSpecialBlock(BlockerID.vertical);
-                    verticalList.push(...this.m_rowBlockerDic.get(this.m_maxCountRow) || []);
+                    verticalList.push(...this.m_rowBlockerDic.get(this.m_maxCountRow) );
                     removeList = verticalList;
-                } else if (this.m_columnBlockerList.length >= 2 && (this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 2) {
+                } else if (this.m_columnBlockerList.length >= 2 && (this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 2) {
                     const tempSquareList = this.CheckSquare(checkBlocker.SelfTiled);
                     if (tempSquareList.length >= 4) {
                         const squareList = this.MakeSpecialBlock(BlockerID.squareid);
                         squareList.push(...tempSquareList);
-                        if ((this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 3) {
-                            this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) || [], squareList);
+                        if ((this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 3) {
+                            this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) , squareList);
                         }
                         removeList = squareList;
                     } else {
-                        if ((this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 3) {
+                        if ((this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 3) {
                             const baseList = this.MakeSpecialBlock(BlockerID.none);
-                            baseList.push(...this.m_rowBlockerDic.get(this.m_maxCountRow) || []);
+                            baseList.push(...this.m_rowBlockerDic.get(this.m_maxCountRow) );
                             removeList = baseList;
                         }
                     }
-                } else if ((this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 3) {
+                } else if ((this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 3) {
                     const baseList = this.MakeSpecialBlock(BlockerID.none);
-                    baseList.push(...this.m_rowBlockerDic.get(this.m_maxCountRow) || []);
+                    baseList.push(...this.m_rowBlockerDic.get(this.m_maxCountRow) );
                     removeList = baseList;
                 }
             } else {
                 if (this.m_columnBlockerList.length >= 5) {
-                    const multiColorList = this.MakeSpecialBlock(BlockerID.multicolor);
+                    const multiColorList = this.MakeSpecialBlock(BlockerID.samecolor);
                     multiColorList.push(...this.m_columnBlockerList);
-                    if ((this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 3) {
-                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) || [], multiColorList);
+                    if ((this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 3) {
+                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) , multiColorList);
                     }
                     removeList = multiColorList;
                 } else if (this.m_columnBlockerList.length >= 4) {
-                    if ((this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 5) {
-                        const multiColorList = this.MakeSpecialBlock(BlockerID.multicolor);
+                    if ((this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 5) {
+                        const multiColorList = this.MakeSpecialBlock(BlockerID.samecolor);
                         multiColorList.push(...this.m_columnBlockerList);
-                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) || [], multiColorList);
+                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) , multiColorList);
                         removeList = multiColorList;
-                    } else if ((this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 3) {
-                        const packageList = this.MakeSpecialBlock(BlockerID.package);
+                    } else if ((this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 3) {
+                        const packageList = this.MakeSpecialBlock(BlockerID.area);
                         packageList.push(...this.m_columnBlockerList);
-                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) || [], packageList);
+                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) , packageList);
                         removeList = packageList;
                     } else {
                         const horizontalList = this.MakeSpecialBlock(BlockerID.horizontal);
@@ -369,17 +358,17 @@ export class MatchHelper {
                         removeList = horizontalList;
                     }
                 } else if (this.m_columnBlockerList.length >= 3) {
-                    if ((this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 5) {
-                        const multiColorList = this.MakeSpecialBlock(BlockerID.multicolor);
+                    if ((this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 5) {
+                        const multiColorList = this.MakeSpecialBlock(BlockerID.samecolor);
                         multiColorList.push(...this.m_columnBlockerList);
-                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) || [], multiColorList);
+                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) , multiColorList);
                         removeList = multiColorList;
-                    } else if ((this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 3) {
-                        const packageList = this.MakeSpecialBlock(BlockerID.package);
+                    } else if ((this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 3) {
+                        const packageList = this.MakeSpecialBlock(BlockerID.area);
                         packageList.push(...this.m_columnBlockerList);
-                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) || [], packageList);
+                        this.Distinct(this.m_rowBlockerDic.get(this.m_maxCountRow) , packageList);
                         removeList = packageList;
-                    } else if (this.m_columnBlockerList.length >= 2 && (this.m_rowBlockerDic.get(this.m_maxCountRow)?.length || 0) >= 2) {
+                    } else if (this.m_columnBlockerList.length >= 2 && (this.m_rowBlockerDic.get(this.m_maxCountRow).length) >= 2) {
                         const tempSquareList = this.CheckSquare(checkBlocker.SelfTiled);
                         if (tempSquareList.length >= 4) {
                             const squareList = this.MakeSpecialBlock(BlockerID.squareid);
@@ -418,7 +407,7 @@ export class MatchHelper {
             for (let i = 0; i < this.m_blklst.length; i++) {
                 isFalling = this.IsExistFalling(this.m_blklst[i]);
                 if (isFalling) {
-                    (originTiled as NormalTiled).BeforeNoCheckMatch = true;
+                    originTiled.BeforeNoCheckMatch = true;
                     return BlockerID.none;
                 }
             }
@@ -432,7 +421,7 @@ export class MatchHelper {
             this.m_blklst[i].IsAlreadyCheckMatch = false;
         }
 
-        let matchListList = this.m_matchResultDic.get(BlockerID.multicolor);
+        let matchListList = this.m_matchResultDic.get(BlockerID.samecolor);
         if (matchListList) {
             this.Sort(matchListList);
             if (matchListList.length > 0 && matchListList[0].length > 0) {
@@ -441,12 +430,12 @@ export class MatchHelper {
                     return BlockerID.none;
                 } else {
                     this.MatchEndCheckSquare(originTiled, matchItems);
-                    return BlockerID.multicolor;
+                    return BlockerID.samecolor;
                 }
             }
         }
 
-        matchListList = this.m_matchResultDic.get(BlockerID.package);
+        matchListList = this.m_matchResultDic.get(BlockerID.area);
         if (matchListList) {
             this.Sort(matchListList);
             if (matchListList.length > 0 && matchListList[0].length > 0) {
@@ -455,7 +444,7 @@ export class MatchHelper {
                     return BlockerID.none;
                 } else {
                     this.MatchEndCheckSquare(originTiled, matchItems);
-                    return BlockerID.package;
+                    return BlockerID.area;
                 }
             }
         }
@@ -513,7 +502,7 @@ export class MatchHelper {
     }
 
     private static MatchEndCheckSquare(originTiled: Tiled, matchItems: Blocker[]) {
-        const squareList = this.CheckSquare(originTiled as NormalTiled);
+        const squareList = this.CheckSquare(originTiled);
         if (squareList.length >= 4) {
             this.Distinct(squareList, matchItems);
         }
@@ -551,7 +540,7 @@ export class MatchHelper {
         // return jellyCount >= blockerList.length;
     }
 
-    public static CheckMatch(orign: NormalTiled, matchItems: Blocker[], checkFalling: boolean = true): BlockerID {
+    public static CheckMatch(orign: Tiled, matchItems: Blocker[], checkFalling: boolean = true): BlockerID {
         let spType: BlockerID = BlockerID.none;
         this.m_blklst = [];
         this.FallingWaitCount = 0;

@@ -6,10 +6,9 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import { Utils } from "../../tools/Utils";
-import { NormalTiled } from "../tiledmap/NormalTiled";
-import { Tiled } from "../tiledmap/Tiled";
+import { BornEffect, Tiled } from "../tiledmap/Tiled";
 import { TiledMap } from "../tiledmap/TiledMap";
-import { Blocker , BaseBlocker} from "./Blocker";
+import { Blocker , BaseBlocker, LineBlocker, SquareBlocker, AreaBlocker, SameColorBlocker} from "./Blocker";
 
 
 export enum BlockerID
@@ -37,8 +36,8 @@ export enum BlockerID
     chameleon               = 22,
     horizontal              = 23,
     vertical                = 24,
-    package                 = 25,
-    multicolor              = 26,
+    area                    = 25,
+    samecolor              = 26,
     monster_jack            = 29,
     cookies_d_id            = 30,
     cookies_e_id            = 31,
@@ -334,11 +333,13 @@ export class BlockerManager {
         return BlockerManager.instance;
     }
 
-    public GenerateNoMatch(row: number, col: number, self: NormalTiled): Blocker {
+    public GenerateNoMatch(row: number, col: number, self: Tiled): Blocker {
         let id: number = BlockerID.baseredid;
         do {
             id =TiledMap.getInstance().FilterRandomID(row, col);
         } while (TiledMap.getInstance().CheckNeighborId(self, id));
+
+        cc.error(`GenerateNoMatch row = ${row} col = ${col} id = ${id}`);
     
         const blk: Blocker = this.CreateFactory(id);
         blk.SelfTiled = self;
@@ -346,9 +347,11 @@ export class BlockerManager {
         return blk;
     }
 
-    public Build(id: number, self: NormalTiled, parentId: number = -1): Blocker {
+    public Build(id: number, self: Tiled, parentId: number = -1, specialParent: cc.Node = null, bornEffect = BornEffect.none): Blocker {
         const blk: Blocker = this.CreateFactory(id, parentId);
         blk.SelfTiled = self;
+        blk.SpecialParent = specialParent;
+        blk.BornEffect = bornEffect;
         blk.Build();
         return blk;
     }
@@ -369,7 +372,39 @@ export class BlockerManager {
                     return baseblocker;
                 }
                 return new BaseBlocker(id);
-                break;
+            case BlockerID.horizontal:
+            case BlockerID.vertical:
+                var baseblocker = this.PopBlocker(BlockerClassType.Line);
+                if (null != baseblocker)
+                {
+                    baseblocker.Reborn(id, parentId);
+                    return baseblocker;
+                }
+                return new LineBlocker(id);
+            case BlockerID.squareid:
+                var baseblocker = this.PopBlocker(BlockerClassType.Square);
+                if (null != baseblocker)
+                {
+                    baseblocker.Reborn(id, parentId);
+                    return baseblocker;
+                }
+                return new SquareBlocker(id);
+            case BlockerID.area:
+                var baseblocker = this.PopBlocker(BlockerClassType.Area);
+                if (null != baseblocker)
+                {
+                    baseblocker.Reborn(id, parentId);
+                    return baseblocker;
+                }
+                return new AreaBlocker(id);
+            case BlockerID.samecolor:
+                var baseblocker = this.PopBlocker(BlockerClassType.Samecolor);
+                if (null != baseblocker)
+                {
+                    baseblocker.Reborn(id, parentId);
+                    return baseblocker;
+                }
+                return new SameColorBlocker(id);
             default:
                 var baseblocker = this.PopBlocker(BlockerClassType.Base);
                 if (null != baseblocker)
@@ -378,7 +413,6 @@ export class BlockerManager {
                     return baseblocker;
                 }
                 return new BaseBlocker(id);
-                break;
         }
     }
 
@@ -410,16 +444,16 @@ export class BlockerManager {
             Utils.SetNodeActive(obj, false);
         }
 
-        let objLst = this.m_poolDic.get(name);
-        if (!objLst) {
-            objLst = [];
-            this.m_poolDic.set(name, objLst);
-        }
-        objLst.push(obj);
+        // let objLst = this.m_poolDic.get(name);
+        // if (!objLst) {
+        //     objLst = [];
+        //     this.m_poolDic.set(name, objLst);
+        // }
+        // objLst.push(obj);
 
-        if (blocker) {
-            this.PushBlocker(blocker);
-        }
+        // if (blocker) {
+        //     this.PushBlocker(blocker);
+        // }
     }
 
     PopBlocker(clsType: BlockerClassType): Blocker | null {
@@ -436,7 +470,6 @@ export class BlockerManager {
     }
 
     PushBlocker(blocker: Blocker): void {
-        //console.log("PushBlocker:" + blocker.ClassType.toString());
         let objLst = this.m_blockerClassPool.get(blocker.ClassType);
         if (!objLst) {
             objLst = [];

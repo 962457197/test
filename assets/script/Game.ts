@@ -14,8 +14,9 @@ import { TiledMap } from './level/tiledmap/TiledMap';
 import { IconTable } from './table/IconTable';
 import { TiledMapTouchHandler } from './tools/TiledMapTouchHandler';
 import { CameraManager } from './tools/CameraManager';
-import { TimerManager } from './tools/TimerManager';
+import { TimerManager, TimerData, TimerType} from './tools/TimerManager';
 import { Utils } from './tools/Utils';
+import { FallingManager } from './level/drop/FallingManager';
 
 export enum GameState
 {
@@ -38,11 +39,17 @@ export default class Game extends cc.Component {
     @property(cc.Node)
     blockerRoot: cc.Node = null;
 
+    @property(cc.Node)
+    effectRoot: cc.Node = null;
+
     @property(cc.Sprite)
     BG: cc.Sprite = null;
 
     @property(cc.Camera)
     MainCamera: cc.Camera = null;
+
+    static CC_SIZE_MULTI = 100;
+    // static GROUP_BLOCK = "block";
 
     static m_blockTable: BlockTable = new BlockTable();
     static m_iconTable: IconTable = new IconTable();
@@ -58,6 +65,7 @@ export default class Game extends cc.Component {
         //     this.BG.spriteFrame = data;
         //     cc.log("222" + err + data);
         // });
+        TiledMap.getInstance().m_effectRoot = this.effectRoot;
 
         Game.LoadingAssetCount++;
         cc.resources.load("table/" + BlockTable.NAME, cc.JsonAsset, (err, jsonAsset: any) =>{
@@ -152,5 +160,6 @@ export default class Game extends cc.Component {
         }
 
         TimerManager.Instance.OnUpdate(dt);
+        FallingManager.Instance.OnUpdate();
     }
 }

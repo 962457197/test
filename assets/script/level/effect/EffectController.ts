@@ -14,7 +14,7 @@ export enum EffectType
     SameColorLine   ,
     SameColorArea   ,
     SameColorSquare ,
-    SameColor       , //Sp Multi
+    SameColorAndSameColor       , //Sp Multi
     AreaLine        ,
     LineLine        ,
     BoostPoint      ,
@@ -62,7 +62,7 @@ export class EffectController {
     public CreateEffect(type: EffectType, orign: Tiled, check: EffectData, args: any = null) {
         const eff = EffectControllerFactory.Instance.PopEffect(type);
         if (eff != null) {
-            eff.Reset(orign, this.OnEffectCallback, check, args);
+            eff.Reset(orign, this.OnEffectCallback.bind(this), check, args);
             this.m_count++;
             this.m_effects.push(eff);
         }
@@ -88,8 +88,8 @@ export class EffectController {
         let timerData = new TimerData();
         timerData.type = TimerType.enConditionOnce;
         timerData.objthis = this,
-        timerData.condition = effect.ExecutePlayCondition;
-        timerData.body = effect.Play;
+        timerData.condition =  effect.ExecutePlayCondition.bind(effect);
+        timerData.body = effect.Play.bind(effect);
         timerData.end = ()=>
         {
             this.m_PlayTimer = null;
@@ -100,7 +100,7 @@ export class EffectController {
 
     public OnEffectCallback(succ: boolean, effbase: EffectBase | null = null) {
         this.m_count--;
-        if (this.m_count <= 0 && this.m_callback) {
+        if (this.m_count <= 0 && this.m_callback != null) {
             this.m_callback();
 
             for (let i = 0; i < this.m_effects.length; i++) {

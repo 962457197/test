@@ -693,6 +693,9 @@
     "blockerRoot": {
       "__id__": 8
     },
+    "effectRoot": {
+      "__id__": 11
+    },
     "BG": {
       "__id__": 10
     },

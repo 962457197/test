@@ -10,12 +10,6 @@ export class TimerData {
 
 export class TimerManager {
 
-    DeltaTime()
-    {
-        const dt: number = 1 / cc.director.getScheduler().getTimeScale();
-        return dt;
-    }
-
     private static s_instance: TimerManager | null = null;
     private m_timerBuilder: TimerBuilder;
 
@@ -28,6 +22,11 @@ export class TimerManager {
             this.s_instance = new TimerManager();
         }
         return this.s_instance;
+    }
+
+    GetDeltaTime() : number
+    {
+        return cc.director.getDeltaTime();
     }
 
     public OnUpdate(dt: number) {
@@ -167,7 +166,7 @@ export abstract class Timer {
     public isNew: boolean;
     public useCount: number = 0;
 
-    m_continue: () => boolean;
+    m_keep: () => boolean;
     m_body: () => void;
     m_end: () => void;
     m_isStart: boolean = true;
@@ -184,7 +183,7 @@ export abstract class Timer {
         // this.m_guid = Timer.GenGUID++;
         this.useCount = 1;
         this.m_isStart = true;
-        this.m_continue = data.keep;
+        this.m_keep = data.keep;
         this.m_body = data.body;
         this.m_end = data.end;
     }
@@ -197,7 +196,7 @@ export abstract class Timer {
 
     public Tick(dt: number): boolean
     {
-        return this.m_continue();
+        return this.m_keep();
     }
 
     public Reset(data: TimerData) {
@@ -208,7 +207,7 @@ export abstract class Timer {
         this.m_isStart = true;
         this.m_body = data.body;
         this.m_end = data.end;
-        this.m_continue = data.keep;
+        this.m_keep = data.keep;
     }
 
     public Stop() {

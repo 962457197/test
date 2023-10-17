@@ -1,4 +1,4 @@
-import { FSBase, FSCheck, FSPrepare, FSSwitch } from "./FSBase";
+import { FSAdpater, FSBase, FSCheck, FSPrepare, FSSwitch } from "./FSBase";
 import { FSStateType } from "./FSM";
 
 export class StateFactory {
@@ -35,6 +35,8 @@ export class StateFactory {
                 return new FSSwitch();
             case FSStateType.enCheck:
                 return new FSCheck();
+            case FSStateType.enAdpater:
+                return new FSAdpater();
             default:
                 return null;
         }

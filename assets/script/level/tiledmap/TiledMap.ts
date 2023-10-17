@@ -6,15 +6,15 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import { Direction, LevelScriptableData, LevelTiledData, TiledType } from "../data/LevelScriptableData";
-import { EntryTiled } from "./EntryTiled";
-import { NormalTiled } from "./NormalTiled";
-import { Tiled } from "./Tiled";
+import { EntryTiled, NormalTiled, Tiled } from "./Tiled";
 import TiledOverCastCom from "./TiledOverCastCom";
 import { Utils } from "../../tools/Utils";
 import Game from "../../Game";
 import { FirstActionType } from "../../table/BlockTable";
 import { ColorManager } from "../blocker/ColorManager";
 import { Blocker } from "../blocker/Blocker";
+import { DropDataBase, DropDataFactory, TiledMapDropDataSpawner } from "../drop/TiledMapDropDataSpawner";
+import { BlockSubType, BlockType, BlockerID } from "../blocker/BlockerManager";
 
 export class TiledMap {
     private static instance: TiledMap | null = null;
@@ -38,10 +38,29 @@ export class TiledMap {
     m_lvlData: LevelScriptableData = null;
     m_tiledMapRoot: cc.Node = null;
     m_blockerRoot: cc.Node = null;
-    m_tiledArray: NormalTiled[] = null;
+    m_effectRoot: cc.Node = null;
+    TiledArray: Tiled[] = null;
     m_enterTiledArray: EntryTiled[] = null;
 
     ColorLimitList: number[] = [];
+    DropDataEndInfo: Map<number, boolean> = new Map<number, boolean>();
+    DropLimitInfo: Map<number, Map<number, number>> = new Map<number, Map<number, number>>();
+    DropSpawner: TiledMapDropDataSpawner = new TiledMapDropDataSpawner();
+    CurrentLevelLimit: number;
+    m_destoryedTiledList: number[] = [];
+    m_destroyedTopBlockers: Blocker[] = [];
+    m_squareTargetTileds: number[] = [];
+
+    get MapRootPosition()
+    {
+        let worldPos = this.m_tiledMapRoot.convertToWorldSpaceAR(cc.Vec2.ZERO);
+        return worldPos;
+    }
+
+    get TotalMoves()
+    {
+        return this.m_lvlData.limit;
+    }
 
     public OnCreate(levelData: LevelScriptableData, tiledMapRoot: cc.Node, tiledRoot: cc.Node, blockerRoot: cc.Node): void 
     {
@@ -62,9 +81,9 @@ export class TiledMap {
                 posy -= ((this.m_lvlData.maxRows - this.m_lvlData.realRows) * 0.5 * Tiled.HEIGHT);
             }
         }
-        tiledMapRoot.setPosition(posx, posy);
+        this.m_tiledMapRoot.setPosition(posx, posy);
 
-        this.m_tiledArray = new Array<NormalTiled>(TiledMap.MAX_COL * TiledMap.MAX_ROW);
+        this.TiledArray = new Array<NormalTiled>(TiledMap.MAX_COL * TiledMap.MAX_ROW);
         this.m_enterTiledArray = new Array<EntryTiled>(TiledMap.MAX_COL * TiledMap.MAX_ROW);
         
         for (let row = 0; row < this.m_lvlData.maxRows; row++) {
@@ -73,21 +92,21 @@ export class TiledMap {
                 const tiledData: LevelTiledData = this.m_lvlData.tiledData[index];
                 const idx: number = row * this.m_lvlData.maxCols + col;
 
-                this.m_tiledArray[idx] = new NormalTiled();
-                this.m_tiledArray[idx].Create(idx, tiledData, tiledRoot, row, col, "NormalTiled_" + row + "_" + col);
+                this.TiledArray[idx] = new NormalTiled();
+                this.TiledArray[idx].Create(idx, tiledData, tiledRoot, row, col, "NormalTiled_" + row + "_" + col);
         
                 if (tiledData.type !== TiledType.None && tiledData.IsEnterPoint) {
 
-                    const enter: Tiled = new EntryTiled();
+                    const enter = new EntryTiled();
                     this.m_enterTiledArray[idx] = enter;
                     this.m_enterTiledArray[idx].Create(idx, tiledData, tiledRoot, row, col, "EntryTiled_" + row + "_" + col);
 
                     this.m_enterTiledArray[idx].PrevTiledGuid = -1;
                     this.m_enterTiledArray[idx].NextTiledGuid = idx;
-                    this.m_tiledArray[idx].EnterPoint = this.m_enterTiledArray[idx];
+                    this.TiledArray[idx].EnterPoint = this.m_enterTiledArray[idx];
                 }
     
-                this.m_tiledArray[idx].GenerateBlocker();
+                (this.TiledArray[idx] as NormalTiled).GenerateBlocker();
             }
         }
     }
@@ -111,72 +130,141 @@ export class TiledMap {
                 return x-y
             });
         }
+
+        this.BuildDropData();
+        this.m_squareTargetTileds.length = 0;
+        this.m_squareTargetTileds.push(...this.m_lvlData.squareTargetList);
     }
+
+    GetSquareTargetTiled() : Tiled
+    {
+        if (this.m_squareTargetTileds.length > 0)
+        {
+            let idx = this.RandomRange(0, this.m_squareTargetTileds.length - 1);
+            let guid = this.m_squareTargetTileds[idx];
+            this.m_squareTargetTileds.splice(idx, 1);
+            return this.GetTiledByGUID(guid);
+        }
+
+        let tempLst = [];
+        for (let index = 0; index < this.TiledArray.length; index++) {
+            const element = this.TiledArray[index];
+            if (element.IsValidTiled())
+            {
+                tempLst.push(element);
+            }
+        }
+
+        let idx = this.RandomRange(0, tempLst.length - 1);
+        return tempLst[idx];
+    }
+
+    BuildDropData(): void {
+        this.DropDataEndInfo.clear();
+        this.DropLimitInfo.clear();
+    
+        for (let i = 0; i < this.m_lvlData.dropDataList.length; i++) {
+            if (this.m_lvlData.dropDataList[i].id > 0 && this.m_lvlData.dropDataList[i].onceCount > 0 && this.m_lvlData.dropDataList[i].spawn > 0) {
+                const data: DropDataBase | null = DropDataFactory.BuildLevelDropData(this.m_lvlData.dropDataList[i]);
+                if (data !== null) {
+                    this.DropSpawner.Add(data);
+                    this.DropDataEndInfo.set(data.id, false);
+                    for (let j = 0; j < data.enterlst.length; j++) {
+                        if (this.DropLimitInfo.has(data.enterlst[j])) {
+                            const info: Map<number, number> | undefined = this.DropLimitInfo.get(data.enterlst[j]);
+                            if (info !== undefined) {
+                                if (info.has(data.id)) {
+                                    info.set(data.id, 0);
+                                } else {
+                                    info.set(data.id, 0);
+                                }
+                            } else {
+                                const info = new Map<number, number>();
+                                info.set(data.id, 0);
+                                this.DropLimitInfo.set(data.enterlst[j], info);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    
+        for (let i = 0; i < this.m_lvlData.DropColorDataList.length; i++) {
+            const data = DropDataFactory.BuildLevelDropColorData(this.m_lvlData.DropColorDataList[i]);
+            if (data !== null) {
+                this.DropSpawner.Add(data);
+            }
+        }
+    }
+    
 
     magicFlag: boolean = false;
     SetTiledData()
     {
-        for (let i = 0; i < this.m_tiledArray.length; i++)
+        let matchNum = this.GetMatchNumAround(5, 3, 10, true);
+        cc.error(`SetTiledData ------ matchNum = ${matchNum}`);
+
+        for (let i = 0; i < this.TiledArray.length; i++)
         {
-            if (!this.m_tiledArray[i].IsValidTiled())
+            if (!this.TiledArray[i].IsValidTiled())
             {
                 continue;
             }
 
-            var r = this.m_tiledArray[i].Row;
-            var c = this.m_tiledArray[i].Col;
+            var r = this.TiledArray[i].Row;
+            var c = this.TiledArray[i].Col;
 
             if (!this.magicFlag && this.GetIsCanMove3X2Square(r, c))
             {
-                (this.m_tiledArray[i] as NormalTiled).GenerateCanMoveCheckMatch();
-                var baseId = this.m_tiledArray[i].CanMoveBlocker.Color;
+                (this.TiledArray[i] as NormalTiled).GenerateCanMoveCheckMatch();
+                var baseId = this.TiledArray[i].CanMoveBlocker.Color;
                 let matches = this.GetMatchNumAround(r, c + 2, baseId, true);
                 let matches2 = this.GetMatchNumAround(r + 1, c + 1, baseId, true);
                 if (matches <= 1 && matches2 <= 1)
                 {
-                    this.GetTiled(r, c + 2).GenerateCanMove(baseId);
-                    this.GetTiled(r + 1, c + 1).GenerateCanMove(baseId);
+                    (this.GetTiled(r, c + 2) as NormalTiled).GenerateCanMove(baseId);
+                    (this.GetTiled(r + 1, c + 1) as NormalTiled).GenerateCanMove(baseId);
                     this.magicFlag = true;
                 }
             }
             else
             {
-                (this.m_tiledArray[i] as NormalTiled).GenerateCanMoveCheckMatch();
+                (this.TiledArray[i] as NormalTiled).GenerateCanMoveCheckMatch();
             }
 
-            let next = this.GetTiled(this.m_tiledArray[i].Row + 1, this.m_tiledArray[i].Col);
+            let next = this.GetTiled(this.TiledArray[i].Row + 1, this.TiledArray[i].Col);
             if (null != next && next.IsValidTiled())
             {
-                if (null == this.m_tiledArray[i].GetNextTiled())
-                    this.m_tiledArray[i].NextTiledGuid = next.Guid;
+                if (null == this.TiledArray[i].GetNextTiled())
+                    this.TiledArray[i].NextTiledGuid = next.Guid;
                 if (null == next.GetPrevTiled())
                     next.PrevTiledGuid = i;
             }
         }
 
-        for (let i = 0; i < this.m_tiledArray.length; i++)
+        for (let i = 0; i < this.TiledArray.length; i++)
         {
             // 将tiled出现 NextTiled或PrevTiled循环指向置空
-            if (this.m_tiledArray[i].GetPrevTiled() != null && this.m_tiledArray[i].GetPrevTiled().GetPrevTiled() != null
-                && this.m_tiledArray[i].GetPrevTiled().PrevTiledGuid == this.m_tiledArray[i].Guid)
+            if (this.TiledArray[i].GetPrevTiled() != null && this.TiledArray[i].GetPrevTiled().GetPrevTiled() != null
+                && this.TiledArray[i].GetPrevTiled().PrevTiledGuid == this.TiledArray[i].Guid)
             {
-                this.m_tiledArray[i].GetPrevTiled().PrevTiledGuid = -1;
-                this.m_tiledArray[i].PrevTiledGuid = -1;
+                this.TiledArray[i].GetPrevTiled().PrevTiledGuid = -1;
+                this.TiledArray[i].PrevTiledGuid = -1;
             }
-            if (this.m_tiledArray[i].GetNextTiled() != null && this.m_tiledArray[i].GetNextTiled().GetNextTiled() != null
-                && this.m_tiledArray[i].GetNextTiled().NextTiledGuid == this.m_tiledArray[i].Guid)
+            if (this.TiledArray[i].GetNextTiled() != null && this.TiledArray[i].GetNextTiled().GetNextTiled() != null
+                && this.TiledArray[i].GetNextTiled().NextTiledGuid == this.TiledArray[i].Guid)
             {
-                this.m_tiledArray[i].GetNextTiled().NextTiledGuid = -1;
-                this.m_tiledArray[i].NextTiledGuid = -1;
+                this.TiledArray[i].GetNextTiled().NextTiledGuid = -1;
+                this.TiledArray[i].NextTiledGuid = -1;
             }
 
-            if (this.m_tiledArray[i].GetTiledType() == TiledType.None)
+            if (this.TiledArray[i].GetTiledType() == TiledType.None)
             {
-                this.SetInEdge(this.m_tiledArray[i]);
+                this.SetInEdge(this.TiledArray[i]);
             }
             else
             {
-                this.SetOutEdge(this.m_tiledArray[i]);
+                this.SetOutEdge(this.TiledArray[i]);
             }
         }
     }
@@ -353,7 +441,11 @@ export class TiledMap {
 
     public GetTiledByGUID(guid: number)
     {
-        return this.m_tiledArray[guid];
+        if (guid < 0)
+        {
+            return null;
+        }
+        return this.TiledArray[guid];
     }
 
     GetTiled(row: number, col: number)
@@ -362,7 +454,7 @@ export class TiledMap {
         {
             return null;
         }
-        return this.m_tiledArray[row * this.m_lvlData.maxCols + col];
+        return this.TiledArray[row * this.m_lvlData.maxCols + col];
     }
 
     public GetIsCanMove3X2Square(r: number, c: number): boolean {
@@ -374,17 +466,18 @@ export class TiledMap {
     }
     
     private IsTiledNeedGen(r: number, c: number): boolean {
-        const t = this.GetTiled(r, c);
+        const t = this.GetTiled(r, c) as NormalTiled;
         return t !== null && t.IsValidTiled() && t.IsNeedGen();
     }
     
     private isTiledNeedGenAndCanSwitch(r: number, c: number): boolean {
-        const t = this.GetTiled(r, c);
+        const t = this.GetTiled(r, c) as NormalTiled;
         return t !== null && t.IsValidTiled() && t.CanGenerateCanSwitchBlocker();
     }
 
-    public GetMatchNumAround(row: number, col: number, id: number, isLevelFirstGenerate: boolean = false): number {
+    public GetMatchNumAround(row: number, col: number, id: number, isLevelFirstGenerate: boolean = false, isNeedRecordResult: boolean = false): number {
         const curTiled = this.GetTiled(row, col);
+    
         if (curTiled === null) {
             return 0;
         }
@@ -392,94 +485,130 @@ export class TiledMap {
         if (!isLevelFirstGenerate && (curTiled.CanMoveBlocker === null || !curTiled.CanMoveBlocker.ActiveMatch())) {
             return 0;
         }
+    
         if (id === 0) {
             return 0;
         }
     
         let matches = 0;
-        const bottom = curTiled.GetNeighborBottom();
-        const top = curTiled.GetNeighborTop();
+        const bottom = curTiled.GetNeighborBottom() as NormalTiled;
+        const top = curTiled.GetNeighborTop() as NormalTiled;
     
-        // Check if the current tiled line direction has enough tiles to match
-        if ((bottom?.GetIsMatchAround(id)) ?? false) {
+        if ((bottom?.GetIsMatchAround(id) ?? false)) {
             matches = 1;
-            if ((top?.GetIsMatchAround(id)) ?? false) {
+            if ((top?.GetIsMatchAround(id) ?? false)) {
                 matches++;
-                if (matches > 1) {
-                    return matches;
-                }
-    
-                const bottomNeighbor = bottom?.GetNeighborBottom();
-                if ((bottomNeighbor?.GetIsMatchAround(id)) ?? false) {
-                    matches++;
-                    if (matches > 1) {
-                        return matches;
-                    }
-                }
             }
-    
-            matches = 0;
-            if ((top?.GetIsMatchAround(id)) ?? false) {
-                matches = 1;
-                const topNeighbor = top?.GetNeighborTop();
-                if ((topNeighbor?.GetIsMatchAround(id)) ?? false) {
-                    matches++;
-                    return matches;
-                }
+            if (matches > 1) {
+                // if (isNeedRecordResult) {
+                //     this.TryAddToDefaultMatchList(bottom, curTiled, top);
+                // }
+                return matches;
             }
-    
-            matches = 0;
-    
-            // Check if the current tiled horizon direction has enough tiles to match
-            const left = curTiled.GetNeighborLeft();
-            const right = curTiled.GetNeighborRight();
-    
-            if ((left?.GetIsMatchAround(id)) ?? false) {
-                matches = 1;
-                if ((right?.GetIsMatchAround(id)) ?? false) {
-                    matches++;
-                    if (matches > 1) {
-                        return matches;
-                    }
-    
-                    const leftNeighbor = left?.GetNeighborLeft();
-                    if ((leftNeighbor?.GetIsMatchAround(id)) ?? false) {
-                        matches++;
-                        return matches;
-                    }
-                }
+            const bottomNeighbor = bottom?.GetNeighborBottom() as NormalTiled;
+            if ((bottomNeighbor?.GetIsMatchAround(id) ?? false)) {
+                ++matches;
             }
-    
-            matches = 0;
-            if ((right?.GetIsMatchAround(id)) ?? false) {
-                matches = 1;
-                const rightNeighbor = right?.GetNeighborRight();
-                if ((rightNeighbor?.GetIsMatchAround(id)) ?? false) {
-                    matches++;
-                    return matches;
-                }
+            
+            if (matches > 1) {
+                // if (isNeedRecordResult) {
+                //     this.TryAddToDefaultMatchList(bottomNeighbor, bottom, curTiled);
+                // }
+                // DebugView.log("shuffle match find on bottom bottom");
+                return matches;
             }
-    
-            matches = 0;
-    
-            const leftBottom = curTiled.GetNeighborLeftBottom();
-            const leftTop = curTiled.GetNeighborLeftTop();
-            const rightTop = curTiled.GetNeighborRightTop();
-            const rightBottom = curTiled.GetNeighborRightBottom();
-    
-            // Check if it could match to a Rocket
-            if (((bottom?.GetIsMatchAround(id)) ?? false) && ((left?.GetIsMatchAround(id)) ?? false) && ((leftBottom?.GetIsMatchAround(id)) ?? false)) {
-                matches = 4;
-            } else if (((top?.GetIsMatchAround(id)) ?? false) && ((left?.GetIsMatchAround(id)) ?? false) && ((leftTop?.GetIsMatchAround(id)) ?? false)) {
-                matches = 4;
-            } else if (((top?.GetIsMatchAround(id)) ?? false) && ((right?.GetIsMatchAround(id)) ?? false) && ((rightTop?.GetIsMatchAround(id)) ?? false)) {
-                matches = 4;
-            } else if (((bottom?.GetIsMatchAround(id)) ?? false) && ((right?.GetIsMatchAround(id)) ?? false) && ((rightBottom?.GetIsMatchAround(id)) ?? false)) {
-                matches = 4;
+        }
+
+        matches = 0;
+        if (top?.GetIsMatchAround(id) ?? false)
+        {
+            matches = 1;
+            let topNeighbor = top?.GetNeighborTop() as NormalTiled;
+            if (topNeighbor?.GetIsMatchAround(id) ?? false)
+            {
+                //DebugView.log("shuffle match find on top top");
+                ++matches;
+                // if (isNeedRecordResult)
+                // {
+                //     TryAddToDefaultMatchList(topNeighbor, top, curTiled);
+                // }
+                return matches;
             }
+        }
+
+        matches = 0;
+        const left = curTiled.GetNeighborLeft() as NormalTiled;
+        const right = curTiled.GetNeighborRight() as NormalTiled;
+    
+        if ((left?.GetIsMatchAround(id) ?? false)) {
+            matches = 1;
+            if ((right?.GetIsMatchAround(id) ?? false)) {
+                matches++;
+            }
+            if (matches > 1) {
+                // if (isNeedRecordResult) {
+                //     this.TryAddToDefaultMatchList(left, curTiled, right);
+                // }
+                // DebugView.log("shuffle match find on left right");
+                return matches;
+            }
+            const leftNeighbor = left?.GetNeighborLeft() as NormalTiled;
+            if ((leftNeighbor?.GetIsMatchAround(id) ?? false)) {
+                ++matches;
+                // if (isNeedRecordResult) {
+                //     this.TryAddToDefaultMatchList(leftNeighbor, left, curTiled);
+                // }
+                return matches;
+            }
+        }
+
+        matches = 0;
+        if (right?.GetIsMatchAround(id) ?? false)
+        {
+            matches = 1;
+            let rightNeighbor = right?.GetNeighborRight() as NormalTiled;
+            if (rightNeighbor?.GetIsMatchAround(id) ?? false)
+            {
+                ++matches;
+                // if (isNeedRecordResult)
+                // {
+                //     TryAddToDefaultMatchList(rightNeighbor, right, curTiled);
+                // }
+                return matches;
+            }
+        }
+
+        matches = 0;
+        const rightTop = curTiled.GetNeighborRightTop() as NormalTiled;
+        const rightBottom = curTiled.GetNeighborRightBottom() as NormalTiled;
+        const leftBottom = curTiled.GetNeighborLeftBottom() as NormalTiled;
+        const leftTop = curTiled.GetNeighborLeftTop() as NormalTiled;
+    
+        if ((bottom?.GetIsMatchAround(id) ?? false) && (left?.GetIsMatchAround(id) ?? false) && (leftBottom?.GetIsMatchAround(id) ?? false)) {
+            matches = 4;
+            // if (isNeedRecordResult) {
+            //     this.TryAddToDefaultMatchList(bottom, left, leftBottom, curTiled);
+            // }
+        } else if ((top?.GetIsMatchAround(id) ?? false) && (left?.GetIsMatchAround(id) ?? false) && (leftTop?.GetIsMatchAround(id) ?? false)) {
+            matches = 4;
+            // if (isNeedRecordResult) {
+            //     this.TryAddToDefaultMatchList(top, left, leftTop, curTiled);
+            // }
+        } else if ((top?.GetIsMatchAround(id) ?? false) && (right?.GetIsMatchAround(id) ?? false) && (rightTop?.GetIsMatchAround(id) ?? false)) {
+            matches = 4;
+            // if (isNeedRecordResult) {
+            //     this.TryAddToDefaultMatchList(top, right, rightTop, curTiled);
+            // }
+        } else if ((bottom?.GetIsMatchAround(id) ?? false) && (right?.GetIsMatchAround(id) ?? false) && (rightBottom?.GetIsMatchAround(id) ?? false)) {
+            matches = 4;
+            // if (isNeedRecordResult) {
+            //     this.TryAddToDefaultMatchList(bottom, right, rightBottom, curTiled);
+            // }
         }
         return matches;
     }
+    
+    
 
     public FilterRandomID(row: number, col: number): number {
         const exceptColors: number[] = [];
@@ -487,7 +616,6 @@ export class TiledMap {
     
         for (let i = 0; i < count; i++) {
             const matches: number = this.GetMatchNumAround(row, col, this.ColorLimitList[i], true);
-    
             if (Game.GetBlockData(this.ColorLimitList[i]).HasAction(FirstActionType.Match) && matches > 1) {
                 exceptColors.push(i);
             }
@@ -501,6 +629,12 @@ export class TiledMap {
     
         return this.ColorLimitList[randColor];
     }
+
+    RandomID()
+    {
+        let idx = this.RandomRange(0, this.ColorLimitList.length - 1);
+        return this.ColorLimitList[idx];
+    }
     
     public RandomRange(min: number , max: number) {
 		var Range = max - min;
@@ -509,10 +643,10 @@ export class TiledMap {
 	}
 
     public CheckNeighborId(tiled: Tiled, id: number): boolean {
-        const left: NormalTiled = tiled.GetNeighborLeft();
-        const right: NormalTiled = tiled.GetNeighborRight();
-        const top: NormalTiled = tiled.GetNeighborTop();
-        const bottom: NormalTiled = tiled.GetNeighborBottom();
+        const left: NormalTiled = tiled.GetNeighborLeft() as NormalTiled;
+        const right: NormalTiled = tiled.GetNeighborRight() as NormalTiled;
+        const top: NormalTiled = tiled.GetNeighborTop() as NormalTiled;
+        const bottom: NormalTiled = tiled.GetNeighborBottom() as NormalTiled;
     
         if ((this.IsNeighborTiledSame(left, id) && this.IsNeighborTiledSame(top, id) && this.IsNeighborTiledSame(tiled.GetNeighborLeftTop(), id))
             || (this.IsNeighborTiledSame(left, id) && this.IsNeighborTiledSame(bottom, id) && this.IsNeighborTiledSame(tiled.GetNeighborLeftBottom(), id))
@@ -556,23 +690,275 @@ export class TiledMap {
         return false;
     }
 
-    DelayDestroyBlockers(items: Blocker[], destroyMiddle: boolean = true)
+    CheckRecycleBlocker(tiled: Tiled)
     {
+        return true;
+    }
+
+    public ResetDestroyedTiledList(): void {
+        this.m_destoryedTiledList.length = 0;
+    }
+    
+    public AddDestroyedTiled(tiled: Tiled): void {
+        if (tiled === null || !tiled.IsValidTiled()) {
+            return;
+        }
+        this.m_destoryedTiledList.push(tiled.Guid);
+    }
+
+    public FindDestroyedTiled(tiled: Tiled): boolean {
+        if (tiled === null || !tiled.IsValidTiled()) {
+            return true;
+        }
+        for (let i = 0; i < this.m_destoryedTiledList.length; i++) {
+            if (this.m_destoryedTiledList[i] === tiled.Guid) {
+                return true;
+            }
+        }
+        return false;
+    }    
+
+    public DestroyTopAndMiddleBlockers(items: Blocker[]): void {
+        this.m_destroyedTopBlockers.length = 0;
+        for (let j = 0; j < items.length; j++) {
+            if (items[j].SelfTiled.DestroyTopAndMiddleBlockers(items[j].ID, true)) {
+                this.m_destroyedTopBlockers.push(items[j]);
+            }
+        }
+        for (let i = 0; i < this.m_destroyedTopBlockers.length; i++) {
+            items.splice(items.indexOf(this.m_destroyedTopBlockers[i]), 1);
+        }
+        this.ResetDestroyedTiled();
+    }
+
+    public ResetDestroyedTiled(): void {
+        this.ResetDestroyedTiledList();
+    }
+
+    DelayDestroyBlockers(items: Blocker[], destroyMiddle: boolean = true, triggerEffect = true)
+    {
+        if (items == null || items.length == 0)
+        {
+            return;
+        }
         for (var j = 0; j < items.length; j++)
         {
-            this.DestroyBlocker(items[j], destroyMiddle);
+            var tempBlocker = items[j];
+            if (tempBlocker == null)
+            {
+                continue;
+            }
+
+            this.DestroyBlocker(tempBlocker, destroyMiddle, triggerEffect);
+        }
+
+        if (destroyMiddle)
+        {
+            this.ResetDestroyedTiled();
         }
     }
 
-    DestroyBlocker(blk: Blocker | null, destroyMiddle: boolean = true): void {
-        if (blk !== null) {
-          const tiled: NormalTiled | null = blk.SelfTiled;
-          if (tiled === null) {
-            // Console.log("DestroyBlocker id:" + blk.id + " blocker:" + blk.hashCode());
-          } else {
-            // Console.log("1111 DestroyBlocker id:" + blk.id+" Row:"+tiled.row+" col:"+tiled.col);
-            tiled.DestroyBlocker(blk.ID, true, destroyMiddle);
+    DestroyBlocker(blk: Blocker | null, destroyMiddle: boolean = true, triggerEffect = false): void {
+        if (blk != null) {
+          const tiled = blk.SelfTiled;
+          if (tiled != null) {
+            if (triggerEffect && blk.TableData.Data.SubType == BlockSubType.Special)
+            {
+                blk.OnTriggerEffect();
+            }
+            else
+            {
+                tiled.DestroyBlocker(blk.ID, true, destroyMiddle);
+            }
           }
         }
+    }
+
+    GetTiledsByBaseID(baseid: number, lst: Tiled[]): Tiled[] {
+        for (let i = 0; i < this.TiledArray.length; i++) {
+          const currentTiled = this.TiledArray[i];
+          if (
+            currentTiled.CanMoveBlocker !== null &&
+            !currentTiled.CanMoveBlocker.IsGreedyMonster() &&
+            !currentTiled.CanMoveBlocker.IsMagician() &&
+            !currentTiled.CanMoveBlocker.Falling &&
+            currentTiled.CanMoveBlocker.Color === baseid &&
+            !currentTiled.CanMoveBlocker.IsNoColor() &&
+            currentTiled.CanMoveBlocker.IsNotTriggerMatched() &&
+            !currentTiled.CanMoveBlocker.IsBoxingGlove()
+          ) {
+            const toptopBlocker = currentTiled.TopTopBlocker();
+            if (toptopBlocker !== null) {
+              continue;
+            }
+    
+            const topBlocker = currentTiled.TopBlocker();
+            if (
+              topBlocker !== null &&
+              (!topBlocker.IsNotTriggerMatched() || topBlocker.TableData.Data.SubType === BlockSubType.HideMiddle)
+            ) {
+              continue;
+            }
+    
+            lst.push(currentTiled);
+          }
+        }
+        return lst;
+      }
+    
+      GetBlocksByBaseID(baseid: number = 0): Blocker[] {
+        const result: Blocker[] = [];
+        for (let i = 0; i < this.TiledArray.length; i++) {
+          if (!this.TiledArray[i].IsSquareTarget) {
+            this.CheckCanMoveBlockerColor(this.TiledArray[i], baseid, result);
+          }
+        }
+        return result;
+      }
+
+      CheckCanMoveBlockerColor(tiled: Tiled, baseid: number, lst: Blocker[] | null = null): boolean {
+        if (
+          tiled.CanMoveBlocker !== null &&
+          !tiled.CanMoveBlocker.Falling &&
+          tiled.CanMoveBlocker.Color > 0 &&
+          (baseid === 0 || tiled.CanMoveBlocker.Color === baseid) &&
+          !tiled.CanMoveBlocker.IsNoColor() &&
+          tiled.CanMoveBlocker.IsNotTriggerMatched() &&
+          !(tiled.CanMoveBlocker.IsMagician() && tiled.CanMoveBlocker.PassiveMatch())
+        ) {
+          const blocker = tiled.TopTopBlocker();
+          if (blocker !== null) {
+            return false;
+          }
+    
+          const matchBlocker = tiled.MatchBlocker;
+          if (
+            matchBlocker !== null &&
+            (!matchBlocker.IsNotTriggerMatched() || matchBlocker.TableData.Data.SubType === BlockSubType.HideMiddle)
+          ) {
+            return false;
+          }
+    
+          if (lst !== null) {
+            lst.push(matchBlocker);
+          }
+          return true;
+        }
+    
+        return false;
+      }
+
+      m_colorCounts: { [key: number]: number } = {};
+
+      GetMostBaseID(): number {
+          this.m_colorCounts = {};
+  
+          for (let i = 0; i < this.TiledArray.length; i++) {
+              const tiled: Tiled = this.TiledArray[i];
+  
+              if (
+                  tiled.CanMoveBlocker !== null &&
+                  !tiled.CanMoveBlocker.Falling &&
+                  !tiled.CanMoveBlocker.MarkMatch &&
+                  (tiled.CanMoveBlocker.TableData.Data.Type === BlockType.BaseBlock)
+                //     || (tiled.CanMoveBlocker instanceof JellyBlocker &&
+                //           ColorManager.IsBaseColor(tiled.CanMoveBlocker.Color))) &&
+                //   (!tiled.CanMoveBlocker instanceof ChameleonBlocker ||
+                //       !tiled.CanMoveBlocker.IsNeverChanged() ) 
+              ) {
+                  const blocker: Blocker = this.TiledArray[i].TopTopBlocker();
+  
+                  if (blocker !== null) {
+                      continue;
+                  }
+  
+                  const topBlocker: Blocker = this.TiledArray[i].TopBlocker();
+  
+                  if (
+                      topBlocker !== null &&
+                      (!topBlocker.IsNotTriggerMatched() ||
+                          topBlocker.TableData.Data.SubType === BlockSubType.HideMiddle)
+                  ) {
+                      continue;
+                  }
+  
+                  const key: number = tiled.CanMoveBlocker.Color;
+  
+                  if (this.m_colorCounts[key] !== undefined) {
+                      this.m_colorCounts[key]++;
+                  } else {
+                      this.m_colorCounts[key] = 1;
+                  }
+              }
+          }
+  
+          let num: number = 0;
+          let id: number = 0;
+  
+          for (const key in this.m_colorCounts) {
+              if (this.m_colorCounts.hasOwnProperty(key)) {
+                  const value: number = this.m_colorCounts[key];
+  
+                  if (value > num) {
+                      num = value;
+                      id = parseInt(key);
+                  }
+              }
+          }
+  
+          if (id > 0) {
+              return id;
+          }
+  
+          return -1;
+    }
+
+    static QuickSortTildByGuid(list: Tiled[], low: number, high: number): void {
+        if (high <= low) {
+            return;
+        }
+
+        let i: number = low;
+        let j: number = high + 1;
+        const key: number = list[low].Guid;
+
+        while (true) {
+            while (list[++i].Guid < key) {
+                if (i === high) {
+                    break;
+                }
+            }
+
+            while (list[--j].Guid > key) {
+                if (j === low) {
+                    break;
+                }
+            }
+
+            if (i >= j) {
+                break;
+            }
+
+            const vaule: Tiled = list[i];
+            list[i] = list[j];
+            list[j] = vaule;
+        }
+
+        const temp: Tiled = list[low];
+        list[low] = list[j];
+        list[j] = temp;
+
+        TiledMap.QuickSortTildByGuid(list, low, j - 1);
+        TiledMap.QuickSortTildByGuid(list, j + 1, high);
+    }
+
+    GetRandomLineBlocker()
+    {
+        let random = this.RandomRange(0, 1);
+        if (random == 0)
+        {
+            return BlockerID.horizontal;
+        }
+        return BlockerID.vertical;
     }
 }

@@ -1,5 +1,5 @@
 import { Direction } from "../data/LevelScriptableData";
-import { NormalTiled } from "../tiledmap/NormalTiled";
+import { Tiled } from "../tiledmap/Tiled";
 import { FSStartType } from "./FSM";
 
 export interface FSDataBase {
@@ -11,7 +11,7 @@ export class FSPrepareData implements FSDataBase {
     public curPos: cc.Vec2 = cc.Vec2.ZERO;
     public startType: FSStartType = FSStartType.enNormal;
     // public boostData: FSBoostData = new FSBoostData();
-    public Neighbor: NormalTiled | null = null;
+    public Neighbor: Tiled | null = null;
     public Direction: Direction = Direction.None;
 
     public Reset(): void {
@@ -23,10 +23,10 @@ export class FSPrepareData implements FSDataBase {
 }
 
 export class FSSwitchData implements FSDataBase {
-    public src: NormalTiled | null;
-    public dest: NormalTiled | null;
-    public isCheck: boolean;
-    public startType: FSStartType;
+    public src: Tiled = null;
+    public dest: Tiled = null;
+    public isCheck: boolean = false;
+    public startType: FSStartType = FSStartType.enNormal;
 
     public Reset(): void {
         this.src = null;
@@ -37,13 +37,13 @@ export class FSSwitchData implements FSDataBase {
 }
 
 export class FSCheckData implements FSDataBase {
-    public src: NormalTiled; // 必须有数据
-    public dest: NormalTiled;
-    public isCheck: boolean;
+    public src: Tiled = null; // 必须有数据
+    public dest: Tiled = null;
+    public isCheck: boolean = false;
     public isMain: boolean = false;
     public isUseItem: boolean = false;
     public isTriggerEffect: boolean = false;
-    public startType: FSStartType;
+    public startType: FSStartType = FSStartType.enNormal;
 
     public Reset(): void {
         this.src = null;

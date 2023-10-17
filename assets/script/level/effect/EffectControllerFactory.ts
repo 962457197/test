@@ -1,8 +1,14 @@
-import { EffectBase, EffectBaseCrush } from "./EffectBase";
+import { EffectAreaAndArea, EffectAreaCrush, EffectAreaLine, EffectBase, EffectBaseCrush, EffectLineAndLine, EffectLineCrush, EffectSameColorAndSameColor, EffectSameColorArea, EffectSameColorBase, EffectSameColorLine, EffectSameColorSquare, EffectSquareAndSquare, EffectSquareAreaCompose, EffectSquareAreaCrush, EffectSquareCrush, EffectSquareLineCompose, EffectSquareLineCrush } from "./EffectBase";
 import { EffectController, EffectType } from "./EffectController";
 
 export class EffectControllerFactory {
     private static instance: EffectControllerFactory;
+    public static get Instance(): EffectControllerFactory {
+        if (this.instance == null) {
+            this.instance = new EffectControllerFactory();
+        }
+        return this.instance;
+    }
 
     private m_ControllerPool: EffectController[] = [];
     private m_EffectPool: { [key in EffectType]?: EffectBase[] } = {};
@@ -15,34 +21,26 @@ export class EffectControllerFactory {
         this.InitCreateEffectFuns();
     }
 
-    public static get Instance(): EffectControllerFactory {
-        if (this.instance == null) {
-            this.instance = new EffectControllerFactory();
-        }
-        return this.instance;
-    }
-
     private InitCreateEffectFuns(): void {
         this.OnCreateEffectFuns[EffectType.BaseCrush] = () => new EffectBaseCrush();
-
-        // this.OnCreateEffectFuns[EffectType.LineCrush] = () => new EffectLineCrush();
-        // this.OnCreateEffectFuns[EffectType.AreaCrush] = () => new EffectAreaCrush();
-        // this.OnCreateEffectFuns[EffectType.SquareCrush] = () => new EffectSquareCrush();
-        // this.OnCreateEffectFuns[EffectType.SameColorBase] = () => new EffectSameColorBase();
-        // this.OnCreateEffectFuns[EffectType.SquareAreaCompose] = () => new EffectSquareAreaCompose();
-        // this.OnCreateEffectFuns[EffectType.SquareAreaCrush] = () => new EffectSquareAreaCrush();
-        // this.OnCreateEffectFuns[EffectType.SquareLineCompose] = () => new EffectSquareLineCompose();
-        // this.OnCreateEffectFuns[EffectType.SquareLineCrush] = () => new EffectSquareLineCrush();
-        // this.OnCreateEffectFuns[EffectType.SquareAndSquare] = () => new EffectSquareAndSquare();
+        this.OnCreateEffectFuns[EffectType.LineCrush] = () => new EffectLineCrush();
+        this.OnCreateEffectFuns[EffectType.AreaCrush] = () => new EffectAreaCrush();
+        this.OnCreateEffectFuns[EffectType.SquareCrush] = () => new EffectSquareCrush();
+        this.OnCreateEffectFuns[EffectType.SameColorBase] = () => new EffectSameColorBase();
+        this.OnCreateEffectFuns[EffectType.SquareAreaCompose] = () => new EffectSquareAreaCompose();
+        this.OnCreateEffectFuns[EffectType.SquareAreaCrush] = () => new EffectSquareAreaCrush();
+        this.OnCreateEffectFuns[EffectType.SquareLineCompose] = () => new EffectSquareLineCompose();
+        this.OnCreateEffectFuns[EffectType.SquareLineCrush] = () => new EffectSquareLineCrush();
+        this.OnCreateEffectFuns[EffectType.SquareAndSquare] = () => new EffectSquareAndSquare();
         // this.OnCreateEffectFuns[EffectType.DirLine] = () => new EffectDirLineCrush();
         // this.OnCreateEffectFuns[EffectType.JackCrush] = () => new EffectJackCrush();
-        // this.OnCreateEffectFuns[EffectType.AreaLine] = () => new EffectAreaLine();
-        // this.OnCreateEffectFuns[EffectType.LineLine] = () => new EffectLineAndLine();
-        // this.OnCreateEffectFuns[EffectType.AreaAndArea] = () => new EffectAreaAndArea();
-        // this.OnCreateEffectFuns[EffectType.SameColorLine] = () => new EffectSameColorLine();
-        // this.OnCreateEffectFuns[EffectType.SameColorArea] = () => new EffectSameColorArea();
-        // this.OnCreateEffectFuns[EffectType.SameColorSquare] = () => new EffectSameColorSquare();
-        // this.OnCreateEffectFuns[EffectType.SameColor] = () => new EffectSameColor();
+        this.OnCreateEffectFuns[EffectType.AreaLine] = () => new EffectAreaLine();
+        this.OnCreateEffectFuns[EffectType.LineLine] = () => new EffectLineAndLine();
+        this.OnCreateEffectFuns[EffectType.AreaAndArea] = () => new EffectAreaAndArea();
+        this.OnCreateEffectFuns[EffectType.SameColorLine] = () => new EffectSameColorLine();
+        this.OnCreateEffectFuns[EffectType.SameColorArea] = () => new EffectSameColorArea();
+        this.OnCreateEffectFuns[EffectType.SameColorSquare] = () => new EffectSameColorSquare();
+        this.OnCreateEffectFuns[EffectType.SameColorAndSameColor] = () => new EffectSameColorAndSameColor();
         // this.OnCreateEffectFuns[EffectType.BoostCrossLine] = () => new EffectBoostCrossLine();
         // this.OnCreateEffectFuns[EffectType.RollingCrush] = () => new EffectRollingCrush();
         // this.OnCreateEffectFuns[EffectType.GummyBear] = () => new EffectGummyBear();
@@ -74,28 +72,23 @@ export class EffectControllerFactory {
 
     public PopEffect(type: EffectType): EffectBase | null {
         let effect: EffectBase | null = null;
-        const effectList = this.m_EffectPool[type];
+        // const effectList = this.m_EffectPool[type];
 
-        if (effectList && effectList.length > 0) {
-            effect = effectList[0];
-            effectList.splice(0, 1);
-            return effect;
-        }
+        // if (effectList && effectList.length > 0) {
+        //     effect = effectList[0];
+        //     effectList.splice(0, 1);
+        //     return effect;
+        // }
 
-        if (this.OnCreateEffectFuns[type]) {
+        if (this.OnCreateEffectFuns[type] != null) {
             effect = this.OnCreateEffectFuns[type]();
-        }
-
-        if (type === EffectType.BaseCrush)
-        {
-            effect = new EffectBaseCrush();
         }
 
         return effect;
     }
 
     public PushEffect(type: EffectType, effect: EffectBase): void {
-        if (!this.m_EffectPool[type]) {
+        if (this.m_EffectPool[type] == null) {
             this.m_EffectPool[type] = [];
         }
 

@@ -8,43 +8,74 @@
 import Game from "../../Game";
 import { Utils } from "../../tools/Utils";
 import { FirstActionType, BlockerData } from "../../table/BlockTable";
-import { Tiled } from "../tiledmap/Tiled";
+import { BornEffect, Tiled } from "../tiledmap/Tiled";
 import { TiledMap } from "../tiledmap/TiledMap";
 import BaseBlockerCom from "./BaseBlockerCom";
 import BlockerCom from "./BlockerCom";
-import { BlockSubType, BlockType, BlockerClassType, BlockerID, BlockerManager } from "./BlockerManager"
+import { BlockLayer, BlockSubType, BlockType, BlockerClassType, BlockerID, BlockerManager } from "./BlockerManager"
 import { ColorManager } from "./ColorManager";
-import { NormalTiled } from "../tiledmap/NormalTiled";
 import { EffectType } from "../effect/EffectController";
 import { StateFactory } from "../fsm/StateFactory";
 import { FSStateType } from "../fsm/FSM";
+import { Direction } from "../data/LevelScriptableData";
+import { TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
+import { FallingManager } from "../drop/FallingManager";
 import { FSAdpater } from "../fsm/FSBase";
 
 export class Blocker {
     ClassType: BlockerClassType = BlockerClassType.None;
 
-    IsDestroy: boolean;
-    ID: number;
-    CurHp: number;
-    m_parentId: number;
-    m_bufCount: number;
-    m_blocker: cc.Node;
-    m_blockerCom: BlockerCom;
-    m_mono: cc.Node;
-    m_AttributeState: number;
-    m_prefabName: string;
-    TableData: BlockerData;
-    Color: number;
-    SelfTiled: NormalTiled;
-    MarkMatch: boolean;
-    CrushState: boolean;
-    Marked: boolean;
-    Falling: boolean;
-    IsSwitching: boolean;
-    IsAlreadyCheckMatch: boolean;
-    MatchGuid: number;
-    MatchEffectType: EffectType;
-    IsTriggerEffect: boolean;
+    IsDestroy: boolean = false;
+    ID: number = 0;
+    CurHp: number = 0;
+    m_parentId: number = -1;
+    m_bufCount: number = 0;
+    m_blocker: cc.Node = null;
+    m_blockerCom: BlockerCom = null;
+    m_mono: cc.Node = null;
+    m_AttributeState: number = 0;
+    m_prefabName: string = '';
+    TableData: BlockerData = null;
+    Color: number = 0;
+    SelfTiled: Tiled = null;
+    MarkMatch: boolean = false;
+    CrushState: boolean = false;
+    Marked: boolean = false;
+    Falling: boolean = false;
+    IsSwitching: boolean = false;
+    IsAlreadyCheckMatch: boolean = false;
+    MatchGuid: number = 0;
+    MatchEffectType: EffectType = EffectType.None;
+    IsTriggerEffect: boolean = false;
+
+    SpecialParent: cc.Node  = null;
+    BornEffect: BornEffect = BornEffect.none;
+    ExtraPosition: cc.Vec2 = cc.Vec2.ZERO;
+
+    get LocalPosition()
+    {
+        // if (this.m_blocker == null)
+        // {
+        //     cc.log(`match3 this.m_blocker == null row = ${this.SelfTiled.Row} col = ${this.SelfTiled.Col}`);
+        // }
+        return this.m_blocker.getPosition();
+    }
+    set LocalPosition(position: cc.Vec2)
+    {
+        this.m_blocker.setPosition(position);
+    }
+
+    get WorldPosition()
+    {
+        const worldPositionAR = this.m_blocker.convertToWorldSpaceAR(cc.Vec2.ZERO);
+        return worldPositionAR;
+    }
+
+    // set position (position: cc.Vec2)
+    // {
+    //     const worldPositionAR = this.m_blocker.convertToNodeSpaceAR(position);
+    //     this.m_blocker.setPosition(worldPositionAR);
+    // }
 
     // 构造函数
     constructor(id: number) {
@@ -64,6 +95,12 @@ export class Blocker {
         this.m_parentId = 0;
         this.m_bufCount = 0;
         this.m_blocker = null;
+        this.MarkMatch = false;
+        this.CrushState = false;
+        this.Marked = false;
+        this.Falling = false;
+        this.IsDestroy = false;
+        this.SpecialParent = null;
     }
 
     public Build(data: BlockerData | null = null): void {
@@ -78,8 +115,6 @@ export class Blocker {
         // if (this.CanMove()) {
         //     this.m_mono.box.enabled = true;
         // }
-
-        this.MarkMatch = false;
     }
 
     protected InitPrefabName(): void {
@@ -94,7 +129,14 @@ export class Blocker {
         if (act)
         {
             Utils.SetNodeActive(this.m_blocker, true);
-            this.m_blocker.setPosition(this.SelfTiled.LocalPosition());
+            if (this.SpecialParent != null)
+            {
+                this.m_blocker.setPosition(cc.Vec2.ZERO);
+            }
+            else
+            {
+                this.m_blocker.setPosition(this.SelfTiled.LocalPosition);
+            }
             return;
         }
         
@@ -112,21 +154,31 @@ export class Blocker {
             Game.LoadingAssetCount++;
             cc.resources.load("prefab/blocker/"+ this.m_prefabName, (err, data: any) =>{
                 this.m_blocker = cc.instantiate(data);
-                this.m_blocker.setParent(TiledMap.getInstance().m_blockerRoot);
-                this.m_blocker.name = this.SelfTiled.Row + "_" + this.SelfTiled.Col + "_" + this.ID;
-                this.m_blockerCom = this.m_blocker.getComponent(BlockerCom);
-                this.OnBorning();
+                this.OnGoLoaded();
                 Game.LoadingAssetCount--;
             })
         }
         else
         {
             this.m_blocker = blocker;
-            this.m_blocker.setParent(TiledMap.getInstance().m_blockerRoot);
-            this.m_blocker.name = this.SelfTiled.Row + "_" + this.SelfTiled.Col + "_" + this.ID;
-            this.m_blockerCom = this.m_blocker.getComponent(BlockerCom);
-            this.OnBorning();
+            this.OnGoLoaded();
         }
+    }
+
+    private OnGoLoaded()
+    {
+        if (this.SpecialParent != null)
+        {
+            this.m_blocker.setParent(this.SpecialParent);
+        }
+        else
+        {
+            this.m_blocker.setParent(TiledMap.getInstance().m_blockerRoot);
+        }
+        
+        this.m_blocker.name = this.SelfTiled.Row + "_" + this.SelfTiled.Col + "_" + this.ID;
+        this.m_blockerCom = this.m_blocker.getComponent(BlockerCom);
+        this.OnBorning();
     }
     
     static IsMagician(id: number) : boolean
@@ -182,9 +234,6 @@ export class Blocker {
         return this.TableData.HasAction(FirstActionType.NearMatch);
     }
 
-    public CanBlock(): boolean {
-        return this.TableData.HasAction(FirstActionType.Block);
-    }
 
     public CanRecycle(): boolean {
         return this.TableData.HasAction(FirstActionType.Recycle);
@@ -203,6 +252,23 @@ export class Blocker {
         return !this.IsMarked() && !this.Falling;
     }
 
+    PringLog()
+    {
+        cc.log(`match3 falling = ${this.Falling} marked = ${this.Marked} markmatch = ${this.MarkMatch} crushstate = ${this.CrushState} isDestroy = ${this.IsDestroy} IsSwitching = ${this.IsSwitching}`);
+    }
+
+    OnTriggerEffect(): boolean {
+        if (this.IsNoColor()) {
+            if (!this.CrushState) {
+                // this.StopBornAnimation();
+                const wrap = StateFactory.Instance.Create(FSStateType.enAdpater) as FSAdpater;
+                wrap.StartTriggerEffect(this.SelfTiled);
+                return true;
+            }
+        }
+        return false;
+    }
+
     IsNoColor()
     {
         if (this.TableData.Data.SubType == BlockSubType.Special)
@@ -211,15 +277,104 @@ export class Blocker {
         }
         return false;
     }
+
+    IsIngredient()
+    {
+        return false;
+    }
+
+    IsJelly()
+    {
+        return false;
+    }
     
     IsBottomBlocker()
     {
         return false;
     }
 
+    IsLineBlocker()
+    {
+        return LineBlocker.IsLineBlocker(this.ID);
+    }
+
+    IsAreaBlocker()
+    {
+        return AreaBlocker.IsAreaBlocker(this.ID);
+    }
+
     IsSameColor()
     {
+        return SameColorBlocker.IsSameColorBlocker(this.ID);;
+    }
+    
+    IsSquareBlocker()
+    {
+        return SquareBlocker.IsSquareBlocker(this.ID);
+    }
+
+    IsMagicHat()
+    {
         return false;
+    }
+
+    IsCoCo()
+    {
+        return false;
+    }
+
+    IsBlinds()
+    {
+        return false;
+    }
+
+    IsChameleon()
+    {
+        return false;
+    }
+
+    IsButterCookies()
+    {
+        return false;
+    }
+
+    IsLight()
+    {
+        return false;
+    }
+
+    IsOrangeJamJar()
+    {
+        return false;
+    }
+
+    IsGreedyMonster()
+    {
+        return false;
+    }
+
+    IsMagician()
+    {
+        return false;
+    }
+
+    IsBoxingGlove()
+    {
+        return false;
+    }
+
+    IsNotTriggerMatched()
+    {
+        if (!this.MarkMatch && !this.CrushState)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    CheckIsTop()
+    {
+        return this.TableData.Data.Layer == BlockLayer.Top;
     }
 
     DecrHP()
@@ -251,34 +406,97 @@ export class Blocker {
 
     DelayCheck(delayTime: number = 0.5)
     {
-        // FallingManager.Instance.AddDelayCount(this);//DelayCount++;
-        // m_delayCheckTimer = Inf.TimerManager.Instance.CreateTimer(new Inf.TimerData { type = Inf.TimerType.enOnce, objthis = this, interval = delayTime, body = this.OnDelayWrapCheck });
+        FallingManager.Instance.AddDelayCount();
+        
+        let timerData = new TimerData();
+        timerData.type = TimerType.enOnce;
+        timerData.objthis = this;
+        timerData.interval = delayTime;
+        timerData.body = this.OnDelayWrapCheck.bind(this);
+
+        TimerManager.Instance.CreateTimer(timerData);
     }
 
-    // OnDelayWrapCheck()
-    // {
-    //     FallingManager.Instance.RemoveDelayCount(this);//DelayCount--;
-    //     m_delayCheckTimer = null;
-    //     if (this.SelfTiled == null || this.SelfTiled.CanMoveBlocker == null)
-    //     {
-    //         return;
-    //     }
-    //     var wrap = StateFactory.Instance.Create(FSStateType.enAdpater) as FSAdpater;//new FSAdpater();
-    //     wrap.StartByTiled(this.SelfTiled);
-    // }
-
-    Destroy()
+    OnDelayWrapCheck()
     {
+        FallingManager.Instance.RemoveDelayCount();
+        if (this.SelfTiled == null || this.SelfTiled.CanMoveBlocker == null)
+        {
+            return;
+        }
 
+        const wrap: FSAdpater = StateFactory.Instance.Create(FSStateType.enAdpater) as FSAdpater;
+        wrap.StartTriggerTiled(this.SelfTiled);
     }
 
-    OnDestroyObj()
+    Destroy(tiled: Tiled)
     {
+        if (this.IsDestroy)
+        {
+            return;
+        }
+        this.IsDestroy = true;
 
+        this.OnDestroyObj(tiled);
     }
+
+    OnDestroyObj(tiled: Tiled, needFalling: boolean = true)
+    {
+        BlockerManager.getInstance().Push(this, this.m_prefabName, this.m_blocker);
+        this.m_blocker = null;
+        this.m_blockerCom = null;
+
+        if (null != this.SelfTiled.CanMoveBlocker && this.SelfTiled.CanMoveBlocker.ID == this.ID)
+        {
+            this.SelfTiled.CanMoveBlocker = null;
+        }
+        if (this.SelfTiled != null)
+        {
+            this.SelfTiled.BeTriggerTiled = null;
+        }
+        if (needFalling)
+        {
+            this.SelfTiled.CheckTriggerFall();
+        }
+        this.SelfTiled = null;
+    }
+
+    StartFalling()
+    {
+        this.Falling = true;
+    }
+
+    StopFalling(toDir: Direction)
+    {
+        this.Falling = false;
+
+        // m_toDir = toDir;
+        // PlayAnimation(AnimState.dropEnd);
+    }
+
+    ChangeSortLayer()
+    {
+        if (this.SpecialParent != null)
+        {
+            this.SpecialParent = null;
+            this.m_blocker.setParent(TiledMap.getInstance().m_blockerRoot);
+            this.LocalPosition = TiledMap.getInstance().m_blockerRoot.convertToNodeSpaceAR(this.WorldPosition);
+        }
+    }
+
+    public ImediateDestroyWithoutTriggerFalling(needTarget: boolean = true, isShowDes: boolean = true, needFalling: boolean = true): void {
+        this.IsDestroy = true;
+        this.m_bufCount = 0;
+        this.CurHp = 0;
+    
+        this.OnDestroyObj(this.SelfTiled, needFalling);
+    }
+    
 }
 
 export class BaseBlocker extends Blocker {
+
+    ClassType: BlockerClassType = BlockerClassType.Base;
 
     m_baseBlockerCom: BaseBlockerCom;
 
@@ -293,16 +511,114 @@ export class BaseBlocker extends Blocker {
             this.m_baseBlockerCom.Icon.spriteFrame = data;
         });
     }
+}
 
-    Destroy()
-    {
-        this.OnDestroyObj();
+export class LineBlocker extends Blocker {
+
+    ClassType: BlockerClassType = BlockerClassType.Line;
+
+    m_baseBlockerCom: BaseBlockerCom;
+
+    constructor(id: number) {
+        super(id);
     }
 
-    OnDestroyObj()
+    static IsLineBlocker(id: number)
     {
-        BlockerManager.getInstance().Push(this, this.m_prefabName, this.m_blocker);
-        this.m_blocker = null;
-        this.m_blockerCom = null;
+        if (id == BlockerID.horizontal ||
+            id == BlockerID.vertical)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    protected OnCreated(): void {
+        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
+        cc.resources.load("texture/" + Game.GetIconName(this.TableData.Data.IconId), cc.SpriteFrame, (err, data: any) =>
+        {
+            this.m_baseBlockerCom.Icon.spriteFrame = data;
+        });
+    }
+}
+
+export class SquareBlocker extends Blocker {
+
+    ClassType: BlockerClassType = BlockerClassType.Square;
+
+    m_baseBlockerCom: BaseBlockerCom;
+
+    static IsSquareBlocker(id: number)
+    {
+        if (id == BlockerID.squareid)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    constructor(id: number) {
+        super(id);
+    }
+
+    protected OnCreated(): void {
+        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
+        this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+    }
+}
+
+export class AreaBlocker extends Blocker {
+
+    ClassType: BlockerClassType = BlockerClassType.Area;
+
+    m_baseBlockerCom: BaseBlockerCom;
+
+    static IsAreaBlocker(id: number)
+    {
+        if (id == BlockerID.area)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    constructor(id: number) {
+        super(id);
+    }
+
+    protected OnCreated(): void {
+        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
+        cc.resources.load("texture/" + Game.GetIconName(this.TableData.Data.IconId), cc.SpriteFrame, (err, data: any) =>
+        {
+            this.m_baseBlockerCom.Icon.spriteFrame = data;
+        });
+    }
+}
+
+export class SameColorBlocker extends Blocker {
+
+    ClassType: BlockerClassType = BlockerClassType.Samecolor;
+
+    m_baseBlockerCom: BaseBlockerCom;
+
+    static IsSameColorBlocker(id: number)
+    {
+        if (id == BlockerID.samecolor)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    constructor(id: number) {
+        super(id);
+    }
+
+    protected OnCreated(): void {
+        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
+        cc.resources.load("texture/" + Game.GetIconName(this.TableData.Data.IconId), cc.SpriteFrame, (err, data: any) =>
+        {
+            this.m_baseBlockerCom.Icon.spriteFrame = data;
+        });
     }
 }
