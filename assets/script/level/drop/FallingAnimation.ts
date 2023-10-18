@@ -172,7 +172,7 @@ export class FallingAnimation {
         // }
 
         let distance = this.m_destTiled.CanMoveBlocker.WorldPosition.sub(this.m_destTiled.WorldPosition).mag();
-        
+
         if (!Utils.IsZero(distance)) {
             this.m_startTime += TimerManager.Instance.GetDeltaTime();;
             const t = this.m_startTime;
@@ -228,9 +228,7 @@ export class FallingAnimation {
             //     this.m_destTiled.CanMoveBlocker!.DestroyCloneObject();
             // }
 
-            let localPos = this.m_destTiled.CanMoveBlocker.m_blocker.parent.convertToNodeSpaceAR(this.m_destTiled.WorldPosition);
-            this.m_destTiled.CanMoveBlocker.LocalPosition = localPos;
-
+            this.m_destTiled.CanMoveBlocker.LocalPosition = this.m_destTiled.LocalPosition;
             this.m_destTiled.CanMoveBlocker.ChangeSortLayer();
             
             // if (LevelManager.Instance.SameColorTriggeringCount > 0) {
@@ -267,11 +265,12 @@ export class FallingAnimation {
             
             let checkTiled: Tiled | null = null;
 
-            if (next === null && !TiledMap.getInstance().CheckRecycleBlocker(this.m_destTiled)) {
+            if (next == null && !TiledMap.getInstance().CheckRecycleBlocker(this.m_destTiled)) {
+
                 next = this.m_destTiled.CheckSlantArriveTiled();
 
                 if (next !== null) {
-                    if (next.CanMoveBlocker !== null && next.CanMoveBlocker.Falling) {
+                    if (next.CanMoveBlocker != null && next.CanMoveBlocker.Falling) {
                         if (this.m_destTiled.TryArrivingTiled !== null && this.m_destTiled.TryArrivingTiled.Guid === next.Guid) {
                             this.m_checkedTileds = [];
 

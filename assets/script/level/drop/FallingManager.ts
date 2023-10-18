@@ -290,13 +290,15 @@ export class FallingManager {
         if (tiled.Guid === -1 || tiled.Guid >= TiledMap.ENTRY_GUID_OFFSET) {
             return null;
         }
-        const preTiled: Tiled | null = tiled.GetPrevTiled();
+        let preTiled: Tiled | null = tiled.GetPrevTiled();
         if (preTiled == null || (!tiled.CheckCanFallingFromPrevTiled() && !preTiled.PrevTiledCanFalling() && !preTiled.IsConnectedToEnterPoint()) || !tiled.CheckCanArriveFromLineTiled(preTiled)) {
+            
             // if (!LevelManager.Instance.Map.IsMoveDirection) {
-            //     return null;
+                return null;
             // }
-            const newPreTiled: Tiled | null = tiled.OnGetPrevTiledAround();
-            if (newPreTiled == null) {
+
+            preTiled = tiled.OnGetPrevTiledAround();
+            if (preTiled == null) {
                 return null;
             }
         }

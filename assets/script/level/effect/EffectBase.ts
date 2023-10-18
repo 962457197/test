@@ -940,13 +940,9 @@ export class EffectLineCrush extends EffectLineBase {
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
 
-            //cc.error(`match3 tiledmap local = ${TiledMap.getInstance().m_tiledMapRoot.position} origin worldpos = ${this.m_orign.WorldPosition} localPos = ${this.m_orign.LocalPosition}`);
-
             moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
-
-            // cc.error(`match3 back spacePos = ${spacePos} worldpos = ${moveEffectNode.convertToWorldSpaceAR(cc.Vec2.ZERO)} localPos = ${moveEffectNode.position}`);
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(this.m_spType, this.m_orign), end1PointTiled.WorldPosition, this.GetTarPos2(this.m_spType, this.m_orign), 
@@ -1026,13 +1022,9 @@ export class EffectSquareLineCrush extends EffectLineBase {
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
 
-            //cc.error(`match3 tiledmap local = ${TiledMap.getInstance().m_tiledMapRoot.position} origin worldpos = ${this.m_orign.WorldPosition} localPos = ${this.m_orign.LocalPosition}`);
-
             moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
-
-            // cc.error(`match3 back spacePos = ${spacePos} worldpos = ${moveEffectNode.convertToWorldSpaceAR(cc.Vec2.ZERO)} localPos = ${moveEffectNode.position}`);
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(this.m_spType, this.m_orign), end1PointTiled.WorldPosition, this.GetTarPos2(this.m_spType, this.m_orign), 
@@ -1101,14 +1093,10 @@ export class EffectLineAndLine extends EffectLineBase {
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
 
-            //cc.error(`match3 tiledmap local = ${TiledMap.getInstance().m_tiledMapRoot.position} origin worldpos = ${this.m_orign.WorldPosition} localPos = ${this.m_orign.LocalPosition}`);
-
             moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
 
-            // cc.error(`match3 back spacePos = ${spacePos} worldpos = ${moveEffectNode.convertToWorldSpaceAR(cc.Vec2.ZERO)} localPos = ${moveEffectNode.position}`);
-            
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(BlockerID.horizontal, this.m_orign), horizontalEnd1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.horizontal, this.m_orign), 
                             horizontalEnd2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this));
@@ -1124,14 +1112,10 @@ export class EffectLineAndLine extends EffectLineBase {
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
 
-            //cc.error(`match3 tiledmap local = ${TiledMap.getInstance().m_tiledMapRoot.position} origin worldpos = ${this.m_orign.WorldPosition} localPos = ${this.m_orign.LocalPosition}`);
-
             moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
 
-            // cc.error(`match3 back spacePos = ${spacePos} worldpos = ${moveEffectNode.convertToWorldSpaceAR(cc.Vec2.ZERO)} localPos = ${moveEffectNode.position}`);
-            
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(BlockerID.vertical, this.m_orign), verticalEnd1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.vertical, this.m_orign), 
                             verticalEnd2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this));
@@ -1201,13 +1185,10 @@ export class EffectAreaLine extends EffectLineBase {
             cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
                 let moveEffectNode : cc.Node = cc.instantiate(data);
     
-                //cc.error(`match3 tiledmap local = ${TiledMap.getInstance().m_tiledMapRoot.position} origin worldpos = ${this.m_orign.WorldPosition} localPos = ${this.m_orign.LocalPosition}`);
-    
                 moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
                 let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(tiled.WorldPosition);
                 moveEffectNode.setPosition(spacePos);
     
-                // cc.error(`match3 back spacePos = ${spacePos} worldpos = ${moveEffectNode.convertToWorldSpaceAR(cc.Vec2.ZERO)} localPos = ${moveEffectNode.position}`);
                 let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
                 moveEffectCom.StartMove(tiled, this.GetTarPos1(BlockerID.horizontal, tiled), end1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.horizontal, tiled), 
                                 end2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this));
@@ -1230,14 +1211,10 @@ export class EffectAreaLine extends EffectLineBase {
             cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
                 let moveEffectNode : cc.Node = cc.instantiate(data);
 
-                //cc.error(`match3 tiledmap local = ${TiledMap.getInstance().m_tiledMapRoot.position} origin worldpos = ${this.m_orign.WorldPosition} localPos = ${this.m_orign.LocalPosition}`);
-
                 moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
                 let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(tiled.WorldPosition);
                 moveEffectNode.setPosition(spacePos);
 
-                // cc.error(`match3 back spacePos = ${spacePos} worldpos = ${moveEffectNode.convertToWorldSpaceAR(cc.Vec2.ZERO)} localPos = ${moveEffectNode.position}`);
-                
                 let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
                 moveEffectCom.StartMove(tiled, this.GetTarPos1(BlockerID.vertical, tiled), end1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.vertical, tiled), 
                                 end2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this));

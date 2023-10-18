@@ -339,8 +339,6 @@ export class BlockerManager {
             id =TiledMap.getInstance().FilterRandomID(row, col);
         } while (TiledMap.getInstance().CheckNeighborId(self, id));
 
-        cc.error(`GenerateNoMatch row = ${row} col = ${col} id = ${id}`);
-    
         const blk: Blocker = this.CreateFactory(id);
         blk.SelfTiled = self;
         blk.Build();

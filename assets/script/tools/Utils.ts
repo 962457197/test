@@ -28,7 +28,7 @@ export class Utils {
         const row = Math.round(Math.abs(localWorldPos.y / Tiled.HEIGHT));
         const col = Math.round(Math.abs(localWorldPos.x / Tiled.WIDTH));
 
-        cc.log("ScreenPosToTiledPos row = " + row + " col = " + col);
+        //cc.log("ScreenPosToTiledPos row = " + row + " col = " + col);
     
         return { row, col };
     }

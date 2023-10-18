@@ -75,19 +75,6 @@ export default class LineMoveEffectCom extends cc.Component {
         this.endAction = endAction;
         this.checkMatch = checkMatch;
         this.m_isStart = true;
-
-        // let c2 = Utils.GetTiledRowAndCol(originTiled.LocalPosition);
-
-        // let c1CurPos = this.end1Node.convertToWorldSpaceAR(cc.Vec2.ZERO);
-        // // let c1 = Utils.GetTiledRowAndCol(c1CurPos);
-        
-
-        // let curPos = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
-        // // let c3 = Utils.GetTiledRowAndCol(curPos);
-
-        // let curPo2 = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
-
-        // cc.error(`match3 = c1CurPos = ${c1CurPos} localPos = ${this.end1Node.position} localpos2 = ${this.end1Node.getPosition()} curPos = ${curPos}`);
     }
 
     update (dt) {

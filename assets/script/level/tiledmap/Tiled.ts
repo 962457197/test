@@ -303,9 +303,9 @@ export class Tiled {
 
     public CheckNextArriveTiled(): Tiled | null {
         let nextTiled = this.GetNextTiled();
-        if (nextTiled === null) {
+        if (nextTiled == null) {
             nextTiled = this.GetLocalNeighborBottom();
-            if (nextTiled === null) {
+            if (nextTiled == null) {
                 return null;
             }
         }
@@ -319,9 +319,9 @@ export class Tiled {
         }
     
         const prevTiled = nextTiled.GetPrevTiled();
-        if (prevTiled === null) {
+        if (prevTiled == null) {
             return null;
-        } else if (nextTiled.CanMoveBlocker === null && nextTiled.PrevTiledGuid !== this.Guid && nextTiled.CheckCanArriveFromLineTiled(nextTiled.GetPrevTiled())) {
+        } else if (nextTiled.CanMoveBlocker == null && nextTiled.PrevTiledGuid !== this.Guid && nextTiled.CheckCanArriveFromLineTiled(nextTiled.GetPrevTiled())) {
             return null;
         }
     
@@ -578,20 +578,20 @@ export class Tiled {
         // if (this.Map.IsMoveDirection && this.OnCheckIsSameDirectionGroup(preTiled)) {
         //     return false;
         // }
-        const row: number = this.Row - preTiled.Row;
-        const col: number = this.Col - preTiled.Col;
-        if (row === 0 || col === 0) {
-            return false;
-        }
-        let tiledDirection: Direction;
-        if (row > 1 || row < -1 || col > 1 || col < -1) {
-            return false;
-        }
-        if (row > 0) {
-            tiledDirection = col > 0 ? Direction.RightDown : Direction.LeftDown;
-        } else {
-            tiledDirection = col > 0 ? Direction.RightUp : Direction.LeftUp;
-        }
+        // const row: number = this.Row - preTiled.Row;
+        // const col: number = this.Col - preTiled.Col;
+        // if (row === 0 || col === 0) {
+        //     return false;
+        // }
+        // let tiledDirection: Direction;
+        // if (row > 1 || row < -1 || col > 1 || col < -1) {
+        //     return false;
+        // }
+        // if (row > 0) {
+        //     tiledDirection = col > 0 ? Direction.RightDown : Direction.LeftDown;
+        // } else {
+        //     tiledDirection = col > 0 ? Direction.RightUp : Direction.LeftUp;
+        // }
         // if (this.OnCheckTiledBorderStopSlantFalling(preTiled, tiledDirection)) {
         //     return false;
         // }
@@ -600,6 +600,24 @@ export class Tiled {
         // }
         return true;
     }
+
+    // OnCheckTiledMoveDirectionStopSlantFalling(preTiled: Tiled, tiledDirection: Direction): boolean {
+    //     switch (tiledDirection) {
+    //         case Direction.RightDown:
+    //             return !((this.FallingDir === Direction.Right || this.FallingDir === Direction.Down) &&
+    //                 (preTiled.FallingDir === Direction.Right || preTiled.FallingDir === Direction.Down));
+    //         case Direction.LeftDown:
+    //             return !((this.FallingDir === Direction.Left || this.FallingDir === Direction.Down) &&
+    //                 (preTiled.FallingDir === Direction.Left || preTiled.FallingDir === Direction.Down));
+    //         case Direction.RightUp:
+    //             return !((this.FallingDir === Direction.Right || this.FallingDir === Direction.Up) &&
+    //                 (preTiled.FallingDir === Direction.Right || preTiled.FallingDir === Direction.Up));
+    //         case Direction.LeftUp:
+    //             return !((this.FallingDir === Direction.Left || this.FallingDir === Direction.Up) &&
+    //                 (preTiled.FallingDir === Direction.Left || preTiled.FallingDir === Direction.Up));
+    //     }
+    //     return false;
+    // }
 
     CheckCanArriveFromLineTiled(preTiled: Tiled, checkTiledMarked = true): boolean {
 
@@ -1694,6 +1712,9 @@ export class EntryTiled extends Tiled {
         Game.LoadingAssetCount++;
         cc.resources.load("prefab/tiled/EntryTiled", (err, data: any) =>{
             this.m_tiled = cc.instantiate(data);
+            this.m_tiled.setParent(this.m_tiledRoot);
+            this.m_tiled.setPosition(0, 0);
+
             Game.LoadingAssetCount--;
         });
     }

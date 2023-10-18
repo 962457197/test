@@ -50,8 +50,6 @@ export class FSM
 
     OnBeginDrag(row: number, col: number, tiled: Tiled, direction: Direction)
     {
-        cc.error("OnBeginDrag !!! row = " + row + " col = " + col);
-        
         let fsprepare = StateFactory.Instance.Create(FSStateType.enPrepare);
 
         let data = fsprepare.GetData() as FSPrepareData;

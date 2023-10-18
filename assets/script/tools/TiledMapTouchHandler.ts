@@ -38,7 +38,7 @@ export class TiledMapTouchHandler
     private onTouchStart(event: cc.Event.EventTouch) {
         if (Game.IsPlayState()) {
             this.touchStartPos = event.getLocation();
-            cc.warn("event  = " + event.currentTarget.group + " touchStartPos = " + this.touchStartPos);
+            //cc.warn("event  = " + event.currentTarget.group + " touchStartPos = " + this.touchStartPos);
             // 玩家触摸开始时的操作
 
             // if (event.currentTarget.group != Game.GROUP_BLOCK)
@@ -53,7 +53,7 @@ export class TiledMapTouchHandler
                 return;
             }
 
-            cc.error(`this.m_ClickedTiled != null ${this.m_ChooseGuid == -1} ${this.CheckClickTiledCanMove()} ${this.m_ChooseGuid != this.m_ClickedTiled.Guid}`);
+            //cc.error(`this.m_ClickedTiled != null ${this.m_ChooseGuid == -1} ${this.CheckClickTiledCanMove()} ${this.m_ChooseGuid != this.m_ClickedTiled.Guid}`);
 
             if (this.m_ChooseGuid == -1 && this.CheckClickTiledCanMove())
             {
@@ -96,8 +96,6 @@ export class TiledMapTouchHandler
                     moveDirection = Direction.Down;
                 }
 
-                cc.error("offsetY = " + offsetY + " offsetX = " + offsetX);
-        
                 if (Math.abs(offsetY) > 30 || Math.abs(offsetX) > 25) {
                     this.EndChooseEffect();
 

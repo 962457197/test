@@ -377,7 +377,7 @@ export class FSSwitch extends FSBase {
         }
     }
 
-    MoveTime: number = 0.35;
+    MoveTime: number = 0.25;
 
     private OnPlaySwitchAnimation(fsdata: FSSwitchData, action: () => void, isBackMove: boolean = false): void {
 

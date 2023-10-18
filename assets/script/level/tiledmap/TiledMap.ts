@@ -201,9 +201,6 @@ export class TiledMap {
     magicFlag: boolean = false;
     SetTiledData()
     {
-        let matchNum = this.GetMatchNumAround(5, 3, 10, true);
-        cc.error(`SetTiledData ------ matchNum = ${matchNum}`);
-
         for (let i = 0; i < this.TiledArray.length; i++)
         {
             if (!this.TiledArray[i].IsValidTiled())
@@ -692,7 +689,7 @@ export class TiledMap {
 
     CheckRecycleBlocker(tiled: Tiled)
     {
-        return true;
+        return false;
     }
 
     public ResetDestroyedTiledList(): void {

@@ -131,7 +131,7 @@ export class Blocker {
             Utils.SetNodeActive(this.m_blocker, true);
             if (this.SpecialParent != null)
             {
-                this.m_blocker.setPosition(cc.Vec2.ZERO);
+                this.m_blocker.setPosition(0, 0);
             }
             else
             {
@@ -254,7 +254,7 @@ export class Blocker {
 
     PringLog()
     {
-        cc.log(`match3 falling = ${this.Falling} marked = ${this.Marked} markmatch = ${this.MarkMatch} crushstate = ${this.CrushState} isDestroy = ${this.IsDestroy} IsSwitching = ${this.IsSwitching}`);
+        //cc.log(`match3 falling = ${this.Falling} marked = ${this.Marked} markmatch = ${this.MarkMatch} crushstate = ${this.CrushState} isDestroy = ${this.IsDestroy} IsSwitching = ${this.IsSwitching}`);
     }
 
     OnTriggerEffect(): boolean {
@@ -480,7 +480,6 @@ export class Blocker {
         {
             this.SpecialParent = null;
             this.m_blocker.setParent(TiledMap.getInstance().m_blockerRoot);
-            this.LocalPosition = TiledMap.getInstance().m_blockerRoot.convertToNodeSpaceAR(this.WorldPosition);
         }
     }
 
