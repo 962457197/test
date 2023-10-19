@@ -9,8 +9,8 @@ import Game from "../../Game";
 import { FirstActionType } from "../../table/BlockTable";
 import { Timer, TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
 import { Utils } from "../../tools/Utils";
-import { Blocker } from "../blocker/Blocker";
-import { BlockLayer, BlockSubType, BlockerID, BlockerManager } from "../blocker/BlockerManager";
+import { Blocker, MultiTiledBlocker } from "../blocker/Blocker";
+import { BlockLayer, BlockSubType, BlockZIndex, BlockerID, BlockerManager } from "../blocker/BlockerManager";
 import { ColorManager } from "../blocker/ColorManager";
 import { Direction, TiledType } from "../data/LevelScriptableData";
 import { LevelTiledData } from "../data/LevelScriptableData";
@@ -1519,6 +1519,11 @@ export class NormalTiled extends Tiled{
                 continue;
             }
 
+            if (blockdata.Data.MultiTiled)
+            {
+                continue;
+            }
+
             let blocker: Blocker;
             if (blockdata.HasAction(FirstActionType.Sticky)) {
                 if (canMoveId === -1) continue;
@@ -1681,11 +1686,91 @@ export class NormalTiled extends Tiled{
     {
         return this.CanArrive();
     }
+
+    public GenerateMultiTiledBlocker(): void {
+        for (let i = 0; i < this.m_tiledTableData.blockDataList.length; i++) {
+            const id = this.m_tiledTableData.blockDataList[i].id;
+            const blockdata = Game.GetBlockData(id);
+            if (blockdata.Data.MultiTiled) {
+                this.GenerateMultiTiledBlockerById(id);
+            }
+        }
+    }
+    
+    public GenerateMultiTiledBlockerById(id: number, row: number = -1, col: number = -1): void {
+        const realRow = row <= 0 ? MultiTiledBlocker.DEFAULT_AREA_ROW : row;
+        const realCol = col <= 0 ? MultiTiledBlocker.DEFAULT_AREA_COL : col;
+    
+        const multiTiledBlocker = BlockerManager.getInstance().BuildMultiTiledBlocker(id, this, realRow, realCol) as MultiTiledBlocker;
+    
+        if (multiTiledBlocker) {
+            // if (multiTiledBlocker.IsRomanColumn() || multiTiledBlocker.IsSawmill()) {
+            //     const dataList = multiTiledBlocker.IsSawmill()
+            //         ? LevelManager.Instance.Map.SawmillBlockDatas
+            //         : LevelManager.Instance.Map.RomanColumnBlockDatas;
+            //     let data: SawmillAndRomanBlockData = new SawmillAndRomanBlockData();
+            //     for (let i = 0; i < dataList.length; i++) {
+            //         if (dataList[i].Index === this.Guid) {
+            //             data = dataList[i];
+            //             break;
+            //         }
+            //     }
+    
+            //     switch (data.Direction) {
+            //         case Direction.Left:
+            //             for (let i = 0; i < data.TotalCount; i++) {
+            //                 const comTiled = Map.GetTiled(multiTiledBlocker.SelfTiled.Row, multiTiledBlocker.SelfTiled.Col - i);
+            //                 if (comTiled.IsValidTiled()) {
+            //                     multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
+            //                 }
+            //             }
+            //             break;
+            //         case Direction.Up:
+            //             for (let i = 0; i < data.TotalCount; i++) {
+            //                 const comTiled = Map.GetTiled(multiTiledBlocker.SelfTiled.Row - i, multiTiledBlocker.SelfTiled.Col);
+            //                 if (comTiled.IsValidTiled()) {
+            //                     multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
+            //                 }
+            //             }
+            //             break;
+            //         case Direction.Right:
+            //             for (let i = 0; i < data.TotalCount; i++) {
+            //                 const comTiled = m_map.GetTiled(multiTiledBlocker.SelfTiled.Row, multiTiledBlocker.SelfTiled.Col + i);
+            //                 if (comTiled.IsValidTiled()) {
+            //                     multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
+            //                 }
+            //             }
+            //             break;
+            //         case Direction.Down:
+            //             for (let i = 0; i < data.TotalCount; i++) {
+            //                 const comTiled = m_map.GetTiled(multiTiledBlocker.SelfTiled.Row + i, multiTiledBlocker.SelfTiled.Col);
+            //                 if (comTiled.IsValidTiled()) {
+            //                     multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
+            //                 }
+            //             }
+            //             break;
+            //     }
+            //     return;
+            // }
+    
+            for (let j = 0; j < multiTiledBlocker.AreaRow; j++) {
+                for (let k = 0; k < multiTiledBlocker.AreaCol; k++) {
+                    const comTiled = TiledMap.getInstance().GetTiled(multiTiledBlocker.SelfTiled.Row + j, multiTiledBlocker.SelfTiled.Col + k);
+                    if (comTiled.IsValidTiled()) {
+                        const index = j * multiTiledBlocker.AreaCol + k;
+                        multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, index);
+                    }
+                }
+            }
+        }
+    }
+    
 }
 
 export class EntryTiled extends Tiled {
 
     m_specialDropIndex: number = 0;
+    m_entryBlockerRoot: cc.Node = null;
 
     Create(idx: number, data: LevelTiledData, parent: cc.Node, row: number, col: number, name: string)
     {
@@ -1705,15 +1790,26 @@ export class EntryTiled extends Tiled {
         
         this.Guid = TiledMap.ENTRY_GUID_OFFSET + idx;
 
+        let localPos = new cc.Vec2(this.Col * Tiled.WIDTH, -this.Row * Tiled.HEIGHT);
         this.m_tiledRoot = new cc.Node(name);
         this.m_tiledRoot.setParent(parent);
-        this.m_tiledRoot.setPosition(this.Col * Tiled.WIDTH, -this.Row * Tiled.HEIGHT);
+        this.m_tiledRoot.setPosition(localPos);
 
         Game.LoadingAssetCount++;
         cc.resources.load("prefab/tiled/EntryTiled", (err, data: any) =>{
             this.m_tiled = cc.instantiate(data);
             this.m_tiled.setParent(this.m_tiledRoot);
             this.m_tiled.setPosition(0, 0);
+
+            Game.LoadingAssetCount--;
+        });
+
+        Game.LoadingAssetCount++;
+        cc.resources.load("prefab/blocker/EntryBlockRoot", (err, data: any) =>{
+            this.m_entryBlockerRoot = cc.instantiate(data);
+            this.m_entryBlockerRoot.setParent(TiledMap.getInstance().m_blockerRoot);
+            this.m_entryBlockerRoot.setPosition(localPos);
+            this.m_entryBlockerRoot.zIndex = BlockZIndex.Special;
 
             Game.LoadingAssetCount--;
         });
@@ -1748,7 +1844,7 @@ export class EntryTiled extends Tiled {
                 this.m_specialDropIndex < this.m_tiledTableData.specialDropList.length)
             {
                 let id = this.m_tiledTableData.specialDropList[this.m_specialDropIndex++];
-                blocker = BlockerManager.getInstance().Build(id, this, -1, this.m_tiled);
+                blocker = BlockerManager.getInstance().Build(id, this, -1, this.m_entryBlockerRoot);
             }
 
             if (blocker == null)
@@ -1761,14 +1857,14 @@ export class EntryTiled extends Tiled {
                     // {
                     //     parent = m_map.DropSpawner.DropBaseColor(dropguid);
                     // }
-                    blocker = BlockerManager.getInstance().Build(id, this, parent, this.m_tiled);
+                    blocker = BlockerManager.getInstance().Build(id, this, parent, this.m_entryBlockerRoot);
                     TiledMap.getInstance().DropSpawner.UpdateData(id, dropguid);
                 }
                 else
                 {
                     // let id = TiledMap.getInstance().DropSpawner.DropBaseColor(dropguid);
                     let id = TiledMap.getInstance().RandomID();
-                    blocker = BlockerManager.getInstance().Build(id, this, -1, this.m_tiled);
+                    blocker = BlockerManager.getInstance().Build(id, this, -1, this.m_entryBlockerRoot);
 
                     TiledMap.getInstance().DropSpawner.UpdateData(id, dropguid);
                 }

@@ -49,6 +49,51 @@
       "ID": 29,
       "IconName": "element_common_colorbomb",
       "IconShadow": null
+    },
+    "30": {
+      "ID": 30,
+      "IconName": "element_bottom_c",
+      "IconShadow": null
+    },
+    "31": {
+      "ID": 31,
+      "IconName": "element_bottom_a",
+      "IconShadow": null
+    },
+    "32": {
+      "ID": 32,
+      "IconName": "element_bottom_b",
+      "IconShadow": null
+    },
+    "33": {
+      "ID": 33,
+      "IconName": "element_common_biscuit",
+      "IconShadow": null
+    },
+    "34": {
+      "ID": 34,
+      "IconName": "element_cookie_a",
+      "IconShadow": null
+    },
+    "35": {
+      "ID": 35,
+      "IconName": "element_cookie_b",
+      "IconShadow": null
+    },
+    "36": {
+      "ID": 36,
+      "IconName": "element_cookie_c",
+      "IconShadow": null
+    },
+    "76": {
+      "ID": 76,
+      "IconName": "element_cookie_d",
+      "IconShadow": null
+    },
+    "77": {
+      "ID": 77,
+      "IconName": "element_cookie_e",
+      "IconShadow": null
     }
   }
 }

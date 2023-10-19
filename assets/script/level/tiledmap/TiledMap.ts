@@ -208,6 +208,16 @@ export class TiledMap {
                 continue;
             }
 
+            (this.TiledArray[i] as NormalTiled).GenerateMultiTiledBlocker();
+        }
+
+        for (let i = 0; i < this.TiledArray.length; i++)
+        {
+            if (!this.TiledArray[i].IsValidTiled())
+            {
+                continue;
+            }
+
             var r = this.TiledArray[i].Row;
             var c = this.TiledArray[i].Col;
 

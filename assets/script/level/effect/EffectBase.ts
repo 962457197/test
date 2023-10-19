@@ -4,7 +4,7 @@ import { MatchHelper } from "../../tools/MatchHelper";
 import { Timer, TimerManager, TimerData, TimerType } from "../../tools/TimerManager";
 import { Utils } from "../../tools/Utils";
 import BaseBlockerCom from "../blocker/BaseBlockerCom";
-import { Blocker, SameColorBlocker } from "../blocker/Blocker";
+import { Blocker, MultiTiledDestroyableComBlocker, SameColorBlocker } from "../blocker/Blocker";
 import { BlockLayer, BlockerID } from "../blocker/BlockerManager";
 import { Direction } from "../data/LevelScriptableData";
 import { IntervalExecEffect } from "../fsm/FSBase";
@@ -224,27 +224,32 @@ export class EffectBase
             }
         }
     
-        // if (destroyBlocker instanceof MultiTiledDestroyableComBlocker) {
-        //     if (destroyBlocker instanceof JackComBlocker) {
-        //         const com: MultiTiledComBlocker = destroyBlocker;
-        //         if (!com.isShow || com.markMatch) {
-        //             
-        //             return this.IsAddedBlocker;
-        //         }
-        //     } else {
-        //         const com: MultiTiledDestroyableComBlocker = destroyBlocker;
-        //         if (!com.isForbibCom && com.checkCanAddDestroy(this.m_orign.Guid)) {
-        //             com.DecrHP();
-        //             com.isTriggerEffect = true;
-        //             com.matchEffectType = this.EffType;
-        //             blockers.push(com);
+        if (destroyBlocker instanceof MultiTiledDestroyableComBlocker) {
+            // if (destroyBlocker instanceof JackComBlocker) 
+            // {
+            //     const com: MultiTiledComBlocker = destroyBlocker;
+            //     if (!com.isShow || com.markMatch) {
+                    
+            //         return this.IsAddedBlocker;
+            //     }
+            // } 
+            // else 
+            {
+                const com: MultiTiledDestroyableComBlocker = destroyBlocker;
+                if (!com.IsForbidCom && com.CheckCanAddDestroy(this.m_orign.Guid)) {
+                    com.DecrHP();
+                    com.IsTriggerEffect = true;
+                    com.MatchEffectType = this.EffType;
+                    blockers.push(com);
     
-        //             this.IsAddedBlocker = true;
-        //         }
-        //         
-        //         return this.IsAddedBlocker;
-        //     }
-        // } else if (destroyBlocker instanceof ChameleonBlocker) {
+                    this.IsAddedBlocker = true;
+                }
+                
+                return this.IsAddedBlocker;
+            }
+        }
+        
+        // else if (destroyBlocker instanceof ChameleonBlocker) {
         //     const chameleon: ChameleonBlocker = destroyBlocker;
         //     if (chameleon.isNeverChanged()) {
         //         chameleon.DecrHP();
@@ -790,8 +795,8 @@ export class EffectSquareAreaCrush extends EffectAreaBase
         super.Finish();
 
         this.m_Data.IsSuccess = true;
+        this.m_matchItems.push(this.m_orign.CanMoveBlocker);
         TiledMap.getInstance().DelayDestroyBlockers(this.m_matchItems);
-        TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker, true, true);
 
         this.m_ctrl.Execute();
     }

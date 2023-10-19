@@ -8,7 +8,8 @@
 import { Utils } from "../../tools/Utils";
 import { BornEffect, Tiled } from "../tiledmap/Tiled";
 import { TiledMap } from "../tiledmap/TiledMap";
-import { Blocker , BaseBlocker, LineBlocker, SquareBlocker, AreaBlocker, SameColorBlocker} from "./Blocker";
+import { Blocker , BaseBlocker, LineBlocker, SquareBlocker, AreaBlocker, SameColorBlocker, ObstacleBlocker, ButterCookiesComBlocker, MultiTiledBlocker, ButterCookiesBlocker} from "./Blocker";
+import ButterCookiesCom from "./ButterCookiesCom";
 
 
 export enum BlockerID
@@ -318,6 +319,18 @@ export enum BlockLayer
     TopTop,
 }
 
+export enum BlockZIndex
+{
+    Bottom = 100,
+    Middle = 200,
+    Top    = 300,
+    TopTop = 400,
+
+
+    //
+    Special = 1000,
+}
+
 export class BlockerManager {
     private static instance: BlockerManager | null = null;
 
@@ -345,6 +358,17 @@ export class BlockerManager {
         return blk;
     }
 
+    public BuildMultiTiledBlocker(id: number, self: Tiled, parentId: number = -1, areaRow = 2, areaCol = 2) : Blocker
+    {
+        var blk = this.CreateFactory(id, parentId);
+        let multiTiledBlocker = blk as MultiTiledBlocker;
+        multiTiledBlocker.AreaRow = areaRow;
+        multiTiledBlocker.AreaCol = areaCol;
+        blk.SelfTiled = self;
+        blk.Build();
+        return blk;
+    }
+
     public Build(id: number, self: Tiled, parentId: number = -1, specialParent: cc.Node = null, bornEffect = BornEffect.none): Blocker {
         const blk: Blocker = this.CreateFactory(id, parentId);
         blk.SelfTiled = self;
@@ -352,6 +376,22 @@ export class BlockerManager {
         blk.BornEffect = bornEffect;
         blk.Build();
         return blk;
+    }
+
+    CreateFactoryCom(classType: BlockerClassType, id: number, parentId: number = -1)
+    {
+        switch (classType) {
+            case BlockerClassType.ButterCookiesCom:
+                var baseblocker = this.PopBlocker(BlockerClassType.ButterCookiesCom);
+                if (null != baseblocker)
+                {
+                    baseblocker.Reborn(id, parentId);
+                    return baseblocker;
+                }
+                return new ButterCookiesComBlocker(id);
+            default:
+                break;
+        }
     }
 
     CreateFactory(id: number, parentId: number = -1) : Blocker
@@ -403,6 +443,32 @@ export class BlockerManager {
                     return baseblocker;
                 }
                 return new SameColorBlocker(id);
+            case BlockerID.bottom_a_id:
+            case BlockerID.bottom_b_id:
+            case BlockerID.bottom_c_id:
+            case BlockerID.cookies_a_id:
+            case BlockerID.cookies_b_id:
+            case BlockerID.cookies_c_id:
+            case BlockerID.cookies_d_id:
+            case BlockerID.cookies_e_id:
+            case BlockerID.moved_ob_brickid:
+                var baseblocker = this.PopBlocker(BlockerClassType.Obstacle);
+                if (null != baseblocker)
+                {
+                    baseblocker.Reborn(id, parentId);
+                    return baseblocker;
+                }
+                return new ObstacleBlocker(id);
+            case BlockerID.butter_cookies_a_id:
+            case BlockerID.butter_cookies_b_id:
+            case BlockerID.butter_cookies_c_id:
+                var baseblocker = this.PopBlocker(BlockerClassType.ButterCookies);
+                if (null != baseblocker)
+                {
+                    baseblocker.Reborn(id, parentId);
+                    return baseblocker;
+                }
+                return new ButterCookiesBlocker(id);
             default:
                 var baseblocker = this.PopBlocker(BlockerClassType.Base);
                 if (null != baseblocker)

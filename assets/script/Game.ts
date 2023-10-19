@@ -42,11 +42,11 @@ export default class Game extends cc.Component {
     @property(cc.Node)
     effectRoot: cc.Node = null;
 
-    @property(cc.Sprite)
-    BG: cc.Sprite = null;
-
     @property(cc.Camera)
     MainCamera: cc.Camera = null;
+
+    @property(cc.Node)
+    CanvasNode: cc.Node = null;
 
     static CC_SIZE_MULTI = 100;
     // static GROUP_BLOCK = "block";
@@ -107,6 +107,8 @@ export default class Game extends cc.Component {
         });
 
         CameraManager.getInstance().MainCamera = this.MainCamera;
+        CameraManager.getInstance().Adapter(this.CanvasNode);
+
         TiledMapTouchHandler.getInstance().Init();
         Game.m_gameState = GameState.LoadData;
     }

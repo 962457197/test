@@ -171,11 +171,12 @@ export default class LineMoveEffectCom extends cc.Component {
             if (!this.m_markTileds.includes(tiled))
             {
                 this.m_markTileds.push(tiled);
-            }
-            this.checkMatch(tiled, this.m_matchBlockers);
-            if (this.m_matchBlockers.length > 0)
-            {
-                TiledMap.getInstance().DelayDestroyBlockers(this.m_matchBlockers);
+
+                this.checkMatch(tiled, this.m_matchBlockers);
+                if (this.m_matchBlockers.length > 0)
+                {
+                    TiledMap.getInstance().DelayDestroyBlockers(this.m_matchBlockers);
+                }
             }
         }
     }
