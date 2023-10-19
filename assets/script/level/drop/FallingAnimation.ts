@@ -122,19 +122,19 @@ export class FallingAnimation {
     }
 
     public OnUpdate(): void {
-        // if (this.m_isPause) {
-        //     if (LevelManager.Instance.SameColorTriggeringCount <= 0) {
-        //         if (this.m_destTiled != null && this.m_destTiled.CanMoveBlocker !== null && this.m_pauseBlocker !== null && this.m_destTiled.CanMoveBlocker.Guid === this.m_pauseBlocker.Guid && !this.m_destTiled.CanMoveBlocker.CrushState) {
-        //             this.m_isPause = false;
-        //             this.m_destTiled.CanMoveBlocker.Falling = true;
-        //         } else {
-        //             this.m_isStart = false;
-        //             this.m_end(this, null, this.m_toDirection);
-        //             return;
-        //         }
-        //     }
-        //     return;
-        // }
+        if (this.m_isPause) {
+            if (TiledMap.getInstance().SameColorTriggeringCount <= 0) {
+                if (this.m_destTiled != null && this.m_destTiled.CanMoveBlocker !== null && this.m_pauseBlocker !== null && this.m_destTiled.CanMoveBlocker.Guid === this.m_pauseBlocker.Guid && !this.m_destTiled.CanMoveBlocker.CrushState) {
+                    this.m_isPause = false;
+                    this.m_destTiled.CanMoveBlocker.Falling = true;
+                } else {
+                    this.m_isStart = false;
+                    this.m_end(this, null, this.m_toDirection);
+                    return;
+                }
+            }
+            return;
+        }
 
         if (!this.m_isStart) {
             return;
@@ -231,12 +231,12 @@ export class FallingAnimation {
             this.m_destTiled.CanMoveBlocker.LocalPosition = this.m_destTiled.LocalPosition;
             this.m_destTiled.CanMoveBlocker.ChangeSortLayer();
             
-            // if (LevelManager.Instance.SameColorTriggeringCount > 0) {
-            //     this.m_isPause = true;
-            //     this.m_destTiled.CanMoveBlocker!.Falling = false;
-            //     this.m_pauseBlocker = this.m_destTiled.CanMoveBlocker;
-            //     return;
-            // }
+            if (TiledMap.getInstance().SameColorTriggeringCount > 0) {
+                this.m_isPause = true;
+                this.m_destTiled.CanMoveBlocker!.Falling = false;
+                this.m_pauseBlocker = this.m_destTiled.CanMoveBlocker;
+                return;
+            }
             
             let next = this.m_destTiled.CheckNextArriveTiled();
 

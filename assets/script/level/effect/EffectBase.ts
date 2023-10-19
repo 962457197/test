@@ -795,7 +795,11 @@ export class EffectSquareAreaCrush extends EffectAreaBase
         super.Finish();
 
         this.m_Data.IsSuccess = true;
-        this.m_matchItems.push(this.m_orign.CanMoveBlocker);
+        if (this.m_orign.CanMoveBlocker != null)
+        {
+            this.m_orign.CanMoveBlocker.CrushState = false;
+            this.m_matchItems.push(this.m_orign.CanMoveBlocker);
+        }
         TiledMap.getInstance().DelayDestroyBlockers(this.m_matchItems);
 
         this.m_ctrl.Execute();
@@ -941,7 +945,12 @@ export class EffectLineCrush extends EffectLineBase {
         let end1PointTiled = this.m_end1PointTiled;
         let end2PointTiled = this.m_end2PointTiled;
 
-        let iconId = this.m_orign.CanMoveBlocker.TableData.Data.IconId;
+        let iconId = 26;
+        if (this.m_spType == BlockerID.vertical)
+        {
+            iconId = 27;
+        }
+
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
 
@@ -1041,7 +1050,11 @@ export class EffectSquareLineCrush extends EffectLineBase {
 
     CheckOriginAndOtherTiled()
     {
-        TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker, true, true);
+        if (this.m_orign.CanMoveBlocker != null)
+        {
+            this.m_orign.CanMoveBlocker.CrushState = false;
+            TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker, true, true);
+        }
     }
 
     EndAction()
@@ -1943,6 +1956,8 @@ export class EffectSameColorAndSameColor extends EffectBase
 
     public Start(): void {
         super.Start();
+        this.WaitTime = 0.5;
+        TiledMap.getInstance().SameColorTriggeringCount++;
     }
 
     public Play(): void {
@@ -1959,5 +1974,9 @@ export class EffectSameColorAndSameColor extends EffectBase
         TiledMap.getInstance().DelayDestroyBlockers(this.m_matchItems);
         TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker);
         TiledMap.getInstance().DestroyBlocker(this.m_srcBlocker);
+    }
+
+    public Finish(): void {
+        TiledMap.getInstance().SameColorTriggeringCount--;
     }
 }

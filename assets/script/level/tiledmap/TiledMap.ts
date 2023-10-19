@@ -30,8 +30,8 @@ export class TiledMap {
         return TiledMap.instance;
     }
 
-    public static MAX_COL: number = 9;
-    public static MAX_ROW: number = 9;
+    public static MAX_COL: number = 18;
+    public static MAX_ROW: number = 18;
     public static CC_OFFSET = 100;
     public static ENTRY_GUID_OFFSET: number = 1000;
 
@@ -50,6 +50,8 @@ export class TiledMap {
     m_destoryedTiledList: number[] = [];
     m_destroyedTopBlockers: Blocker[] = [];
     m_squareTargetTileds: number[] = [];
+
+    SameColorTriggeringCount: number = 0;
 
     get MapRootPosition()
     {

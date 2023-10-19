@@ -24,10 +24,14 @@ import { FSAdpater } from "../fsm/FSBase";
 import ButterCookiesCom from "./ButterCookiesCom";
 
 export class Blocker {
+
+    static m_blockerGuid: number = 0;
+
     ClassType: BlockerClassType = BlockerClassType.None;
 
     IsDestroy: boolean = false;
     ID: number = 0;
+    Guid: number = 0;
     CurHp: number = 0;
     m_parentId: number = -1;
     m_bufCount: number = 0;
@@ -103,6 +107,7 @@ export class Blocker {
         this.Falling = false;
         this.IsDestroy = false;
         this.SpecialParent = null;
+        this.Guid = Blocker.m_blockerGuid++;
     }
 
     public Build(data: BlockerData | null = null): void {
