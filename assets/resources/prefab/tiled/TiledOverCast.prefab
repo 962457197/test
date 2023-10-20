@@ -244,7 +244,7 @@
       "__id__": 3
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 5
@@ -351,7 +351,7 @@
       "__id__": 3
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 8
@@ -572,7 +572,7 @@
       "__id__": 12
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 14
@@ -679,7 +679,7 @@
       "__id__": 12
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 17
@@ -900,7 +900,7 @@
       "__id__": 21
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 23
@@ -1007,7 +1007,7 @@
       "__id__": 21
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 26
@@ -1228,7 +1228,7 @@
       "__id__": 30
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 32
@@ -1335,7 +1335,7 @@
       "__id__": 30
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 35
@@ -2068,7 +2068,7 @@
       "__id__": 53
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 55
@@ -2175,7 +2175,7 @@
       "__id__": 53
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 58
@@ -2396,7 +2396,7 @@
       "__id__": 62
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 64
@@ -2430,10 +2430,10 @@
         -17.26,
         63.3,
         0,
+        0,
+        0,
         0.7071067811865475,
         0.7071067811865476,
-        4.329780281177466e-17,
-        4.329780281177467e-17,
         1,
         1,
         1
@@ -2447,7 +2447,7 @@
     },
     "_skewX": 0,
     "_skewY": 0,
-    "_is3DNode": true,
+    "_is3DNode": false,
     "_groupIndex": 0,
     "groupIndex": 0,
     "_id": ""
@@ -2503,7 +2503,7 @@
       "__id__": 62
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 67
@@ -2724,7 +2724,7 @@
       "__id__": 71
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 73
@@ -2831,7 +2831,7 @@
       "__id__": 71
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 76
@@ -3052,7 +3052,7 @@
       "__id__": 80
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 82
@@ -3159,7 +3159,7 @@
       "__id__": 80
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 85
@@ -3320,8 +3320,6 @@
       "__id__": 1
     },
     "_enabled": true,
-    "label": null,
-    "text": "hello",
     "TiledOverCasts": [
       {
         "__id__": 91
@@ -3329,10 +3327,6 @@
       {
         "__id__": 92
       }
-    ],
-    "myArray": [
-      0,
-      0
     ],
     "_id": ""
   },
@@ -3425,10 +3419,18 @@
     "Down_Left_HorFill": {
       "__id__": 84
     },
-    "LineUp": null,
-    "LineRight": null,
-    "LineLeft": null,
-    "LineDown": null
+    "LineUp": {
+      "__id__": 53
+    },
+    "LineRight": {
+      "__id__": 62
+    },
+    "LineLeft": {
+      "__id__": 71
+    },
+    "LineDown": {
+      "__id__": 80
+    }
   },
   {
     "__type__": "cc.PrefabInfo",

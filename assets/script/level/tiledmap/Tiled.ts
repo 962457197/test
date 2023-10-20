@@ -18,6 +18,7 @@ import { FallingManager } from "../drop/FallingManager";
 import { EffectBaseCrush } from "../effect/EffectBase";
 import { EffectType } from "../effect/EffectController";
 import { TiledMap } from "./TiledMap";
+import TiledOverCastCom from "./TiledOverCastCom";
 
 export enum BornEffect
 {
@@ -39,6 +40,9 @@ export class Tiled {
     Guid: number = 0;
     m_tiledRoot: cc.Node = null;
     m_tiled: cc.Node = null;
+    Bg: cc.Node = null;
+    OverCastRoot: cc.Node = null;
+    OverCastCom: TiledOverCastCom = null;
     EnterPoint: Tiled = null;
     PrevTiledGuid: number = -1;
     NextTiledGuid: number = -1;
@@ -71,7 +75,6 @@ export class Tiled {
     ForbidFindEnterPoint: boolean;
     CurrentFallingSlantTiled: Tiled = null;
     CurrentSelectedSlantFallingNumber: number = -1;
-    Bg: cc.Node = null;
     m_isNeedGen: boolean = true;
     m_stickyBlockerId: number = -1;
     BeforeNoCheckMatch: boolean = false;
@@ -1490,11 +1493,13 @@ export class NormalTiled extends Tiled{
         this.m_tiledRoot.setPosition(col * Tiled.WIDTH, -row * Tiled.HEIGHT);
 
         Game.LoadingAssetCount++;
+        Game.LoadingAssetCount++;
         cc.resources.load("prefab/tiled/NormalTiled", (err, data: any) =>{
             this.m_tiled = cc.instantiate(data);
             this.m_tiled.setParent(this.m_tiledRoot);
             this.m_tiled.setPosition(0, 0);
             this.Bg = this.m_tiled.getChildByName("Bg");
+            this.OverCastRoot = this.m_tiled.getChildByName("OverCast");
             Game.LoadingAssetCount--;
 
             if (this.m_tiledTableData.type == TiledType.Normal || this.m_tiledTableData.type == TiledType.Empty)
@@ -1506,6 +1511,14 @@ export class NormalTiled extends Tiled{
             {
                 Utils.SetNodeActive(this.Bg, false);
             }
+
+            cc.resources.load("prefab/tiled/TiledOverCast", (err, data: any) =>{
+                let com: cc.Node = cc.instantiate(data);
+                this.OverCastCom = com.getComponent(TiledOverCastCom);
+                this.OverCastCom.node.setParent(this.OverCastRoot);
+                Game.LoadingAssetCount--;
+            });
+
         })
     }
 
@@ -1615,7 +1628,7 @@ export class NormalTiled extends Tiled{
     {
         if (this.m_isNeedGen)
         {
-            this.CanMoveBlocker = BlockerManager.getInstance().Build(id, this);
+            this.CanMoveBlocker = BlockerManager.getInstance().Build(id, this, -1, null);
             this.m_isNeedGen = false;
         }
     }

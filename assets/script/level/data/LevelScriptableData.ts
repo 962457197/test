@@ -91,7 +91,7 @@ export class LevelScriptableData
     public checkFalling: boolean = false;
     public targetList: LevelTargetData[] = [];
     public dropDataList: LevelDropData[] = [];
-    public tiledData: LevelTiledData[] = new Array(81);
+    public tiledData: LevelTiledData[] = [];
     public conveyerList: number[] = [];
     public moveDirectionList: number[] = [];
     public squareTargetList: number[] = [];

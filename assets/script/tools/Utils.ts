@@ -10,7 +10,7 @@ import { TiledMap } from "../level/tiledmap/TiledMap";
 
 export class Utils {
     static SetNodeActive(node: cc.Node, active: boolean) {
-        if (node) {
+        if (node != null) {
             node.active = active;
         }
     }

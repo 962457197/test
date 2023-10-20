@@ -89,7 +89,7 @@ export class TiledMap {
         }
         this.m_tiledMapRoot.setPosition(posx, posy);
 
-        this.TiledArray = new Array<NormalTiled>(TiledMap.MAX_COL * TiledMap.MAX_ROW);
+        this.TiledArray = new Array<Tiled>(TiledMap.MAX_COL * TiledMap.MAX_ROW);
         this.m_enterTiledArray = new Array<EntryTiled>(TiledMap.MAX_COL * TiledMap.MAX_ROW);
         
         for (let row = 0; row < this.m_lvlData.maxRows; row++) {
@@ -288,24 +288,24 @@ export class TiledMap {
         const bottom = tiled.GetNeighborBottom();
         const left = tiled.GetNeighborLeft();
         const right = tiled.GetNeighborRight();
-        const hasTop = top !== null && (top.GetTiledType() === TiledType.Normal || top.GetTiledType() === TiledType.Empty);
-        const hasBottom = bottom !== null && (bottom.GetTiledType() === TiledType.Normal || bottom.GetTiledType() === TiledType.Empty);
-        const hasLeft = left !== null && (left.GetTiledType() === TiledType.Normal || left.GetTiledType() === TiledType.Empty);
-        const hasRight = right !== null && (right.GetTiledType() === TiledType.Normal || right.GetTiledType() === TiledType.Empty);
+        const hasTop = top != null && (top.GetTiledType() == TiledType.Normal || top.GetTiledType() == TiledType.Empty);
+        const hasBottom = bottom != null && (bottom.GetTiledType() == TiledType.Normal || bottom.GetTiledType() == TiledType.Empty);
+        const hasLeft = left != null && (left.GetTiledType() == TiledType.Normal || left.GetTiledType() == TiledType.Empty);
+        const hasRight = right != null && (right.GetTiledType() == TiledType.Normal || right.GetTiledType() == TiledType.Empty);
     
-        const nothasTop = top !== null && top.GetTiledType() === TiledType.None;
-        const nothasBottom = bottom !== null && bottom.GetTiledType() === TiledType.None;
-        const nothasLeft = left !== null && left.GetTiledType() === TiledType.None;
-        const nothasRight = right !== null && right.GetTiledType() === TiledType.None;
+        const nothasTop = top != null && top.GetTiledType() == TiledType.None;
+        const nothasBottom = bottom != null && bottom.GetTiledType() == TiledType.None;
+        const nothasLeft = left != null && left.GetTiledType() == TiledType.None;
+        const nothasRight = right != null && right.GetTiledType() == TiledType.None;
     
         const lefttop = tiled.GetNeighborLeftTop();
         const leftbottom = tiled.GetNeighborLeftBottom();
         const righttop = tiled.GetNeighborRightTop();
         const rightbottom = tiled.GetNeighborRightBottom();
-        const hasLeftTop = lefttop !== null && (lefttop.GetTiledType() === TiledType.Normal || lefttop.GetTiledType() === TiledType.Empty);
-        const hasLeftBottom = leftbottom !== null && (leftbottom.GetTiledType() === TiledType.Normal || leftbottom.GetTiledType() === TiledType.Empty);
-        const hasRightTop = righttop !== null && (righttop.GetTiledType() === TiledType.Normal || righttop.GetTiledType() === TiledType.Empty);
-        const hasRightBottom = rightbottom !== null && (rightbottom.GetTiledType() === TiledType.Normal || rightbottom.GetTiledType() === TiledType.Empty);
+        const hasLeftTop = lefttop != null && (lefttop.GetTiledType() == TiledType.Normal || lefttop.GetTiledType() == TiledType.Empty);
+        const hasLeftBottom = leftbottom != null && (leftbottom.GetTiledType() == TiledType.Normal || leftbottom.GetTiledType() == TiledType.Empty);
+        const hasRightTop = righttop != null && (righttop.GetTiledType() == TiledType.Normal || righttop.GetTiledType() == TiledType.Empty);
+        const hasRightBottom = rightbottom != null && (rightbottom.GetTiledType() == TiledType.Normal || rightbottom.GetTiledType() == TiledType.Empty);
     
         if (!((hasTop && hasLeft)
             || (hasTop && hasRight)
@@ -315,7 +315,11 @@ export class TiledMap {
         }
     
         const normal = tiled as NormalTiled;
-        const overCast = normal.m_tiled.getComponentInChildren(TiledOverCastCom).TiledOverCasts[1];
+        const overCast = normal.OverCastCom.TiledOverCasts[1];
+        if (overCast == null)
+        {
+            return;
+        }
     
         //左上
         if (hasTop && hasLeft) {
@@ -364,19 +368,19 @@ export class TiledMap {
         const bottom = tiled.GetNeighborBottom();
         const left = tiled.GetNeighborLeft();
         const right = tiled.GetNeighborRight();
-        const hasTop = top !== null && (top.GetTiledType() === TiledType.Normal || top.GetTiledType() === TiledType.Empty);
-        const hasBottom = bottom !== null && (bottom.GetTiledType() === TiledType.Normal || bottom.GetTiledType() === TiledType.Empty);
-        const hasLeft = left !== null && (left.GetTiledType() === TiledType.Normal || left.GetTiledType() === TiledType.Empty);
-        const hasRight = right !== null && (right.GetTiledType() === TiledType.Normal || right.GetTiledType() === TiledType.Empty);
+        const hasTop = top != null && (top.GetTiledType() == TiledType.Normal || top.GetTiledType() == TiledType.Empty);
+        const hasBottom = bottom != null && (bottom.GetTiledType() == TiledType.Normal || bottom.GetTiledType() == TiledType.Empty);
+        const hasLeft = left != null && (left.GetTiledType() == TiledType.Normal || left.GetTiledType() == TiledType.Empty);
+        const hasRight = right != null && (right.GetTiledType() == TiledType.Normal || right.GetTiledType() == TiledType.Empty);
     
         const lefttop = tiled.GetNeighborLeftTop();
         const leftbottom = tiled.GetNeighborLeftBottom();
         const righttop = tiled.GetNeighborRightTop();
         const rightbottom = tiled.GetNeighborRightBottom();
-        const hasLeftTop = lefttop !== null && (lefttop.GetTiledType() === TiledType.Normal || lefttop.GetTiledType() === TiledType.Empty);
-        const hasLeftBottom = leftbottom !== null && (leftbottom.GetTiledType() === TiledType.Normal || leftbottom.GetTiledType() === TiledType.Empty);
-        const hasRightTop = righttop !== null && (righttop.GetTiledType() === TiledType.Normal || righttop.GetTiledType() === TiledType.Empty);
-        const hasRightBottom = rightbottom !== null && (rightbottom.GetTiledType() === TiledType.Normal || rightbottom.GetTiledType() === TiledType.Empty);
+        const hasLeftTop = lefttop != null && (lefttop.GetTiledType() == TiledType.Normal || lefttop.GetTiledType() == TiledType.Empty);
+        const hasLeftBottom = leftbottom != null && (leftbottom.GetTiledType() == TiledType.Normal || leftbottom.GetTiledType() == TiledType.Empty);
+        const hasRightTop = righttop != null && (righttop.GetTiledType() == TiledType.Normal || righttop.GetTiledType() == TiledType.Empty);
+        const hasRightBottom = rightbottom != null && (rightbottom.GetTiledType() == TiledType.Normal || rightbottom.GetTiledType() == TiledType.Empty);
     
         if (!((!hasLeft && !hasTop && !hasLeftTop)
             || (!hasLeft && !hasBottom && !hasLeftBottom)
@@ -392,8 +396,12 @@ export class TiledMap {
         }
     
         const normal = tiled as NormalTiled;
-        const overCast = normal.m_tiled.getComponentInChildren(TiledOverCastCom).TiledOverCasts[0];
-    
+        const overCast = normal.OverCastCom.TiledOverCasts[0];
+        if (overCast == null)
+        {
+            return;
+        }
+
         //左上
         if (!hasLeft && !hasTop && !hasLeftTop) {
             Utils.SetNodeActive(overCast.Up_Left, true);
@@ -468,7 +476,12 @@ export class TiledMap {
         {
             return null;
         }
-        return this.TiledArray[row * this.m_lvlData.maxCols + col];
+        let index = row * this.m_lvlData.maxCols + col;
+        if (index >= this.TiledArray.length)
+        {
+            return null;
+        }
+        return this.TiledArray[index];
     }
 
     public GetIsCanMove3X2Square(r: number, c: number): boolean {
@@ -481,18 +494,18 @@ export class TiledMap {
     
     private IsTiledNeedGen(r: number, c: number): boolean {
         const t = this.GetTiled(r, c) as NormalTiled;
-        return t !== null && t.IsValidTiled() && t.IsNeedGen();
+        return t != null && t.IsValidTiled() && t.IsNeedGen();
     }
     
     private isTiledNeedGenAndCanSwitch(r: number, c: number): boolean {
         const t = this.GetTiled(r, c) as NormalTiled;
-        return t !== null && t.IsValidTiled() && t.CanGenerateCanSwitchBlocker();
+        return t != null && t.IsValidTiled() && t.CanGenerateCanSwitchBlocker();
     }
 
     public GetMatchNumAround(row: number, col: number, id: number, isLevelFirstGenerate: boolean = false, isNeedRecordResult: boolean = false): number {
         const curTiled = this.GetTiled(row, col);
     
-        if (curTiled === null) {
+        if (curTiled == null) {
             return 0;
         }
     
