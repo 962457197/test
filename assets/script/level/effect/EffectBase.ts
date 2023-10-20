@@ -7,8 +7,7 @@ import BaseBlockerCom from "../blocker/BaseBlockerCom";
 import { Blocker, MultiTiledDestroyableComBlocker, SameColorBlocker } from "../blocker/Blocker";
 import { BlockLayer, BlockerID } from "../blocker/BlockerManager";
 import { Direction } from "../data/LevelScriptableData";
-import { IntervalExecEffect } from "../fsm/FSBase";
-import { FSM } from "../fsm/FSM";
+import { FSM, IntervalExecEffect } from "../fsm/FSBase";
 import { BornEffect, NormalTiled, Tiled } from "../tiledmap/Tiled";
 import { TiledMap } from "../tiledmap/TiledMap";
 import { EffectController, EffectType } from "./EffectController";
@@ -1455,7 +1454,11 @@ export class EffectSquareLineCompose extends EffectSquareBase
     OnArrivedAction(tiled: Tiled)
     {
         let m_effData = new EffectData();
-        let ctrl = EffectControllerFactory.Instance.PopController(() => { this.m_ctrl.Execute() }); //new EffectController(this.OnSquareAndAreaEffectFinished);
+        let ctrl = EffectControllerFactory.Instance.PopController(() => 
+        { 
+            this.m_Data.IsSuccess = true;
+            this.m_ctrl.Execute() 
+        });
         ctrl.CreateEffect(EffectType.SquareLineCrush, tiled, m_effData, this.m_spType);
         ctrl.Execute();
     }
@@ -1521,7 +1524,11 @@ export class EffectSquareAreaCompose extends EffectSquareBase
     OnArrivedAction(tiled: Tiled)
     {
         let m_effData = new EffectData();
-        let ctrl = EffectControllerFactory.Instance.PopController(() => { this.m_ctrl.Execute() }); //new EffectController(this.OnSquareAndAreaEffectFinished);
+        let ctrl = EffectControllerFactory.Instance.PopController(() => 
+        { 
+            this.m_Data.IsSuccess = true;
+            this.m_ctrl.Execute() 
+        });
         ctrl.CreateEffect(EffectType.SquareAreaCrush, tiled, m_effData, this.m_spType);
         ctrl.Execute();
     }
@@ -1649,6 +1656,7 @@ class EffectSameColorInterface extends EffectBase {
     Finish(): void {
         super.Finish();
         this.m_Data.IsSuccess = true;
+        FSM.getInstance().MovingCanMatch = true;
     }
 }
 
@@ -1952,6 +1960,8 @@ export class EffectSameColorAndSameColor extends EffectBase
         this.m_srcBlocker.MarkMatch = true;
         this.m_srcBlocker.CrushState = true;
         this.m_srcBlocker.MatchEffectType = this.EffType;
+
+        FSM.getInstance().MovingCanMatch = false;
     }
 
     public Start(): void {
@@ -1977,6 +1987,11 @@ export class EffectSameColorAndSameColor extends EffectBase
     }
 
     public Finish(): void {
+        super.Finish();
+
+        FSM.getInstance().MovingCanMatch = true;
         TiledMap.getInstance().SameColorTriggeringCount--;
+
+        this.m_ctrl.Execute();
     }
 }

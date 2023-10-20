@@ -47,6 +47,10 @@ export class TiledMap {
     DropLimitInfo: Map<number, Map<number, number>> = new Map<number, Map<number, number>>();
     DropSpawner: TiledMapDropDataSpawner = new TiledMapDropDataSpawner();
     CurrentLevelLimit: number;
+    get UseStep()
+    {
+        return this.m_lvlData.limit - this.CurrentLevelLimit;
+    }
     m_destoryedTiledList: number[] = [];
     m_destroyedTopBlockers: Blocker[] = [];
     m_squareTargetTileds: number[] = [];
@@ -115,6 +119,7 @@ export class TiledMap {
 
     InitLevelData(levelData: LevelScriptableData) {
         this.m_lvlData = levelData;
+        this.CurrentLevelLimit = this.m_lvlData.limit;
 
         this.ColorLimitList = this.m_lvlData.ColorLimitList;
         let allcolors = ColorManager.GetAllBaseColorIds();

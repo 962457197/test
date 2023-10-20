@@ -1,5 +1,4 @@
-import { FSAdpater, FSBase, FSCheck, FSPrepare, FSSwitch } from "./FSBase";
-import { FSStateType } from "./FSM";
+import { FSAdpater, FSBase, FSCheck, FSPrepare, FSStateType, FSSwitch } from "./FSBase";
 
 export class StateFactory {
     private static s_instance: StateFactory;
@@ -16,17 +15,17 @@ export class StateFactory {
 
     public Create(stateType: FSStateType): FSBase | null {
         StateFactory.count++;
-        let outLst: FSBase[] | undefined = this.m_pools.get(stateType);
+        // let outLst: FSBase[] | undefined = this.m_pools.get(stateType);
 
-        if (outLst != null) {
-            if (outLst.length > 0) {
-                const ret: FSBase = outLst[outLst.length - 1];
-                outLst.pop();
-                ret.Reset();
-                // console.log("Create:" + ret.constructor.name + " this:" + ret.GetHashCode());
-                return ret;
-            }
-        }
+        // if (outLst != null) {
+        //     if (outLst.length > 0) {
+        //         const ret: FSBase = outLst[outLst.length - 1];
+        //         outLst.pop();
+        //         ret.Reset();
+        //         // console.log("Create:" + ret.constructor.name + " this:" + ret.GetHashCode());
+        //         return ret;
+        //     }
+        // }
 
         switch (stateType) {
             case FSStateType.enPrepare:

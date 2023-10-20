@@ -1,7 +1,7 @@
 import Game from "../Game";
 import { BlockerID } from "../level/blocker/BlockerManager";
 import { Direction } from "../level/data/LevelScriptableData";
-import { FSM } from "../level/fsm/FSM";
+import { FSM } from "../level/fsm/FSBase";
 import { Tiled } from "../level/tiledmap/Tiled";
 import { TiledMap } from "../level/tiledmap/TiledMap";
 import { CameraManager } from "./CameraManager";

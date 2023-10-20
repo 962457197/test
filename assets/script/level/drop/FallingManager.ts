@@ -1,7 +1,6 @@
 import { Blocker } from "../blocker/Blocker";
 import { TiledType, Direction } from "../data/LevelScriptableData";
-import { FSBase, FSAdpater } from "../fsm/FSBase";
-import { FSStateType } from "../fsm/FSM";
+import { FSBase, FSAdpater, FSStateType } from "../fsm/FSBase";
 import { StateFactory } from "../fsm/StateFactory";
 import { Tiled } from "../tiledmap/Tiled";
 import { TiledMap } from "../tiledmap/TiledMap";
@@ -59,13 +58,10 @@ export class FallingManager {
         this.PushEmptyTiled(curTiled);
     }
     
+    m_allFallStateLst: FSBase[] = [];
     public OnStartFalling(fall: FSBase): void {
         this.m_isStart = true;
-        if (null == this.m_lastState) {
-            this.m_lastState = fall;
-        } else {
-            fall.OnFinish();
-        }
+        this.m_allFallStateLst.push(fall);
     }
 
     public AddDelayCount(): void {
@@ -101,7 +97,6 @@ export class FallingManager {
         this.m_anims = [];
         this.m_dequeueAnim = [];
         this.AdpaterStates = [];
-        this.m_lastState = null;
         this.m_isPauseFallingCount = 0;
         this.m_waitList = [];
     }
@@ -270,15 +265,24 @@ export class FallingManager {
         }
         this.m_dequeueAnim = [];
         if (this.IsStopFalling()) {
-            if (null !== this.m_lastState) {
-                if (this.m_lastState.IsOver()) {
-                    this.m_isStart = false;
-                    const tmp = this.m_lastState;
-                    this.m_lastState = null;
-                    this.m_waitList.length = 0;
-                    tmp.OnFinish();
+            if (this.m_allFallStateLst.length > 0)
+            {
+                for (let i = this.m_allFallStateLst.length - 1; i >= 0; i--) {
+                    const element = this.m_allFallStateLst[i];
+                    if (element.IsOver()) {
+                        element.OnFinish();
+                        this.m_allFallStateLst.splice(i, 1);
+                    }   
                 }
-            } else {
+
+                if (this.m_allFallStateLst.length <= 0)
+                {
+                    this.m_waitList.length = 0;
+                    this.m_isStart = false;
+                }
+            }
+            else
+            {
                 this.m_waitList.length = 0;
                 this.m_isStart = false;
             }

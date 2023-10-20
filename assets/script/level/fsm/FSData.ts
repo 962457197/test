@@ -1,6 +1,6 @@
 import { Direction } from "../data/LevelScriptableData";
 import { Tiled } from "../tiledmap/Tiled";
-import { FSStartType } from "./FSM";
+import { FSStartType } from "./FSBase";
 
 export interface FSDataBase {
     Reset(): void;

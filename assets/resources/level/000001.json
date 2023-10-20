@@ -4,7 +4,7 @@
   "levelNum": 144,
   "limitType": 0,
   "limit": 25,
-  "colorLimit": 2,
+  "colorLimit": 4,
   "stars": [
     10000,
     20000,
@@ -34,8 +34,6 @@
       "onceCount": 0,
       "enterlst": [
         23,
-        24,
-        25,
         26,
         27,
         28,
@@ -517,12 +515,52 @@
       "direction": 1,
       "blockDataList": [
         {
-          "id": 184
+          "id": 19
         }
       ],
       "borderDataList": [],
       "recylceList": [],
       "IsEnterPoint": true,
+      "IsTeleportIn": false,
+      "teleportOut": -1,
+      "IsTeleportOut": false,
+      "teleportIn": -1,
+      "conveyerData": null,
+      "moveDirectionData": null,
+      "ribbonsData": null,
+      "iceCreamPathData": null,
+      "mentosData": null,
+      "specialDropList": [],
+      "CreamIdx": -1,
+      "lampPathData": null
+    },
+    {
+      "type": 0,
+      "direction": 1,
+      "blockDataList": [],
+      "borderDataList": [],
+      "recylceList": [],
+      "IsEnterPoint": false,
+      "IsTeleportIn": false,
+      "teleportOut": -1,
+      "IsTeleportOut": false,
+      "teleportIn": -1,
+      "conveyerData": null,
+      "moveDirectionData": null,
+      "ribbonsData": null,
+      "iceCreamPathData": null,
+      "mentosData": null,
+      "specialDropList": [],
+      "CreamIdx": -1,
+      "lampPathData": null
+    },
+    {
+      "type": 0,
+      "direction": 1,
+      "blockDataList": [],
+      "borderDataList": [],
+      "recylceList": [],
+      "IsEnterPoint": false,
       "IsTeleportIn": false,
       "teleportOut": -1,
       "IsTeleportOut": false,
@@ -645,36 +683,12 @@
       "lampPathData": null
     },
     {
-      "type": 2,
-      "direction": 1,
-      "blockDataList": [
-        {
-          "id": 184
-        }
-      ],
-      "borderDataList": [],
-      "recylceList": [],
-      "IsEnterPoint": true,
-      "IsTeleportIn": false,
-      "teleportOut": -1,
-      "IsTeleportOut": false,
-      "teleportIn": -1,
-      "conveyerData": null,
-      "moveDirectionData": null,
-      "ribbonsData": null,
-      "iceCreamPathData": null,
-      "mentosData": null,
-      "specialDropList": [],
-      "CreamIdx": -1,
-      "lampPathData": null
-    },
-    {
-      "type": 2,
+      "type": 0,
       "direction": 1,
       "blockDataList": [],
       "borderDataList": [],
       "recylceList": [],
-      "IsEnterPoint": true,
+      "IsEnterPoint": false,
       "IsTeleportIn": false,
       "teleportOut": -1,
       "IsTeleportOut": false,
@@ -889,27 +903,7 @@
       "lampPathData": null
     },
     {
-      "type": 2,
-      "direction": 1,
-      "blockDataList": [],
-      "borderDataList": [],
-      "recylceList": [],
-      "IsEnterPoint": false,
-      "IsTeleportIn": false,
-      "teleportOut": -1,
-      "IsTeleportOut": false,
-      "teleportIn": -1,
-      "conveyerData": null,
-      "moveDirectionData": null,
-      "ribbonsData": null,
-      "iceCreamPathData": null,
-      "mentosData": null,
-      "specialDropList": [],
-      "CreamIdx": -1,
-      "lampPathData": null
-    },
-    {
-      "type": 2,
+      "type": 0,
       "direction": 1,
       "blockDataList": [],
       "borderDataList": [],
@@ -6640,13 +6634,15 @@
   "conveyerList": [],
   "moveDirectionList": [],
   "squareTargetList": [
-    223
+    30
   ],
   "SplitList": [],
   "CantAsGreedyTargetList": [],
   "ColorLimitList": [
     11,
-    10
+    10,
+    8,
+    9
   ],
   "CantAsBubbleTargetList": [],
   "difficulty": 0,

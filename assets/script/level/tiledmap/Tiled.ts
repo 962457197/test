@@ -1452,6 +1452,28 @@ export class Tiled {
         }
     }
 
+    public CanSwitch()
+    {
+        if (!this.IsValidTiled())
+        {
+            return false;
+        }
+        return this.CanMoveBlocker != null && !this.CanMoveBlocker.ForbidSwitch() && !this.HasForbidSwitch();
+    }
+
+
+    HasForbidSwitch()
+    {
+        for (let i = 0; i < this.m_blockerList.length; i++)
+        {
+            if (this.m_blockerList[i].ForbidSwitch())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 export class NormalTiled extends Tiled{
@@ -1601,19 +1623,6 @@ export class NormalTiled extends Tiled{
     IsNeedGen()
     {
         return this.m_isNeedGen && this.m_stickyBlockerId <= 0;
-    }
-
-    HasForbidSwitch()
-    {
-        for (let i = 0; i < this.m_blockerList.length; i++)
-        {
-            if (this.m_blockerList[i].ForbidSwitch())
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     CanGenerateCanSwitchBlocker()

@@ -17,6 +17,7 @@ import { CameraManager } from './tools/CameraManager';
 import { TimerManager, TimerData, TimerType} from './tools/TimerManager';
 import { Utils } from './tools/Utils';
 import { FallingManager } from './level/drop/FallingManager';
+import { FSM } from './level/fsm/FSBase';
 
 export enum GameState
 {
@@ -125,7 +126,7 @@ export default class Game extends cc.Component {
 
     static IsPlayState()
     {
-        return Game.m_gameState === GameState.Play;
+        return Game.m_gameState === GameState.Play && FSM.getInstance().CanOperate();
     }
 
     update (dt) 

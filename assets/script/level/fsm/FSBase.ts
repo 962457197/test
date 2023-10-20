@@ -1,7 +1,6 @@
 
 import { Direction } from "../data/LevelScriptableData";
 import { TiledMap } from "../tiledmap/TiledMap";
-import { FSM, FSStartType, FSStateType } from "./FSM";
 import { FSCheckData, FSDataBase, FSPrepareData, FSSwitchData } from "./FSData";
 import { StateFactory } from "./StateFactory";
 import { BlockerAttribute } from "../../table/BlockTable";
@@ -48,13 +47,13 @@ export class FSBase {
         this.m_isStop = true;
     }
 
-    OnFinish()
+    OnFinish(nextState?: FSBase)
     {
         this.Stop();
         if (this.PreState !== null) {
             const state = this.PreState;
             this.PreState = null;
-            state.OnFinish();
+            state.OnFinish(nextState);
         }
 
         if (this.StateType !== FSStateType.enPrepare && this.StateType !== FSStateType.enFSM) {
@@ -62,17 +61,147 @@ export class FSBase {
         }
     }
 
-    public BackMove(data: FSDataBase): void {
+    public BackMove(data: FSDataBase, nextState?: FSBase): void {
         this.Stop();
         if (this.PreState !== null) {
             const state = this.PreState;
             this.PreState = null;
-            state.BackMove(data);
+            state.BackMove(data, nextState);
         }
 
         if (this.StateType !== FSStateType.enPrepare && this.StateType !== FSStateType.enFSM) {
             StateFactory.Instance.Recycle(this);
         }
+    }
+}
+
+export enum FSStateType
+{
+    enNone = 0,
+    enFSM = 1,
+    enAdpater = 2,
+    enPrepare = 3,
+    enSwitch = 4,
+    enShuffle = 5,
+    enSecondStageBlockers = 6,
+    enInitFalling = 7,
+    enFalling = 8,
+    enExecuteEffect = 9,
+    enEndPreMatch = 10,
+    enConveryor = 11,
+    enConveryorMatch = 12,
+    enCheck = 13,
+    enBoostCheck = 14,
+    enFlippedTiled = 15,
+}
+
+export enum FSStartType
+{
+    enNone,
+    enNormal,
+    enInit,
+    enBoost,
+    enDoubleClick,
+}
+
+export class FSM extends FSBase
+{
+    private static instance: FSM | null = null;
+
+    public static getInstance(): FSM{
+        if (!FSM.instance)
+        {
+            FSM.instance = new FSM(FSStateType.enFSM);
+        }
+        return FSM.instance;
+    }
+
+    MovingCanMatch: boolean = true;
+    m_prepareState: FSBase[] = [];
+
+    OnBeginDrag(row: number, col: number, tiled: Tiled, direction: Direction)
+    {
+        let fsprepare = StateFactory.Instance.Create(FSStateType.enPrepare);
+
+        let data = fsprepare.GetData() as FSPrepareData;
+        data.curPos.x = row;
+        data.curPos.y = col;
+        data.startType = FSStartType.enNormal;
+        data.Neighbor = tiled;
+        data.Direction = direction;
+        fsprepare.Start(this);
+
+        this.m_prepareState.push(fsprepare);
+    }
+
+    OnDoubleClick(row: number, col: number)
+    {
+        let fsprepare = StateFactory.Instance.Create(FSStateType.enPrepare);
+
+        let data = fsprepare.GetData() as FSPrepareData;
+        data.curPos.x = row;
+        data.curPos.y = col;
+        data.startType = FSStartType.enDoubleClick;
+        data.Neighbor = null;
+        data.Direction = Direction.None;
+        fsprepare.Start(this);
+
+        this.m_prepareState.push(fsprepare);
+    }
+
+    CanOperate()
+    {
+        if (!this.MovingCanMatch)
+        {
+            return false;
+        }
+        if (this.IsGameEnd())
+        {
+            return false;
+        }
+        return true;
+    }
+
+    OnFinish(nextState: FSBase)
+    {
+        this.CheckGameEnd(nextState);
+    }
+
+    BackMove(data: FSDataBase, nextState: FSBase): void 
+    {
+        this.CheckGameEnd(nextState);
+    }
+
+    CheckGameEnd(nextState: FSBase)
+    {
+        for (let i = 0; i < this.m_prepareState.length; i++) {
+            const element = this.m_prepareState[i];
+            if (element == nextState)
+            {
+                this.m_prepareState.splice(i, 1);
+                break;
+            }
+        }
+        if (this.m_prepareState.length <= 0)
+        {
+            this.GameEnd();
+        }
+
+        cc.error(`CheckGameEnd !!! this.m_prepareState length = ${this.m_prepareState.length}`);
+    }
+
+    GameEnd()
+    {
+        if (this.IsGameEnd())
+        {
+            cc.error(`match3 GameEnd !!! `);
+        }
+    }
+
+    IsGameEnd()
+    {
+        return false;
+        return TiledMap.getInstance().UseStep >= 3;
     }
 }
 
@@ -154,6 +283,8 @@ export class FSPrepare extends FSBase {
                 return;
             }
 
+            TiledMap.getInstance().CurrentLevelLimit--;
+
             this.NextState = StateFactory.Instance.Create(FSStateType.enCheck);
             const nextData: FSCheckData | null = this.NextState.GetData() as FSCheckData | null;
             if (nextData) {
@@ -189,11 +320,11 @@ export class FSPrepare extends FSBase {
 
     public OnFinish(): void {
         this.Stop();
-        // if (this.PreState !== null) {
-        //     const state = this.PreState;
-        //     this.PreState = null;
-        //     state.OnFinish(this);
-        // }
+        if (this.PreState !== null) {
+            const state = this.PreState;
+            this.PreState = null;
+            state.OnFinish(this);
+        }
         if (this.StateType !== FSStateType.enFSM) {
             StateFactory.Instance.Recycle(this);
         }
@@ -201,11 +332,11 @@ export class FSPrepare extends FSBase {
 
     public BackMove(data: FSDataBase): void {
         this.Stop();
-        // if (this.PreState !== null) {
-        //     const state = this.PreState;
-        //     this.PreState = null;
-        //     state.BackMove(data, this);
-        // }
+        if (this.PreState !== null) {
+            const state = this.PreState;
+            this.PreState = null;
+            state.BackMove(data, this);
+        }
         if (this.StateType !== FSStateType.enFSM) {
             StateFactory.Instance.Recycle(this);
         }
@@ -216,45 +347,43 @@ export class FSPrepare extends FSBase {
             return false;
         }
 
-        // let otherdir: Direction = movedir;
-        // switch (movedir) {
-        //     case Direction.Left:
-        //         otherdir = Direction.Right;
-        //         break;
-        //     case Direction.Right:
-        //         otherdir = Direction.Left;
-        //         break;
-        //     case Direction.Down:
-        //         otherdir = Direction.Up;
-        //         break;
-        //     case Direction.Up:
-        //         otherdir = Direction.Down;
-        //         break;
-        // }
-        // if (srcTiled.CanSwitch() && dstTiled.CanSwitch() && srcTiled.CanSwitchInDirection(movedir) && dstTiled.CanSwitchInDirection(otherdir)) {
-        //     return false;
-        // }
+        let otherdir: Direction = movedir;
+        switch (movedir) {
+            case Direction.Left:
+                otherdir = Direction.Right;
+                break;
+            case Direction.Right:
+                otherdir = Direction.Left;
+                break;
+            case Direction.Down:
+                otherdir = Direction.Up;
+                break;
+            case Direction.Up:
+                otherdir = Direction.Down;
+                break;
+        }
+        if (srcTiled.CanSwitch() && dstTiled.CanSwitch() && srcTiled.CanSwitchInDirection(movedir) && dstTiled.CanSwitchInDirection(otherdir)) {
+            return false;
+        }
 
-        // if (srcTiled.CanMoveBlocker !== null) {
-        //     if (!dstTiled.IsCanSwitchNoMatchBlocker() && (!dstTiled.CanSwitch() || !dstTiled.SwitchDirectionHaveBorderBlocker(otherdir))) {
-        //         srcTiled.CanMoveBlocker.PlayForbidSwitchAnim(operation);
-        //         return true;
-        //     }
-        // } else {
-        //     console.log(`PlayCanNotSwitchAnimationIfNeeded srcTiled.CanMoveBlocker == null EffectType:${srcTiled.CanMoveEffectType} OpenLevel:${User.Instance.OpenLevel} srcTiled.Guid:${srcTiled.Guid} dstTiled.Guid:${dstTiled.Guid}`);
-        // }
+        if (srcTiled.CanMoveBlocker !== null) {
+            if (!dstTiled.IsCanSwitchNoMatchBlocker() && !dstTiled.CanSwitchInDirection(otherdir)) {
+                // srcTiled.CanMoveBlocker.PlayForbidSwitchAnim(operation);
+                return true;
+            }
+        }
 
-        // const dstTiledMatchBlocker = dstTiled.MatchBlocker;
-        // if (dstTiledMatchBlocker !== null && dstTiledMatchBlocker.TableData.Data.SubType !== BlockSubType.HideMiddle) {
-        //     if (!srcTiled.IsCanSwitchNoMatchBlocker() && (!srcTiled.CanSwitch() || !srcTiled.SwitchDirectionHaveBorderBlocker(movedir))) {
-        //         if (operation === Operation.LeftMove || operation === Operation.RightMove) {
-        //             dstTiled.CanMoveBlocker?.PlayForbidSwitchAnim(12 - operation);
-        //         } else if (operation === Operation.UpMove || operation === Operation.DownMove) {
-        //             dstTiled.CanMoveBlocker?.PlayForbidSwitchAnim(18 - operation);
-        //         }
-        //         return true;
-        //     }
-        // }
+        const dstTiledMatchBlocker = dstTiled.MatchBlocker;
+        if (dstTiledMatchBlocker !== null && dstTiledMatchBlocker.TableData.Data.SubType !== BlockSubType.HideMiddle) {
+            if (!srcTiled.IsCanSwitchNoMatchBlocker() && !srcTiled.CanSwitchInDirection(movedir)) {
+                // if (operation === Operation.LeftMove || operation === Operation.RightMove) {
+                //     dstTiled.CanMoveBlocker?.PlayForbidSwitchAnim(12 - operation);
+                // } else if (operation === Operation.UpMove || operation === Operation.DownMove) {
+                //     dstTiled.CanMoveBlocker?.PlayForbidSwitchAnim(18 - operation);
+                // }
+                return true;
+            }
+        }
 
         return false;
     }
@@ -475,7 +604,7 @@ export class FSCheck extends FSBase {
                 this.BackMove(this.m_data);
             }
         } else {
-            this.m_ctrl = EffectControllerFactory.Instance.PopController(()=> { this.OnEffectCtrlCallback.bind(this) });
+            this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
             // 3 match
             if (this.m_data.src !== null && this.m_data.src.CanMoveBlocker != null && this.m_data.src.CanMoveBlocker.CanMatch()) {
                 // this.m_data.src.IsExpandGrapeJuice = this.m_data.src.IsHaveGrapeJuice();
@@ -494,6 +623,7 @@ export class FSCheck extends FSBase {
     private DeductLimit(): void {
         if (this.m_data.startType === FSStartType.enNormal) {
             this.m_isDeductLimited = true;
+            TiledMap.getInstance().CurrentLevelLimit--;
         }
     }
 
@@ -527,8 +657,13 @@ export class FSCheck extends FSBase {
                             const blocker = (srcBlocker.TableData.Data.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
                             if (blocker.TableData.Data.Type === BlockType.BaseBlock || blocker.TableData.Data.Type === BlockType.SpecialBlock || blocker.TableData.IsHasAttribute(BlockerAttribute.canSwitchWithSameColor)) {
                                 this.DeductLimit();
-                                const spblocker = (srcBlocker.TableData.Data.SubType !== BlockSubType.none) ? srcBlocker : destBlocker;
                                 executeEffectBefore();
+
+                                const spblocker = (srcBlocker.TableData.Data.SubType !== BlockSubType.none) ? srcBlocker : destBlocker;
+                                const normalBlocker = (srcBlocker.TableData.Data.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
+                                if (normalBlocker.CanMatch()) {
+                                    this.m_ctrl.CreateEffect(EffectType.BaseCrush, normalBlocker.SelfTiled, this.m_effData);
+                                }
                                 this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
                                 this.m_ctrl.CreateEffect(EffectType.SameColorBase, spblocker.SelfTiled, this.m_effData, blocker);
                                 this.m_ctrl.Execute();
@@ -774,7 +909,6 @@ export class FSCheck extends FSBase {
                     if (!this.m_isDeductLimited)
                     {
                         this.m_isDeductLimited = true;
-                        FSM.getInstance().MovingCanMatch = true;
                         TiledMap.getInstance().CurrentLevelLimit--;
                     }
                     
@@ -794,6 +928,15 @@ export class FSCheck extends FSBase {
                         this.m_data.dest.CheckTriggerFall();
                     }
                 }
+            }
+
+            if (this.m_data.isMain)
+            {
+                FallingManager.Instance.OnStartFalling(this);
+            }
+            else
+            {
+                this.OnFinish();
             }
         }
     }

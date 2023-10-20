@@ -16,11 +16,10 @@ import { BlockLayer, BlockSubType, BlockType, BlockZIndex, BlockerClassType, Blo
 import { ColorManager } from "./ColorManager";
 import { EffectType } from "../effect/EffectController";
 import { StateFactory } from "../fsm/StateFactory";
-import { FSStateType } from "../fsm/FSM";
 import { Direction } from "../data/LevelScriptableData";
 import { TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
 import { FallingManager } from "../drop/FallingManager";
-import { FSAdpater } from "../fsm/FSBase";
+import { FSAdpater, FSStateType } from "../fsm/FSBase";
 import ButterCookiesCom from "./ButterCookiesCom";
 
 export class Blocker {
