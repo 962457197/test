@@ -11,6 +11,8 @@ import { EffectControllerFactory } from "../effect/EffectControllerFactory";
 import { Tiled } from "../tiledmap/Tiled";
 import { FallingManager } from "../drop/FallingManager";
 import { TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
+import { UIManager } from "../../ui/UIManager";
+import { MatchTipsManager } from "../../tools/MatchTipsManager";
 
 export class FSBase {
     public PreState: FSBase | null = null;
@@ -121,6 +123,8 @@ export class FSM extends FSBase
 
     OnBeginDrag(row: number, col: number, tiled: Tiled, direction: Direction)
     {
+        MatchTipsManager.Instance.StopMatchTipsAnimation();
+
         let fsprepare = StateFactory.Instance.Create(FSStateType.enPrepare);
 
         let data = fsprepare.GetData() as FSPrepareData;
@@ -136,6 +140,8 @@ export class FSM extends FSBase
 
     OnDoubleClick(row: number, col: number)
     {
+        MatchTipsManager.Instance.StopMatchTipsAnimation();
+
         let fsprepare = StateFactory.Instance.Create(FSStateType.enPrepare);
 
         let data = fsprepare.GetData() as FSPrepareData;
@@ -164,15 +170,15 @@ export class FSM extends FSBase
 
     OnFinish(nextState: FSBase)
     {
-        this.CheckGameEnd(nextState);
+        this.CheckFinish(nextState);
     }
 
     BackMove(data: FSDataBase, nextState: FSBase): void 
     {
-        this.CheckGameEnd(nextState);
+        this.CheckFinish(nextState);
     }
 
-    CheckGameEnd(nextState: FSBase)
+    CheckFinish(nextState: FSBase)
     {
         for (let i = 0; i < this.m_prepareState.length; i++) {
             const element = this.m_prepareState[i];
@@ -184,23 +190,27 @@ export class FSM extends FSBase
         }
         if (this.m_prepareState.length <= 0)
         {
-            this.GameEnd();
+            this.CheckGameEnd();
         }
 
         cc.error(`CheckGameEnd !!! this.m_prepareState length = ${this.m_prepareState.length}`);
     }
 
-    GameEnd()
+    CheckGameEnd()
     {
         if (this.IsGameEnd())
         {
-            cc.error(`match3 GameEnd !!! `);
+            UIManager.Instance.OpenLevelPass();
+        }
+        else
+        {
+            MatchTipsManager.Instance.OnBeginCheckTiledMap();
         }
     }
 
     IsGameEnd()
     {
-        return false;
+        // return false;
         return TiledMap.getInstance().UseStep >= 3;
     }
 }

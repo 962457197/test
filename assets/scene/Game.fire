@@ -920,6 +920,9 @@
     "CanvasNode": {
       "__id__": 2
     },
+    "UIRoot": {
+      "__id__": 14
+    },
     "_id": "8b/4+A8btMua2//RYlRlrx"
   }
 ]

@@ -18,6 +18,8 @@ import { TimerManager, TimerData, TimerType} from './tools/TimerManager';
 import { Utils } from './tools/Utils';
 import { FallingManager } from './level/drop/FallingManager';
 import { FSM } from './level/fsm/FSBase';
+import { UIManager } from './ui/UIManager';
+import { MatchTipsManager } from './tools/MatchTipsManager';
 
 export enum GameState
 {
@@ -48,6 +50,9 @@ export default class Game extends cc.Component {
 
     @property(cc.Node)
     CanvasNode: cc.Node = null;
+
+    @property(cc.Node)
+    UIRoot: cc.Node = null;
 
     static CC_SIZE_MULTI = 100;
     // static GROUP_BLOCK = "block";
@@ -109,6 +114,7 @@ export default class Game extends cc.Component {
 
         CameraManager.getInstance().MainCamera = this.MainCamera;
         CameraManager.getInstance().Adapter(this.CanvasNode);
+        UIManager.Instance.UIRoot = this.UIRoot;
 
         TiledMapTouchHandler.getInstance().Init();
         Game.m_gameState = GameState.LoadData;
@@ -157,6 +163,8 @@ export default class Game extends cc.Component {
         {
             if (Game.LoadingAssetCount <= 0)
             {
+                MatchTipsManager.Instance.OnBeginCheckTiledMap();
+                
                 Game.m_gameState = GameState.Play;
             }
             return;

@@ -15,4 +15,12 @@ export default class BlockerCom extends cc.Component {
 
     @property(cc.Node)
     DynamicNode: cc.Node = null;
+
+    @property(cc.Animation)
+    Anim: cc.Animation = null;
+
+    PlayAnim(animName: string)
+    {
+        this.Anim.play(animName);
+    }
 }

@@ -497,7 +497,42 @@ export class Blocker {
     
         this.OnDestroyObj(this.SelfTiled, needFalling);
     }
+
+
+    private static MatchTipNormal: string = "match_tip";
+    private static MatchTipDirectionUp: string = "match_tip_up";
+    private static MatchTipDirectionDown: string = "match_tip_down";
+    private static MatchTipDirectionLeft: string = "match_tip_left";
+    private static MatchTipDirectionRight: string = "match_tip_right";
     
+    PlayMatchTipsAnimation(dir: Direction = Direction.None)
+    {
+        let matchTip = Blocker.MatchTipNormal;
+        switch (dir)
+        {
+            case Direction.Up:
+                matchTip = Blocker.MatchTipDirectionUp;
+                break;
+            case Direction.Down:
+                matchTip = Blocker.MatchTipDirectionDown;
+                break;
+            case Direction.Left:
+                matchTip = Blocker.MatchTipDirectionLeft;
+                break;
+            case Direction.Right:
+                matchTip = Blocker.MatchTipDirectionRight;
+                break;
+        }
+
+        this.m_blockerCom.PlayAnim(matchTip);
+    }
+
+    StopMatchTipsAnimation()
+    {
+        this.m_blockerCom.Anim.stop();
+        this.m_blockerCom.Anim.node.setScale(cc.Vec2.ONE);
+        this.m_blockerCom.Anim.node.setRotation(0);
+    }
 }
 
 export class BaseBlocker extends Blocker {
