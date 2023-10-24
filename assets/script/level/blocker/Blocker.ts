@@ -255,7 +255,7 @@ export class Blocker {
     
     public IsCanSwitch(): boolean {
         // DebugView.e("MarkMatch:" + MarkMatch + ",CrushState:" + CrushState + ",Marked:" + Marked + ",Falling:" + Falling);
-        return !this.IsMarked() && !this.Falling;
+        return !this.IsMarked() && !this.Falling && this.m_blocker != null;
     }
 
     PringLog()
@@ -527,11 +527,19 @@ export class Blocker {
         this.m_blockerCom.PlayAnim(matchTip);
     }
 
-    StopMatchTipsAnimation()
+    StopAnimation()
     {
-        this.m_blockerCom.Anim.stop();
-        this.m_blockerCom.Anim.node.setScale(cc.Vec2.ONE);
-        this.m_blockerCom.Anim.node.setRotation(0);
+        if (this.m_blockerCom != null)
+        {
+            this.m_blockerCom.Anim.stop();
+            this.m_blockerCom.Anim.node.setScale(cc.Vec2.ONE);
+            this.m_blockerCom.Anim.node.angle = 0;
+        }
+    }
+
+    PlaySameColorShake()
+    {
+        this.m_blockerCom.PlayAnim("ele_anim_samecolorblock_shake");
     }
 }
 
@@ -653,6 +661,11 @@ export class LineBlocker extends Blocker {
         this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
         this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
+
+        if (this.BornEffect == BornEffect.samecolor)
+        {
+            this.PlaySameColorShake();
+        }
     }
 }
 
@@ -680,6 +693,11 @@ export class SquareBlocker extends Blocker {
         this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
         this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
+
+        if (this.BornEffect == BornEffect.samecolor)
+        {
+            this.PlaySameColorShake();
+        }
     }
 }
 
@@ -707,6 +725,11 @@ export class AreaBlocker extends Blocker {
         this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
         this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
+
+        if (this.BornEffect == BornEffect.samecolor)
+        {
+            this.PlaySameColorShake();
+        }
     }
 }
 
@@ -734,6 +757,11 @@ export class SameColorBlocker extends Blocker {
         this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
         this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
+    }
+
+    PlayReadyAnim()
+    {
+        this.m_baseBlockerCom.PlayAnim("ele_anim_samecolorblock_ready");
     }
 }
 

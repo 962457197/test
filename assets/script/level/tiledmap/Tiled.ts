@@ -46,7 +46,16 @@ export class Tiled {
     EnterPoint: Tiled = null;
     PrevTiledGuid: number = -1;
     NextTiledGuid: number = -1;
-    CanMoveBlocker: Blocker = null;
+
+    private m_canMove: Blocker = null;
+    set CanMoveBlocker(canmove: Blocker)
+    {
+        this.m_canMove = canmove;
+    }
+    get CanMoveBlocker(): Blocker
+    {
+        return this.m_canMove;
+    }
     m_blockerList: Blocker[] = [];
 
     private m_markCount: number = 0;
@@ -950,6 +959,19 @@ export class Tiled {
 
     CanSwitchInDirection(direction: Direction) : boolean
     {
+        if (!this.CanSwitch())
+        {
+            //            DebugView.log("direction " + " CanSwitchInDirection false");
+            return false;
+        }
+
+        // if (LeftBorder != null)
+        // {
+        //     //            DebugView.log("direction check leftborder forbidSwitch " + LeftBorder.ForbidCross());
+        // }
+
+        // return this.SwitchDirectionHaveBorderBlocker(direction);
+
         return true;
     }
 
@@ -1161,7 +1183,7 @@ export class Tiled {
     
                 this.CanMoveBlocker.MarkMatch = false;
                 // this.CanMoveBlocker.SelfTiled.IsExpandGrapeJuice = false;
-                // this.CanMoveBlocker.DisableSameColorCrushAnim();
+                this.CanMoveBlocker.StopAnimation();
                 this.CanMoveBlocker.DelayCheck(0.2);
     
                 return true;
@@ -1288,9 +1310,9 @@ export class Tiled {
                 if (!block.IsButterCookies() && !this.IsSameColorBaseDestroy(effectType)) {
                     TiledMap.getInstance().AddDestroyedTiled(this);
                 }
-                // if (this.m_canMove !== null) {
-                //     this.m_canMove.DisableSameColorCrushAnim();
-                // }
+                if (this.CanMoveBlocker !== null) {
+                    this.CanMoveBlocker.StopAnimation();
+                }
             }
         } else {
             if (null !== this.CanMoveBlocker && (effectType === EffectType.BaseCrush || this.IsSameColorBaseDestroy(effectType) || this.CanMoveBlocker.NearMatch())) {
@@ -1426,9 +1448,9 @@ export class Tiled {
                     }
                 }
     
-                // if (this.CanMoveBlocker !== null) {
-                //     this.CanMoveBlocker.DisableSameColorCrushAnim();
-                // }
+                if (this.CanMoveBlocker !== null) {
+                    this.CanMoveBlocker.StopAnimation();
+                }
                 break;
             }
         }

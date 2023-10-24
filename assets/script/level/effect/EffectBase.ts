@@ -7,12 +7,14 @@ import BaseBlockerCom from "../blocker/BaseBlockerCom";
 import { Blocker, MultiTiledDestroyableComBlocker, SameColorBlocker } from "../blocker/Blocker";
 import { BlockLayer, BlockerID } from "../blocker/BlockerManager";
 import { Direction } from "../data/LevelScriptableData";
+import { FallingManager } from "../drop/FallingManager";
 import { FSM, IntervalExecEffect } from "../fsm/FSBase";
 import { BornEffect, NormalTiled, Tiled } from "../tiledmap/Tiled";
 import { TiledMap } from "../tiledmap/TiledMap";
 import { EffectController, EffectType } from "./EffectController";
 import { EffectControllerFactory } from "./EffectControllerFactory";
 import LineMoveEffectCom from "./com/LineMoveEffectCom";
+import SameColorEmitCom from "./com/SameColorEmitCom";
 import SquareFlyCom from "./com/SquareFlyCom";
 
 export class EffectData
@@ -592,6 +594,8 @@ export class EffectBaseCrush extends EffectBase {
                 continue;
             }
 
+            FallingManager.Instance.AddDelayCount();
+
             let blkPosition = blockers[i].LocalPosition;
             cc.resources.load("prefab/blocker/BaseBlock", (err, data: any) =>{
                 let effect: cc.Node = cc.instantiate(data);
@@ -609,7 +613,9 @@ export class EffectBaseCrush extends EffectBase {
                 .to(0.3, { position : cc.v3(bornTiled.LocalPosition.x, bornTiled.LocalPosition.y, 0)})
                 .call(()=> { effect.destroy() })
                 .start();
-            })
+
+                FallingManager.Instance.RemoveDelayCount();
+            });
 
             blockers[i].SetActive(false);
         }
@@ -959,7 +965,7 @@ export class EffectLineCrush extends EffectLineBase {
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(this.m_spType, this.m_orign), end1PointTiled.WorldPosition, this.GetTarPos2(this.m_spType, this.m_orign), 
-                            end2PointTiled.WorldPosition, iconId,this.EndAction.bind(this), this.CheckMatch.bind(this));
+                            end2PointTiled.WorldPosition, iconId,this.EndAction.bind(this), this.CheckMatch.bind(this), this.m_spType);
 
             this.CheckOriginAndOtherTiled();
         });
@@ -1041,7 +1047,7 @@ export class EffectSquareLineCrush extends EffectLineBase {
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(this.m_spType, this.m_orign), end1PointTiled.WorldPosition, this.GetTarPos2(this.m_spType, this.m_orign), 
-                            end2PointTiled.WorldPosition, iconId, this.EndAction.bind(this), this.CheckMatch.bind(this));
+                            end2PointTiled.WorldPosition, iconId, this.EndAction.bind(this), this.CheckMatch.bind(this), this.m_spType);
 
             this.CheckOriginAndOtherTiled();
         });
@@ -1116,7 +1122,7 @@ export class EffectLineAndLine extends EffectLineBase {
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(BlockerID.horizontal, this.m_orign), horizontalEnd1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.horizontal, this.m_orign), 
-                            horizontalEnd2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this));
+                            horizontalEnd2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.horizontal);
 
             TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker);
         });
@@ -1135,7 +1141,7 @@ export class EffectLineAndLine extends EffectLineBase {
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(BlockerID.vertical, this.m_orign), verticalEnd1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.vertical, this.m_orign), 
-                            verticalEnd2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this));
+                            verticalEnd2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.vertical);
 
             TiledMap.getInstance().DestroyBlocker(this.m_otherTiled.CanMoveBlocker);
         });
@@ -1208,7 +1214,7 @@ export class EffectAreaLine extends EffectLineBase {
     
                 let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
                 moveEffectCom.StartMove(tiled, this.GetTarPos1(BlockerID.horizontal, tiled), end1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.horizontal, tiled), 
-                                end2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this));
+                                end2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.horizontal);
     
             });
         }
@@ -1234,7 +1240,7 @@ export class EffectAreaLine extends EffectLineBase {
 
                 let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
                 moveEffectCom.StartMove(tiled, this.GetTarPos1(BlockerID.vertical, tiled), end1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.vertical, tiled), 
-                                end2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this));
+                                end2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.vertical);
 
             });
         }
@@ -1633,6 +1639,7 @@ class EffectSameColorInterface extends EffectBase {
         } else {
             this.m_samecolor = this.m_srcBlocker as SameColorBlocker;
         }
+        this.m_samecolor.PlayReadyAnim();
     }
 
     InitWaitTimeByLessCount(): void {
@@ -1718,18 +1725,39 @@ export class EffectSameColorBase extends EffectSameColorInterface {
 
         while(this.m_tempTiledLst.length > 0)
         {
-            let temptiled: Tiled = this.m_tempTiledLst[this.m_tempTiledLst.length - 1];
-            this.m_tempTiledLst.splice(this.m_tempTiledLst.length - 1, 1);
+            let index = TiledMap.getInstance().RandomRange(0, this.m_tempTiledLst.length - 1);
+            let temptiled: Tiled = this.m_tempTiledLst[index];
+            this.m_tempTiledLst.splice(index, 1);
 
-            this.m_count--;
-            if (this.m_count <= 0)
+            let waitTime = this.m_tempTiledLst.length * 0.1;
+
+            cc.resources.load("prefab/effect/SameColorEmit", (err, data: any) =>
             {
-                this.MatchCheck();
-                if (this.m_tempTiledLst.length > 0)
+                let moveEffectNode = cc.instantiate(data);
+
+                moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
+                let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
+                moveEffectNode.setPosition(spacePos);
+
+                let com: SameColorEmitCom = moveEffectNode.getComponent(SameColorEmitCom);
+                com.MoveTo(temptiled, waitTime, (tiled: Tiled) => 
                 {
-                    this.CreateEffect();
-                }
-            }
+                    if (temptiled.CanMoveBlocker != null)
+                    {
+                        temptiled.CanMoveBlocker.PlaySameColorShake();
+                    }
+                    
+                    this.m_count--;
+                    if (this.m_count <= 0)
+                    {
+                        this.MatchCheck();
+                        if (this.m_tempTiledLst.length > 0)
+                        {
+                            this.CreateEffect();
+                        }
+                    }
+                });
+            });
         }
 
         this.WaitTime = 0.3;
@@ -1868,29 +1896,49 @@ export class EffectSameColorOtherEffectBase extends EffectSameColorInterface
 
         while(this.m_tempTiledLst.length > 0)
         {
-            let temptiled: Tiled = this.m_tempTiledLst[this.m_tempTiledLst.length - 1];
-            this.m_tempTiledLst.splice(this.m_tempTiledLst.length - 1, 1);
-
-            if (temptiled.TopBlocker() != null)
-            {
-                this.m_matchItems.push(temptiled.TopBlocker());
-            }
-            else
-            {
-                this.RefreshCreateEffectBlockerId();
-                temptiled.UpdateToSpecial(this.createEffectBlockerId, BornEffect.samecolor, false, true, false, false);
-                temptiled.CanMoveBlocker.Marked = true;
-            }
+            let index = TiledMap.getInstance().RandomRange(0, this.m_tempTiledLst.length - 1);
+            let temptiled: Tiled = this.m_tempTiledLst[index];
+            this.m_tempTiledLst.splice(index, 1);
             
-            this.m_count--;
-            if (this.m_count <= 0)
+            let waitTime = this.m_tempTiledLst.length * 0.1;
+
+            cc.resources.load("prefab/effect/SameColorEmit", (err, data: any) =>
             {
-                this.MatchCheck();
-                if (this.m_tempTiledLst.length > 0)
+                let moveEffectNode = cc.instantiate(data);
+
+                moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
+                let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
+                moveEffectNode.setPosition(spacePos);
+
+                let com: SameColorEmitCom = moveEffectNode.getComponent(SameColorEmitCom);
+                com.MoveTo(temptiled, waitTime, (tiled: Tiled) => 
                 {
-                    this.CreateEffect();
-                }
-            }
+                    if (temptiled.TopBlocker() != null)
+                    {
+                        this.m_matchItems.push(temptiled.TopBlocker());
+                        temptiled.CanMoveBlocker?.PlaySameColorShake();
+                    }
+                    else
+                    {
+                        this.RefreshCreateEffectBlockerId();
+                        temptiled.UpdateToSpecial(this.createEffectBlockerId, BornEffect.samecolor, false, true, false, false);
+                        temptiled.CanMoveBlocker.Marked = true;
+                    }
+
+                    
+                    this.m_count--;
+                    if (this.m_count <= 0)
+                    {
+                        this.MatchCheck();
+                        if (this.m_tempTiledLst.length > 0)
+                        {
+                            this.CreateEffect();
+                        }
+                    }
+                });
+            });
+
+            
         }
 
         this.WaitTime = 0.3;

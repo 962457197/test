@@ -33,7 +33,7 @@ export enum ComposeMode
 class MatchTipsData {
     m_OrignGUID: number;
     m_TargetDirection: Direction;
-    m_TipsBlockers: Blocker[];
+    m_TipsBlockers: Blocker[] = [];
 }
 
 export class MatchTipsManager {
@@ -98,10 +98,13 @@ export class MatchTipsManager {
         }
         for (let i = 0; i < this.m_TipsBlockers.length; i++) {
             const item = this.m_TipsBlockers[i];
-            if (item != null && item.SelfTiled.Guid == this.m_MatchTipsData.m_OrignGUID && this.m_TipsBlockers.length > 1) {
-                item.PlayMatchTipsAnimation(this.m_MatchTipsData.m_TargetDirection);
-            } else {
-                item.PlayMatchTipsAnimation();
+            if (item != null && item.SelfTiled != null)
+            {
+                if (item.SelfTiled.Guid == this.m_MatchTipsData.m_OrignGUID && this.m_TipsBlockers.length > 1) {
+                    item.PlayMatchTipsAnimation(this.m_MatchTipsData.m_TargetDirection);
+                } else {
+                    item.PlayMatchTipsAnimation();
+                }
             }
         }
     }
@@ -121,7 +124,7 @@ export class MatchTipsManager {
 
         for (let i = 0; i < this.m_TipsBlockers.length; i++) {
             const element = this.m_TipsBlockers[i];
-            element.StopMatchTipsAnimation();   
+            element.StopAnimation();   
         }
     }
 
@@ -343,7 +346,7 @@ export class MatchTipsManager {
         const tempData = new MatchTipsData();
         tempData.m_OrignGUID = neighbor.Guid;
         tempData.m_TargetDirection = direction;
-        tempData.m_TipsBlockers = this.m_MatchItems.slice();
+        tempData.m_TipsBlockers.push(...this.m_MatchItems);
         if (this.m_MatchMap[composeMode]) {
             this.m_MatchMap[composeMode].push(tempData);
         } else {

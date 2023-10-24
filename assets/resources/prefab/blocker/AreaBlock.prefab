@@ -472,7 +472,26 @@
     },
     "_enabled": true,
     "_defaultClip": null,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "42c3acac-743b-4c90-999b-9ab65a45c450"
+      },
+      {
+        "__uuid__": "54020267-a8ef-4db2-8731-cd7eec98db24"
+      },
+      {
+        "__uuid__": "45202d5d-5821-4c2f-a5cf-9a196fa79ee6"
+      },
+      {
+        "__uuid__": "ac74baf0-a005-4582-bdd5-6719017e668f"
+      },
+      {
+        "__uuid__": "b403e38a-d21b-4819-ad0d-bd582d76af3b"
+      },
+      {
+        "__uuid__": "02b56e04-5d3d-4b57-8a5b-b8dd8f1977ff"
+      }
+    ],
     "playOnLoad": false,
     "_id": ""
   },

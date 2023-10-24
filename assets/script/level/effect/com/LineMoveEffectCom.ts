@@ -9,6 +9,7 @@ import Game from "../../../Game";
 import { CameraManager } from "../../../tools/CameraManager";
 import { Utils } from "../../../tools/Utils";
 import { Blocker } from "../../blocker/Blocker";
+import { BlockerID } from "../../blocker/BlockerManager";
 import { Tiled } from "../../tiledmap/Tiled";
 import { TiledMap } from "../../tiledmap/TiledMap";
 
@@ -49,18 +50,30 @@ export default class LineMoveEffectCom extends cc.Component {
     checkMatch: (tiled: Tiled, blockers: Blocker[]) => void = null;
     m_speed: number = 1000;
 
-    StartMove(originTiled: Tiled, end1Pos: cc.Vec2, end1TiledPos: cc.Vec2, end2Pos: cc.Vec2, end2TiledPos: cc.Vec2, iconId: number, endAction: ()=> void, checkMatch: (tiled: Tiled, blockers: Blocker[]) => void)
+    StartMove(originTiled: Tiled, end1Pos: cc.Vec2, end1TiledPos: cc.Vec2, end2Pos: cc.Vec2, end2TiledPos: cc.Vec2, iconId: number, 
+        endAction: ()=> void, checkMatch: (tiled: Tiled, blockers: Blocker[]) => void, spType: BlockerID)
     {
-        cc.resources.load("texture/" + Game.GetIconName(iconId), cc.SpriteFrame, (err, data: any) =>
+        if (spType == BlockerID.horizontal)
         {
-            if (this.end1Icon == null)
-            {
-                return;
-            }
+            this.end1Node.angle = 0;
+            this.end2Node.angle = 0;
+        }
+        else
+        {
+            this.end1Node.angle = 90;
+            this.end2Node.angle = 90;
+        }
+        
+        // cc.resources.load("texture/" + Game.GetIconName(iconId), cc.SpriteFrame, (err, data: any) =>
+        // {
+        //     if (this.end1Icon == null)
+        //     {
+        //         return;
+        //     }
 
-            this.end1Icon.spriteFrame = data;
-            this.end2Icon.spriteFrame = data;
-        });
+        //     this.end1Icon.spriteFrame = data;
+        //     this.end2Icon.spriteFrame = data;
+        // });
 
         this.m_startPos = originTiled.WorldPosition;
         this.m_end1Pos = end1Pos;

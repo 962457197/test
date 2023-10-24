@@ -670,10 +670,6 @@ export class FSCheck extends FSBase {
                                 executeEffectBefore();
 
                                 const spblocker = (srcBlocker.TableData.Data.SubType !== BlockSubType.none) ? srcBlocker : destBlocker;
-                                const normalBlocker = (srcBlocker.TableData.Data.SubType === BlockSubType.none) ? srcBlocker : destBlocker;
-                                if (normalBlocker.CanMatch()) {
-                                    this.m_ctrl.CreateEffect(EffectType.BaseCrush, normalBlocker.SelfTiled, this.m_effData);
-                                }
                                 this.m_ctrl = EffectControllerFactory.Instance.PopController(this.OnEffectCtrlCallback.bind(this));
                                 this.m_ctrl.CreateEffect(EffectType.SameColorBase, spblocker.SelfTiled, this.m_effData, blocker);
                                 this.m_ctrl.Execute();

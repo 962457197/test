@@ -1,6 +1,6 @@
 {
   "ver": "2.3.5",
-  "uuid": "7fd6b3c9-4ae2-4a50-8a43-3e3cf1f4a8ec",
+  "uuid": "309df310-d549-47b9-b970-e217ba821fba",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -11,10 +11,10 @@
   "height": 226,
   "platformSettings": {},
   "subMetas": {
-    "ButterCookies": {
+    "0": {
       "ver": "1.0.4",
-      "uuid": "82e38f5b-2d1c-4e81-b1f8-efc819c8f6a9",
-      "rawTextureUuid": "7fd6b3c9-4ae2-4a50-8a43-3e3cf1f4a8ec",
+      "uuid": "1c5f1898-9f37-4836-8a6e-f2849ffea86f",
+      "rawTextureUuid": "309df310-d549-47b9-b970-e217ba821fba",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

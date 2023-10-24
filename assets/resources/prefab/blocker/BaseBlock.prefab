@@ -303,8 +303,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 104,
-      "height": 110
+      "width": 116,
+      "height": 113
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -427,7 +427,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        0,
+        -105.812,
         0,
         0,
         0,
@@ -487,6 +487,9 @@
       },
       {
         "__uuid__": "b403e38a-d21b-4819-ad0d-bd582d76af3b"
+      },
+      {
+        "__uuid__": "02b56e04-5d3d-4b57-8a5b-b8dd8f1977ff"
       }
     ],
     "playOnLoad": false,
