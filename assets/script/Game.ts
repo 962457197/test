@@ -52,6 +52,9 @@ export default class Game extends cc.Component {
     CanvasNode: cc.Node = null;
 
     @property(cc.Node)
+    BgRoot: cc.Node = null;
+
+    @property(cc.Node)
     UIRoot: cc.Node = null;
 
     static CC_SIZE_MULTI = 100;
@@ -103,17 +106,10 @@ export default class Game extends cc.Component {
             }
             this.m_levelData = data.json;
             Game.LoadingAssetCount--;
-
-            // for (let index = 0; index < this.m_levelData.tiledData.length; index++) {
-            //     for (let j = 0; j < this.m_levelData.tiledData[index].blockDataList.length; j++) {
-            //         const element = this.m_levelData.tiledData[index].blockDataList[j];
-            //         cc.log("tield index = " + index + " blcoker id = " + element.Id);
-            //     }   
-            // }
         });
 
         CameraManager.getInstance().MainCamera = this.MainCamera;
-        CameraManager.getInstance().Adapter(this.CanvasNode);
+        CameraManager.getInstance().Adapter(this.CanvasNode, this.BgRoot);
         UIManager.Instance.UIRoot = this.UIRoot;
 
         TiledMapTouchHandler.getInstance().Init();
@@ -164,7 +160,7 @@ export default class Game extends cc.Component {
             if (Game.LoadingAssetCount <= 0)
             {
                 MatchTipsManager.Instance.OnBeginCheckTiledMap();
-                
+
                 Game.m_gameState = GameState.Play;
             }
             return;

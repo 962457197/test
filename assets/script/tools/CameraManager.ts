@@ -27,7 +27,7 @@ export class CameraManager
     ANDROID_PAD_K: number = 0.2889;
     ANDROID_PAD_B: number = 9.534;
 
-    Adapter(canvasNode: cc.Node)
+    Adapter(canvasNode: cc.Node, bgRoot: cc.Node)
     {
         let isPad: boolean = false;
         let hWRate: number = 0;
@@ -36,7 +36,8 @@ export class CameraManager
         const width: number = cc.view.getFrameSize().width;
 
         hWRate = height / width;
-
+        let basehWRate = cc.view.getDesignResolutionSize().height / cc.view.getDesignResolutionSize().width;
+        
         if (hWRate >= this.PAD_MIN_RATE && hWRate <= this.PAD_MAX_RATE) {
             isPad = true;
         }
@@ -48,8 +49,7 @@ export class CameraManager
         } else {
 
             if (hWRate >= 1) {
-                h = 9 * hWRate / 2 + (1.8 /
-                    (cc.view.getDesignResolutionSize().height / cc.view.getDesignResolutionSize().width) * hWRate);
+                h = 9 * hWRate / 2 + (1.8 / basehWRate * hWRate);
             } else {
                 h = 9.6;
             }
@@ -59,13 +59,12 @@ export class CameraManager
             }
         }
 
-        if (height == 1920 || width == 1080)
+        this.MainCamera.orthoSize = h * Game.CC_SIZE_MULTI;
+
+        let scale = h / 9.6;
+        if (scale > 1)
         {
-            this.MainCamera.orthoSize = 20 * Game.CC_SIZE_MULTI;
-        }
-        else
-        {
-            this.MainCamera.orthoSize = h * Game.CC_SIZE_MULTI;
+            bgRoot.setScale(scale, scale);
         }
     }
 
