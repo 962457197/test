@@ -1127,30 +1127,24 @@ export class Tiled {
                 !MultiLayerBlocker.IsWalnut(this.CanMoveBlocker.ID) && */
                 !checkTop) {
                 if (!this.HasTopBlock()) {
-                    const leftBorder = this.GetEliminableBorder(BlockerID.left_candy);
-                    const topBorder = this.GetEliminableBorder(BlockerID.top_candy);
                     const bottom = this.GetNeighborBottom();
     
-                    if (bottom !== null && bottom.GetEliminableBorder(BlockerID.top_candy) === null
-                        && (bottom.TopTopBlocker() === null || bottom.IsBelongBlindsBlock())) {
+                    if (bottom !== null && (bottom.TopTopBlocker() === null || bottom.IsBelongBlindsBlock())) {
                         bottom.TriggerAroundDestroyBlocker(this.CanMoveBlocker, effectType);
                     }
     
                     const left = this.GetNeighborLeft();
-                    if (left !== null && leftBorder === null
-                        && (left.TopTopBlocker() === null || left.IsBelongBlindsBlock())) {
+                    if (left !== null && (left.TopTopBlocker() === null || left.IsBelongBlindsBlock())) {
                         left.TriggerAroundDestroyBlocker(this.CanMoveBlocker, effectType);
                     }
     
                     const top = this.GetNeighborTop();
-                    if (top !== null && topBorder === null
-                        && (top.TopTopBlocker() === null || top.IsBelongBlindsBlock())) {
+                    if (top !== null && (top.TopTopBlocker() === null || top.IsBelongBlindsBlock())) {
                         top.TriggerAroundDestroyBlocker(this.CanMoveBlocker, effectType);
                     }
     
                     const right = this.GetNeighborRight();
-                    if (right !== null && right.GetEliminableBorder(BlockerID.left_candy) === null
-                        && (right.TopTopBlocker() === null || right.IsBelongBlindsBlock())) {
+                    if (right !== null && (right.TopTopBlocker() === null || right.IsBelongBlindsBlock())) {
                         right.TriggerAroundDestroyBlocker(this.CanMoveBlocker, effectType);
                     }
                 }
@@ -1213,7 +1207,7 @@ export class Tiled {
 
     IsSameColorBaseDestroy(type: EffectType)
     {
-        return type == EffectType.SameColorBase || type == EffectType.MagicWand;
+        return type == EffectType.SameColorBase;
     }
 
     private TriggerAroundDestroyBlocker(triggerBlocker: Blocker, effectType: EffectType): void {

@@ -189,14 +189,14 @@ export class Blocker {
     
     static IsMagician(id: number) : boolean
     {
-        if (id === BlockerID.magician_a_id ||
-            id === BlockerID.magician_b_id ||
-            id === BlockerID.magician_c_id ||
-            id === BlockerID.magician_d_id ||
-            id === BlockerID.magician_e_id)
-            {
-                return true;
-            }
+        // if (id === BlockerID.magician_a_id ||
+        //     id === BlockerID.magician_b_id ||
+        //     id === BlockerID.magician_c_id ||
+        //     id === BlockerID.magician_d_id ||
+        //     id === BlockerID.magician_e_id)
+        //     {
+        //         return true;
+        //     }
         return false;
     }
 

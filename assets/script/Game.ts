@@ -68,31 +68,17 @@ export default class Game extends cc.Component {
     m_levelData: LevelScriptableData = new LevelScriptableData();
 
     onLoad () {
-        // cc.resources.load("texture/element_common_red", cc.SpriteFrame, (err, data: any) =>
-        // {
-        //     Utils.SetNodeActive(this.BG.node, true);
-        //     this.BG.spriteFrame = data;
-        //     cc.log("222" + err + data);
-        // });
         TiledMap.getInstance().m_effectRoot = this.effectRoot;
 
         Game.LoadingAssetCount++;
         cc.resources.load("table/" + BlockTable.NAME, cc.JsonAsset, (err, jsonAsset: any) =>{
-            if (err) {
-                cc.error(`Error loading JSON file: ${err}`);
-                return;
-            }
-
+            
             Game.m_blockTable.Load(jsonAsset.json);
             Game.LoadingAssetCount--;
         });
 
         Game.LoadingAssetCount++;
         cc.resources.load("table/" + IconTable.NAME, cc.JsonAsset, (err, data: any) =>{
-            if (err) {
-                cc.error(`Error loading JSON file: ${err}`);
-                return;
-            }
 
             Game.m_iconTable.Load(data.json);
             Game.LoadingAssetCount--;
@@ -100,10 +86,7 @@ export default class Game extends cc.Component {
         
         Game.LoadingAssetCount++;
         cc.resources.load("level/000001", cc.JsonAsset, (err, data: any) =>{
-            if (err) {
-                cc.error(`Error loading JSON file: ${err}`);
-                return;
-            }
+
             this.m_levelData = data.json;
             Game.LoadingAssetCount--;
         });

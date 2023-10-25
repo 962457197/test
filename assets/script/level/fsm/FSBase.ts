@@ -192,8 +192,6 @@ export class FSM extends FSBase
         {
             this.CheckGameEnd();
         }
-
-        cc.error(`CheckGameEnd !!! this.m_prepareState length = ${this.m_prepareState.length}`);
     }
 
     CheckGameEnd()
