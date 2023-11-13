@@ -692,6 +692,18 @@ export class EffectAreaCrush extends EffectAreaBase
 
     public Play(): void {
         super.Play();
+
+        cc.resources.load("prefab/effect/AreaEffect", (err, data: any) =>{
+            var effect = cc.instantiate(data);
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
+            effect.setPosition(spacePos);
+
+
+        });
+
+        this.WaitTime = 0.23;
     }
 
     public Finish(): void {
@@ -756,6 +768,18 @@ export class EffectAreaAndArea extends EffectAreaBase
 
     public Play(): void {
         super.Play();
+
+        cc.resources.load("prefab/effect/AreaAreaEffect", (err, data: any) =>{
+            var effect = cc.instantiate(data);
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
+            effect.setPosition(spacePos);
+
+
+        });
+
+        this.WaitTime = 1;
     }
 
     public Finish(): void {

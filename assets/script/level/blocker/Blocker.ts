@@ -21,6 +21,7 @@ import { TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
 import { FallingManager } from "../drop/FallingManager";
 import { FSAdpater, FSStateType } from "../fsm/FSBase";
 import ButterCookiesCom from "./ButterCookiesCom";
+import BaseBlockDestroyCom from "./BaseBlockDestroyCom";
 
 export class Blocker {
 
@@ -443,8 +444,43 @@ export class Blocker {
         }
         this.IsDestroy = true;
 
-        this.OnDestroyObj(tiled);
+        this.PlayParticle();
+        this.CheckOnDestroyObj(tiled);
         return null;
+    }
+
+    CheckOnDestroyObj(tiled: Tiled)
+    {
+        if (this.TableData.Data.CrushTime > 0)
+        {
+            FallingManager.Instance.AddDelayCount();
+
+            let timerData = new TimerData();
+            timerData.objthis = this;
+            timerData.interval = this.TableData.Data.CrushTime;
+            timerData.type = TimerType.enOnce;
+            timerData.body = ()=>
+            {
+                FallingManager.Instance.RemoveDelayCount();
+                this.OnDestroyObj(tiled);
+            };
+            TimerManager.Instance.CreateTimer(timerData);
+        }
+        else
+        {
+            this.OnDestroyObj(tiled);
+        }
+    }
+
+    PlayParticle()
+    {
+        // cc.resources.load("prefab/effect/"+ this.TableData.Data.EffectPath, (err, data: any) =>{
+        //     let effect = cc.instantiate(data);
+
+        //     effect.setParent(TiledMap.getInstance().m_effectRoot);
+        //     let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
+        //     effect.setPosition(spacePos);
+        // });
     }
 
     OnDestroyObj(tiled: Tiled, needFalling: boolean = true, isQuit: boolean = false)
@@ -546,6 +582,7 @@ export class Blocker {
 export class BaseBlocker extends Blocker {
 
     ClassType: BlockerClassType = BlockerClassType.Base;
+    private static COMMON_DESTROY: string = "common_destroy";
 
     m_baseBlockerCom: BaseBlockerCom;
 
@@ -558,6 +595,30 @@ export class BaseBlocker extends Blocker {
         this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
         this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
+    }
+
+    PlayParticle()
+    {
+        this.m_baseBlockerCom.PlayAnim(BaseBlocker.COMMON_DESTROY);
+
+        cc.resources.load("prefab/effect/"+ "BaseDestroyEffect", (err, data: any) =>{
+            let effect = cc.instantiate(data);
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
+            effect.setPosition(spacePos);
+        });
+
+        cc.resources.load("prefab/effect/"+ "BaseBlockDestroy", (err, data: any) =>{
+            let effect = cc.instantiate(data);
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
+            effect.setPosition(spacePos);
+
+            let effectCom = effect.getComponent(BaseBlockDestroyCom);
+            effectCom.ChangeSpriteByColor(this.Color);
+        });
     }
 }
 
@@ -636,11 +697,28 @@ export class ObstacleBlocker extends Blocker {
     }
 }
 
-export class LineBlocker extends Blocker {
-
-    ClassType: BlockerClassType = BlockerClassType.Line;
-
+export class EffectBlocker extends Blocker
+{
     m_baseBlockerCom: BaseBlockerCom;
+
+    protected OnCreated(): void {
+        super.OnCreated();
+        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
+    }
+
+    PlayGenerateAnim(aniName: string)
+    {
+        if (this.BornEffect != BornEffect.none && this.BornEffect != BornEffect.samecolor)
+        {
+            this.m_baseBlockerCom.PlayAnim(aniName);
+        }
+    }
+}
+
+export class LineBlocker extends EffectBlocker {
+
+    private static ele_anim_line_generate :string = "ele_anim_line_generate";
+    ClassType: BlockerClassType = BlockerClassType.Line;
 
     constructor(id: number) {
         super(id);
@@ -658,8 +736,19 @@ export class LineBlocker extends Blocker {
 
     protected OnCreated(): void {
         super.OnCreated();
-        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
-        this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+        // this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
+        // this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+
+        if (this.ID == BlockerID.horizontal)
+        {
+            this.m_baseBlockerCom.Icon.node.angle = 0;
+        }
+        else
+        {
+            this.m_baseBlockerCom.Icon.node.angle = 90;
+        }
+
+        this.PlayGenerateAnim(LineBlocker.ele_anim_line_generate);
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
 
         if (this.BornEffect == BornEffect.samecolor)
@@ -669,11 +758,10 @@ export class LineBlocker extends Blocker {
     }
 }
 
-export class SquareBlocker extends Blocker {
+export class SquareBlocker extends EffectBlocker {
 
+    private static ele_anim_square_generate :string = "ele_anim_square_generate";
     ClassType: BlockerClassType = BlockerClassType.Square;
-
-    m_baseBlockerCom: BaseBlockerCom;
 
     static IsSquareBlocker(id: number)
     {
@@ -690,8 +778,9 @@ export class SquareBlocker extends Blocker {
 
     protected OnCreated(): void {
         super.OnCreated();
-        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
-        this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+        // this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
+        // this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+        this.PlayGenerateAnim(SquareBlocker.ele_anim_square_generate);
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
 
         if (this.BornEffect == BornEffect.samecolor)
@@ -701,11 +790,10 @@ export class SquareBlocker extends Blocker {
     }
 }
 
-export class AreaBlocker extends Blocker {
+export class AreaBlocker extends EffectBlocker {
 
+    private static ele_anim_area_generate :string = "ele_anim_area_generate";
     ClassType: BlockerClassType = BlockerClassType.Area;
-
-    m_baseBlockerCom: BaseBlockerCom;
 
     static IsAreaBlocker(id: number)
     {
@@ -722,8 +810,8 @@ export class AreaBlocker extends Blocker {
 
     protected OnCreated(): void {
         super.OnCreated();
-        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
-        this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+        // this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+        this.PlayGenerateAnim(AreaBlocker.ele_anim_area_generate);
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
 
         if (this.BornEffect == BornEffect.samecolor)
@@ -733,11 +821,10 @@ export class AreaBlocker extends Blocker {
     }
 }
 
-export class SameColorBlocker extends Blocker {
+export class SameColorBlocker extends EffectBlocker {
 
+    private static ele_anim_samecolor_generate :string = "ele_anim_samecolor_generate";
     ClassType: BlockerClassType = BlockerClassType.Samecolor;
-
-    m_baseBlockerCom: BaseBlockerCom;
 
     static IsSameColorBlocker(id: number)
     {
@@ -754,8 +841,9 @@ export class SameColorBlocker extends Blocker {
 
     protected OnCreated(): void {
         super.OnCreated();
-        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
-        this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+        // this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
+        // this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+        this.PlayGenerateAnim(SameColorBlocker.ele_anim_samecolor_generate);
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
     }
 

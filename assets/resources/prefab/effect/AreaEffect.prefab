@@ -401,14 +401,15 @@
       "__id__": 3
     },
     "_enabled": true,
-    "_defaultClip": null,
+    "_defaultClip": {
+      "__uuid__": "5cfae8bb-0197-4b7a-9bb0-023242465cb0"
+    },
     "_clips": [
       {
         "__uuid__": "5cfae8bb-0197-4b7a-9bb0-023242465cb0"
-      },
-      null
+      }
     ],
-    "playOnLoad": false,
+    "playOnLoad": true,
     "_id": ""
   },
   {

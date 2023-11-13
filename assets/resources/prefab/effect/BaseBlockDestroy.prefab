@@ -386,7 +386,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "a2ee8807-6af3-4add-b059-15535f9bcb3c"
     },
     "fileId": "22UGrADMRPTqEiYq85DiCf",
     "sync": false
@@ -495,7 +495,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "a2ee8807-6af3-4add-b059-15535f9bcb3c"
     },
     "fileId": "55DXY0DG1KFptge0Epy7wi",
     "sync": false
@@ -604,7 +604,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "a2ee8807-6af3-4add-b059-15535f9bcb3c"
     },
     "fileId": "f4nksQD7RPMZWGXUweux3H",
     "sync": false
@@ -713,7 +713,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "a2ee8807-6af3-4add-b059-15535f9bcb3c"
     },
     "fileId": "beHDmT5hREG6ECw/bIxH2p",
     "sync": false
@@ -724,7 +724,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "a2ee8807-6af3-4add-b059-15535f9bcb3c"
     },
     "fileId": "76Sk4vgmlFd7JToGzZiMBK",
     "sync": false
@@ -737,13 +737,15 @@
       "__id__": 3
     },
     "_enabled": true,
-    "_defaultClip": null,
+    "_defaultClip": {
+      "__uuid__": "6b4d6e63-7e7a-41fb-85bb-44ee0fa24427"
+    },
     "_clips": [
       {
         "__uuid__": "6b4d6e63-7e7a-41fb-85bb-44ee0fa24427"
       }
     ],
-    "playOnLoad": false,
+    "playOnLoad": true,
     "_id": ""
   },
   {
@@ -752,7 +754,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "a2ee8807-6af3-4add-b059-15535f9bcb3c"
     },
     "fileId": "b1my10HfFAlpkSiBsyWNBc",
     "sync": false
@@ -763,30 +765,62 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "a2ee8807-6af3-4add-b059-15535f9bcb3c"
     },
     "fileId": "518DWcYklFNIk2iUJ+Im7h",
     "sync": false
   },
   {
-    "__type__": "93964X8cjRFNZo74OXIaWVH",
+    "__type__": "08ac5nTmOpH8KNbwv9jtvMB",
     "_name": "",
     "_objFlags": 0,
     "node": {
       "__id__": 1
     },
     "_enabled": true,
-    "RootBone": {
-      "__id__": 2
-    },
-    "DynamicNode": {
-      "__id__": 4
-    },
-    "Anim": {
-      "__id__": 18
-    },
-    "Icon": {
+    "AllSprites": [
+      {
+        "__uuid__": "fbc5fc16-9000-43a6-bd49-b93213b2bc13"
+      },
+      {
+        "__uuid__": "e4f21954-eb59-4fcb-a6b5-f0d736e6e51a"
+      },
+      {
+        "__uuid__": "0de15a43-6cbe-435c-b443-560a006f8414"
+      },
+      {
+        "__uuid__": "c39244d4-e227-43b9-820a-181f0867938b"
+      },
+      {
+        "__uuid__": "1c201b86-01f9-4b8e-9089-5d3481ee59d5"
+      },
+      {
+        "__uuid__": "c19d72fe-c547-4cd9-b7a0-be8da0a66011"
+      },
+      {
+        "__uuid__": "02d879a8-283e-471c-8982-79b1de804fcc"
+      },
+      {
+        "__uuid__": "d2d9ac4c-fe27-4132-8f5c-e5e477330c60"
+      },
+      {
+        "__uuid__": "aa259f16-7340-46c4-abe9-399d66ab7405"
+      },
+      {
+        "__uuid__": "30791b83-af8b-459b-802d-6d928e33b82e"
+      }
+    ],
+    "Icon01": {
       "__id__": 9
+    },
+    "Icon02": {
+      "__id__": 12
+    },
+    "Icon03": {
+      "__id__": 15
+    },
+    "Icon04": {
+      "__id__": 6
     },
     "_id": ""
   },
@@ -796,7 +830,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "a2ee8807-6af3-4add-b059-15535f9bcb3c"
     },
     "fileId": "",
     "sync": false

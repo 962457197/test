@@ -9,7 +9,7 @@
   "wrapMode": 1,
   "curveData": {
     "paths": {
-      "EffectRoot": {
+      "Dynamic/Effect": {
         "comps": {
           "cc.Sprite": {
             "spriteFrame": [

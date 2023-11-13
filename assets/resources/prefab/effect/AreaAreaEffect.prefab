@@ -513,13 +513,15 @@
       "__id__": 3
     },
     "_enabled": true,
-    "_defaultClip": null,
+    "_defaultClip": {
+      "__uuid__": "5eee22cf-28ab-402d-a342-27a1da0582a8"
+    },
     "_clips": [
       {
         "__uuid__": "5eee22cf-28ab-402d-a342-27a1da0582a8"
       }
     ],
-    "playOnLoad": false,
+    "playOnLoad": true,
     "_id": ""
   },
   {

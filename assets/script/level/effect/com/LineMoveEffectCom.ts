@@ -24,17 +24,13 @@ export default class LineMoveEffectCom extends cc.Component {
     @property(cc.Node)
     end2Node: cc.Node = null;
 
-    @property(cc.Sprite)
-    end1Icon: cc.Sprite = null;
-
-    @property(cc.Sprite)
-    end2Icon: cc.Sprite = null;
-
     m_isStart: boolean = false;
     m_isReset: boolean = false;
 
     m_isArrive1: boolean = false;
     m_isArrive2: boolean = false;
+    m_currentPos1: cc.Vec2 = cc.Vec2.ZERO;
+    m_currentPos2: cc.Vec2 = cc.Vec2.ZERO;
     m_isArrive1Tiled: boolean = false;
     m_isArrive2Tiled: boolean = false;
     m_startPos: cc.Vec2 = cc.Vec2.ZERO;
@@ -48,7 +44,7 @@ export default class LineMoveEffectCom extends cc.Component {
     m_markTileds: Tiled[] = [];
     endAction:  ()=> void = null;
     checkMatch: (tiled: Tiled, blockers: Blocker[]) => void = null;
-    m_speed: number = 1000;
+    m_speed: number = 2000;
 
     StartMove(originTiled: Tiled, end1Pos: cc.Vec2, end1TiledPos: cc.Vec2, end2Pos: cc.Vec2, end2TiledPos: cc.Vec2, iconId: number, 
         endAction: ()=> void, checkMatch: (tiled: Tiled, blockers: Blocker[]) => void, spType: BlockerID)
@@ -63,6 +59,9 @@ export default class LineMoveEffectCom extends cc.Component {
             this.end1Node.angle = 90;
             this.end2Node.angle = 90;
         }
+
+        this.m_currentPos1 = originTiled.WorldPosition;
+        this.m_currentPos2 = originTiled.WorldPosition;
         
         // cc.resources.load("texture/" + Game.GetIconName(iconId), cc.SpriteFrame, (err, data: any) =>
         // {
@@ -103,13 +102,12 @@ export default class LineMoveEffectCom extends cc.Component {
 
         if (!this.m_isArrive1)
         {
-            let curPos = this.end1Node.convertToWorldSpaceAR(cc.Vec2.ZERO);
             if (!this.m_isArrive1Tiled)
             {
-                this.OnCheckMatch(curPos);
+                this.OnCheckMatch(this.m_currentPos1);
             }
             
-            let distance = curPos.sub(this.m_startPos).magSqr();
+            let distance = this.m_currentPos1.sub(this.m_startPos).magSqr();
             if (distance >= this.m_end1Distance)
             {
                 this.m_isArrive1 = true;
@@ -122,19 +120,19 @@ export default class LineMoveEffectCom extends cc.Component {
                 }
 
                 let dir = this.m_end1Pos.sub(this.m_startPos).normalize();
-                let nextPos = new cc.Vec2(this.end1Node.x + dir.x * this.m_speed * dt, this.end1Node.y + dir.y * this.m_speed * dt);
-                this.end1Node.setPosition(nextPos)
+                this.m_currentPos1 = new cc.Vec2(this.m_currentPos1.x + dir.x * this.m_speed * dt, this.m_currentPos1.y + dir.y * this.m_speed * dt);
+
             }
         }
 
         if (!this.m_isArrive2)
         {
-            let curPos = this.end2Node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+            // let curPos = this.end2Node.convertToWorldSpaceAR(cc.Vec2.ZERO);
             if (!this.m_isArrive2Tiled)
             {
-                this.OnCheckMatch(curPos);
+                this.OnCheckMatch(this.m_currentPos2);
             }
-            let distance = curPos.sub(this.m_startPos).magSqr();
+            let distance = this.m_currentPos2.sub(this.m_startPos).magSqr();
             if (distance >= this.m_end2Distance)
             {
                 this.m_isArrive2 = true;
@@ -147,8 +145,7 @@ export default class LineMoveEffectCom extends cc.Component {
                 }
 
                 let dir = this.m_end2Pos.sub(this.m_startPos).normalize();
-                let nextPos = new cc.Vec2(this.end2Node.x + dir.x * this.m_speed * dt, this.end2Node.y + dir.y * this.m_speed * dt);
-                this.end2Node.setPosition(nextPos)
+                this.m_currentPos2 = new cc.Vec2(this.m_currentPos2.x + dir.x * this.m_speed * dt, this.m_currentPos2.y + dir.y * this.m_speed * dt);
             }
         }
 
