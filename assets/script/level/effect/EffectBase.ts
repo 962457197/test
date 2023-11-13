@@ -2040,6 +2040,18 @@ export class EffectSameColorAndSameColor extends EffectBase
         super.Start();
         this.WaitTime = 0.5;
         TiledMap.getInstance().SameColorTriggeringCount++;
+
+        cc.resources.load("prefab/effect/SameColorChangeEffect", (err, data: any) =>{
+            let effect: cc.Node = cc.instantiate(data);
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
+            effect.setPosition(spacePos);
+
+            setTimeout(function () {
+                effect.destroy();
+              }.bind(this), this.WaitTime * 1000);
+        });
     }
 
     public Play(): void {
