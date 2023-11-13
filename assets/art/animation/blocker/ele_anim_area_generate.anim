@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "ele_anim_areagenerate",
+  "_name": "ele_anim_area_generate",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.5,
@@ -19,6 +19,22 @@
                 "x": 4,
                 "y": 4
               }
+            },
+            {
+              "frame": 0.43333333333333335,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 4,
+                "y": 4
+              }
+            },
+            {
+              "frame": 0.4666666666666667,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1,
+                "y": 1
+              }
             }
           ],
           "opacity": [
@@ -29,14 +45,6 @@
             {
               "frame": 0.03333333333333333,
               "value": 255
-            },
-            {
-              "frame": 0.43333333333333335,
-              "value": 255
-            },
-            {
-              "frame": 0.5,
-              "value": 0
             }
           ]
         },
@@ -118,7 +126,7 @@
               {
                 "frame": 0.4666666666666667,
                 "value": {
-                  "__uuid__": "64eb03f0-8860-4c52-8310-990955bfd28d"
+                  "__uuid__": "4333bc66-f7a0-4e9b-84e3-0c405bd520bc"
                 }
               }
             ]

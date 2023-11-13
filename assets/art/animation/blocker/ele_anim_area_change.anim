@@ -1,9 +1,9 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "ele_anim_areaarea_effect",
+  "_name": "ele_anim_area_change",
   "_objFlags": 0,
   "_native": "",
-  "_duration": 1.3666666666666667,
+  "_duration": 1.4333333333333333,
   "sample": 30,
   "speed": 1,
   "wrapMode": 1,
@@ -214,6 +214,22 @@
                 "x": 9.5,
                 "y": 9.5
               }
+            },
+            {
+              "frame": 1.1333333333333333,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 9.5,
+                "y": 9.5
+              }
+            },
+            {
+              "frame": 1.4333333333333333,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 11,
+                "y": 11
+              }
             }
           ],
           "opacity": [
@@ -230,7 +246,7 @@
               "value": 255
             },
             {
-              "frame": 1.3666666666666667,
+              "frame": 1.4333333333333333,
               "value": 0
             }
           ],

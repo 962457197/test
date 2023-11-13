@@ -24,11 +24,11 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 18
+        "__id__": 15
       }
     ],
     "_prefab": {
-      "__id__": 19
+      "__id__": 16
     },
     "_opacity": 255,
     "_color": {
@@ -92,7 +92,7 @@
     "_active": true,
     "_components": [],
     "_prefab": {
-      "__id__": 17
+      "__id__": 14
     },
     "_opacity": 255,
     "_color": {
@@ -156,11 +156,11 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 15
+        "__id__": 12
       }
     ],
     "_prefab": {
-      "__id__": 16
+      "__id__": 13
     },
     "_opacity": 255,
     "_color": {
@@ -222,15 +222,12 @@
       },
       {
         "__id__": 8
-      },
-      {
-        "__id__": 11
       }
     ],
     "_active": true,
     "_components": [],
     "_prefab": {
-      "__id__": 14
+      "__id__": 11
     },
     "_opacity": 255,
     "_color": {
@@ -383,7 +380,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "8cea2dd2-939a-4758-8b9b-3728fc655580"
     },
     "fileId": "85G8oJzGVFDoyy4kI+fhND",
     "sync": false
@@ -492,127 +489,18 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "8cea2dd2-939a-4758-8b9b-3728fc655580"
     },
     "fileId": "55DXY0DG1KFptge0Epy7wi",
     "sync": false
   },
   {
-    "__type__": "cc.Node",
-    "_name": "Icon_fly",
-    "_objFlags": 0,
-    "_parent": {
-      "__id__": 4
-    },
-    "_children": [],
-    "_active": false,
-    "_components": [
-      {
-        "__id__": 12
-      }
-    ],
-    "_prefab": {
-      "__id__": 13
-    },
-    "_opacity": 255,
-    "_color": {
-      "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
-      "a": 255
-    },
-    "_contentSize": {
-      "__type__": "cc.Size",
-      "width": 210,
-      "height": 18
-    },
-    "_anchorPoint": {
-      "__type__": "cc.Vec2",
-      "x": 0.5,
-      "y": 0.5
-    },
-    "_trs": {
-      "__type__": "TypedArray",
-      "ctor": "Float64Array",
-      "array": [
-        -378.912,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        4.5,
-        4.5,
-        1
-      ]
-    },
-    "_eulerAngles": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_skewX": 0,
-    "_skewY": 0,
-    "_is3DNode": false,
-    "_groupIndex": 1,
-    "groupIndex": 1,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.Sprite",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 11
-    },
-    "_enabled": true,
-    "_materials": [
-      {
-        "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
-      }
-    ],
-    "_srcBlendFactor": 770,
-    "_dstBlendFactor": 771,
-    "_spriteFrame": {
-      "__uuid__": "58da302e-0980-4ffe-9f4f-505bfa05a6b8"
-    },
-    "_type": 0,
-    "_sizeMode": 1,
-    "_fillType": 0,
-    "_fillCenter": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "_fillStart": 0,
-    "_fillRange": 0,
-    "_isTrimmedMode": true,
-    "_atlas": {
-      "__uuid__": "ba1831bc-f768-48e2-97b5-2f3d5a13af00"
-    },
-    "_id": ""
-  },
-  {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
-    },
-    "fileId": "57/N87ocBNHY3w/5FwCg3X",
-    "sync": false
-  },
-  {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 1
-    },
-    "asset": {
-      "__id__": 0
+      "__uuid__": "8cea2dd2-939a-4758-8b9b-3728fc655580"
     },
     "fileId": "76Sk4vgmlFd7JToGzZiMBK",
     "sync": false
@@ -640,7 +528,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "8cea2dd2-939a-4758-8b9b-3728fc655580"
     },
     "fileId": "b1my10HfFAlpkSiBsyWNBc",
     "sync": false
@@ -651,7 +539,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "8cea2dd2-939a-4758-8b9b-3728fc655580"
     },
     "fileId": "518DWcYklFNIk2iUJ+Im7h",
     "sync": false
@@ -671,7 +559,7 @@
       "__id__": 4
     },
     "Anim": {
-      "__id__": 15
+      "__id__": 12
     },
     "Icon": {
       "__id__": 9
@@ -684,7 +572,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "8cea2dd2-939a-4758-8b9b-3728fc655580"
     },
     "fileId": "",
     "sync": false
