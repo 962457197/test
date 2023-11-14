@@ -88,6 +88,16 @@
             }
           ]
         }
+      },
+      "Dynamic/Effect_Square_Hit": {
+        "props": {
+          "opacity": [
+            {
+              "frame": 0,
+              "value": 0
+            }
+          ]
+        }
       }
     }
   },
