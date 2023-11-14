@@ -7,6 +7,7 @@
 
 import Game from "../../Game";
 import BlockerCom from "./BlockerCom";
+import { BlockerID } from "./BlockerManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -22,5 +23,17 @@ export default class BaseBlockerCom extends BlockerCom {
         {
             this.Icon.spriteFrame = data;
         });
+    }
+
+    SetRotate(id: number)
+    {
+        if (id == BlockerID.horizontal)
+        {
+            this.Icon.node.angle = 0;
+        }
+        else if (id == BlockerID.vertical)
+        {
+            this.Icon.node.angle = -90;
+        }
     }
 }

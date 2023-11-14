@@ -6,12 +6,14 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import Game from "../../../Game";
+import { TimerData, TimerManager, TimerType } from "../../../tools/TimerManager";
 import { Utils } from "../../../tools/Utils";
 import BaseBlockerCom from "../../blocker/BaseBlockerCom";
 import { BlockSubType } from "../../blocker/BlockerManager";
 import { Tiled } from "../../tiledmap/Tiled";
 import { TiledMap } from "../../tiledmap/TiledMap";
 import { EffectType } from "../EffectController";
+import SquareFlyEffectCom from "./SquareFlyEffectCom";
 
 const {ccclass, property} = cc._decorator;
 
@@ -45,14 +47,17 @@ class FlyData {
 @ccclass
 export default class SquareFlyCom extends cc.Component {
 
-    @property(cc.Sprite)
-    Icon: cc.Sprite = null;
-
     @property(cc.Node)
     Dynamic_01: cc.Node = null;
 
     @property(cc.Node)
     Dynamic_02: cc.Node = null;
+
+    @property(cc.Node)
+    Dynamic_03: cc.Node = null;
+
+    @property(cc.Animation)
+    Anim: cc.Animation = null;
 
     m_flyData: FlyData = new FlyData();
     m_targetBlockerPos: cc.Vec3;
@@ -108,46 +113,91 @@ export default class SquareFlyCom extends cc.Component {
 
     public InitSquareData(originTiled: Tiled, otherTiled: Tiled, targetTiled: Tiled, effectType: EffectType, indexNumber: number, arrivedAction: (tiled: Tiled) => void, iconId: number): void {
 
-        if (effectType != EffectType.SquareCrush 
+        if (effectType != EffectType.SquareCrush && effectType != EffectType.SquareAndSquare
             && originTiled.CanMoveBlocker != null && originTiled.CanMoveBlocker.TableData.Data.SubType == BlockSubType.Special 
             && otherTiled.CanMoveBlocker != null && otherTiled.CanMoveBlocker.TableData.Data.SubType == BlockSubType.Special)
         {
-            Utils.SetNodeActive(this.Icon.node, false);
             Utils.SetNodeActive(this.Dynamic_01, true);
             Utils.SetNodeActive(this.Dynamic_02, true);
 
             let iconId1 = originTiled.CanMoveBlocker.TableData.Data.IconId
-            cc.resources.load("prefab/blocker/"+ originTiled.CanMoveBlocker.m_prefabName, (err, data: any) =>{
-                let blocker: cc.Node = cc.instantiate(data);
-                let blockerCom: BaseBlockerCom = blocker.getComponent(BaseBlockerCom);
-                blockerCom.RefreshIcon(iconId1);
-                blocker.setParent(this.Dynamic_01);
-                blocker.setPosition(new cc.Vec2(-40, 0));
-            })
 
-            let iconId2 = otherTiled.CanMoveBlocker.TableData.Data.IconId
-            cc.resources.load("prefab/blocker/"+ otherTiled.CanMoveBlocker.m_prefabName, (err, data: any) =>{
-                let blocker: cc.Node = cc.instantiate(data);
-                let blockerCom: BaseBlockerCom = blocker.getComponent(BaseBlockerCom);
-                blockerCom.RefreshIcon(iconId2);
-                blocker.setParent(this.Dynamic_02);
-                blocker.setPosition(new cc.Vec2(40, 0));
-            })
+            if (originTiled.CanMoveBlocker.IsSquareBlocker())
+            {
+                cc.resources.load("prefab/effect/SquareFlyEffect", (err, data: any) =>
+                {
+                    var effect: cc.Node = cc.instantiate(data);
+                    effect.setParent(this.Dynamic_01);
+                    effect.setPosition(cc.Vec2.ZERO);
+
+                    let squareFlyEffectCom: SquareFlyEffectCom = effect.getComponent(SquareFlyEffectCom);
+                    squareFlyEffectCom.PlayIdleAnim();
+                });
+
+                cc.resources.load("prefab/effect/SquareFlyEffect", (err, data: any) =>
+                {
+                    var effect: cc.Node = cc.instantiate(data);
+                    effect.setParent(this.Dynamic_03);
+                    effect.setPosition(cc.Vec2.ZERO);
+
+                    let squareFlyEffectCom: SquareFlyEffectCom = effect.getComponent(SquareFlyEffectCom);
+                    squareFlyEffectCom.PlayIdleAnim();
+                });
+            }
+            else
+            {
+                cc.resources.load("prefab/blocker/"+ originTiled.CanMoveBlocker.m_prefabName, (err, data: any) =>{
+                    let blocker: cc.Node = cc.instantiate(data);
+                    let blockerCom: BaseBlockerCom = blocker.getComponent(BaseBlockerCom);
+                    blockerCom.SetRotate(originTiled.CanMoveBlocker.ID);
+                    blocker.setParent(this.Dynamic_01);
+                })
+
+                cc.resources.load("prefab/blocker/"+ originTiled.CanMoveBlocker.m_prefabName, (err, data: any) =>{
+                    let blocker: cc.Node = cc.instantiate(data);
+                    let blockerCom: BaseBlockerCom = blocker.getComponent(BaseBlockerCom);
+                    blockerCom.SetRotate(originTiled.CanMoveBlocker.ID);
+                    blocker.setParent(this.Dynamic_03);
+                })
+            }
+
+            if (otherTiled.CanMoveBlocker.IsSquareBlocker())
+            {
+                cc.resources.load("prefab/effect/SquareFlyEffect", (err, data: any) =>
+                {
+                    var effect: cc.Node = cc.instantiate(data);
+                    effect.setParent(this.Dynamic_02);
+                    effect.setPosition(cc.Vec2.ZERO);
+
+                    let squareFlyEffectCom: SquareFlyEffectCom = effect.getComponent(SquareFlyEffectCom);
+                    squareFlyEffectCom.PlayIdleAnim();
+                });
+            }
+            else
+            {
+                cc.resources.load("prefab/blocker/"+ otherTiled.CanMoveBlocker.m_prefabName, (err, data: any) =>{
+                    let blocker: cc.Node = cc.instantiate(data);
+                    let blockerCom: BaseBlockerCom = blocker.getComponent(BaseBlockerCom);
+                    blockerCom.SetRotate(otherTiled.CanMoveBlocker.ID);
+                    blocker.setParent(this.Dynamic_02);
+                });
+            }
+
+            this.Anim.play("ele_anim_squarefly");
         }
         else
         {
-            Utils.SetNodeActive(this.Icon.node, true);
             Utils.SetNodeActive(this.Dynamic_01, false);
             Utils.SetNodeActive(this.Dynamic_02, false);
             
-            cc.resources.load("texture/" + Game.GetIconName(iconId), cc.SpriteFrame, (err, data: any) =>
+            cc.resources.load("prefab/effect/SquareFlyEffect", (err, data: any) =>
             {
-                if (this.Icon == null)
-                {
-                    return;
-                }
+                var effect: cc.Node = cc.instantiate(data);
+                effect.setParent(this.Anim.node);
+                effect.setPosition(cc.Vec2.ZERO);
 
-                this.Icon.spriteFrame = data;
+                let squareFlyEffectCom: SquareFlyEffectCom = effect.getComponent(SquareFlyEffectCom);
+                squareFlyEffectCom.PlayStartFlyAnim();
             });
         }
 
@@ -157,6 +207,7 @@ export default class SquareFlyCom extends cc.Component {
         let convertPos = this.node.parent.convertToNodeSpaceAR(targetTiled.WorldPosition);
         this.m_targetBlockerPos = new cc.Vec3(convertPos.x, convertPos.y, 0);
         this.ArrivedAction = arrivedAction;
+
 
         this.FlyTo(this.m_indexNumber, false, false, true);
     }
@@ -336,7 +387,6 @@ export default class SquareFlyCom extends cc.Component {
     OnMoveEnd()
     {
         this.ArrivedAction(this.m_targetTiled);
-
         this.node.destroy();
     }
 }

@@ -1381,6 +1381,16 @@ export class EffectSquareCrush extends EffectSquareBase {
     public Play(): void {
         super.Play();
 
+        cc.resources.load("prefab/effect/SquareEffect", (err, data: any) =>{
+            var effect = cc.instantiate(data);
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
+            effect.setPosition(spacePos);
+
+
+        });
+
         TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker);
         TiledMap.getInstance().DelayDestroyBlockers(this.m_matchItems);
     }

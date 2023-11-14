@@ -743,9 +743,9 @@ export class LineBlocker extends EffectBlocker {
         {
             this.m_baseBlockerCom.Icon.node.angle = 0;
         }
-        else
+        else if (this.ID == BlockerID.vertical)
         {
-            this.m_baseBlockerCom.Icon.node.angle = 90;
+            this.m_baseBlockerCom.Icon.node.angle = -90;
         }
 
         this.PlayGenerateAnim(LineBlocker.ele_anim_line_generate);

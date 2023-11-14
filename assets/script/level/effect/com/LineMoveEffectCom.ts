@@ -56,8 +56,8 @@ export default class LineMoveEffectCom extends cc.Component {
         }
         else
         {
-            this.end1Node.angle = 90;
-            this.end2Node.angle = 90;
+            this.end1Node.angle = -90;
+            this.end2Node.angle = -90;
         }
 
         this.m_currentPos1 = originTiled.WorldPosition;
