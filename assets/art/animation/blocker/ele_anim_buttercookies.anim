@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "ele_anim_buttercookies_box",
+  "_name": "ele_anim_buttercookies",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.75,
@@ -9,16 +9,6 @@
   "wrapMode": 1,
   "curveData": {
     "paths": {
-      "EffectRoot": {
-        "props": {
-          "opacity": [
-            {
-              "frame": 0,
-              "value": 0
-            }
-          ]
-        }
-      },
       "Dynamic/Bg": {
         "props": {
           "position": [
