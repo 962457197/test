@@ -6,7 +6,7 @@
   "_duration": 0.8,
   "sample": 60,
   "speed": 1,
-  "wrapMode": 1,
+  "wrapMode": 2,
   "curveData": {
     "paths": {
       "Dynamic_01": {
@@ -90,8 +90,8 @@
               "frame": 0.2,
               "value": {
                 "__type__": "cc.Vec2",
-                "x": 0.8,
-                "y": 0.8
+                "x": 0.78,
+                "y": 0.78
               }
             },
             {
@@ -234,8 +234,8 @@
               "frame": 0.6,
               "value": {
                 "__type__": "cc.Vec2",
-                "x": 0.7,
-                "y": 0.7
+                "x": 0.75,
+                "y": 0.75
               }
             },
             {
@@ -299,6 +299,14 @@
           ],
           "position": [
             {
+              "frame": 0,
+              "value": [
+                -60.639,
+                20.028,
+                0
+              ]
+            },
+            {
               "frame": 0.4,
               "value": [
                 58.403,
@@ -333,13 +341,21 @@
             {
               "frame": 0.8,
               "value": [
-                -59.914,
-                19.636,
+                -60.639,
+                20.028,
                 0
               ]
             }
           ],
           "scale": [
+            {
+              "frame": 0,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1,
+                "y": 1
+              }
+            },
             {
               "frame": 0.4,
               "value": {
@@ -366,6 +382,10 @@
             }
           ],
           "angle": [
+            {
+              "frame": 0,
+              "value": 5
+            },
             {
               "frame": 0.4,
               "value": -5
