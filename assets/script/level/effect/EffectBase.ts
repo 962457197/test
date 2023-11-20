@@ -779,7 +779,7 @@ export class EffectAreaAndArea extends EffectAreaBase
 
         });
 
-        this.WaitTime = 1;
+        this.WaitTime = 1.7;
     }
 
     public Finish(): void {

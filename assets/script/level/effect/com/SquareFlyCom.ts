@@ -81,6 +81,7 @@ export default class SquareFlyCom extends cc.Component {
     m_targetTiled: Tiled = null;
     m_indexNumber: number = 0;
     ArrivedAction: (tiled: Tiled) => void = null;
+    m_squareFlyEffectCom : SquareFlyEffectCom = null;
 
     CalculateBezierPoint(p0: cc.Vec3, p1: cc.Vec3, p2: cc.Vec3, p3: cc.Vec3, t: number): cc.Vec3 {
         const u = 1 - t;
@@ -112,6 +113,8 @@ export default class SquareFlyCom extends cc.Component {
     }
 
     public InitSquareData(originTiled: Tiled, otherTiled: Tiled, targetTiled: Tiled, effectType: EffectType, indexNumber: number, arrivedAction: (tiled: Tiled) => void, iconId: number): void {
+
+        this.m_squareFlyEffectCom = null;
 
         if (effectType != EffectType.SquareCrush && effectType != EffectType.SquareAndSquare
             && originTiled.CanMoveBlocker != null && originTiled.CanMoveBlocker.TableData.Data.SubType == BlockSubType.Special 
@@ -196,8 +199,8 @@ export default class SquareFlyCom extends cc.Component {
                 effect.setParent(this.Anim.node);
                 effect.setPosition(cc.Vec2.ZERO);
 
-                let squareFlyEffectCom: SquareFlyEffectCom = effect.getComponent(SquareFlyEffectCom);
-                squareFlyEffectCom.PlayStartFlyAnim();
+                this.m_squareFlyEffectCom = effect.getComponent(SquareFlyEffectCom);
+                this.m_squareFlyEffectCom.PlayStartFlyAnim();
             });
         }
 
@@ -386,7 +389,20 @@ export default class SquareFlyCom extends cc.Component {
     
     OnMoveEnd()
     {
-        this.ArrivedAction(this.m_targetTiled);
-        this.node.destroy();
+        if (this.m_squareFlyEffectCom != null)
+        {
+            this.m_squareFlyEffectCom.PlayFlyEndAnim();
+
+            setTimeout(function () {
+                this.ArrivedAction(this.m_targetTiled);
+                this.node.destroy();
+
+              }.bind(this), 0.21 * 1000);
+        }
+        else
+        {
+            this.ArrivedAction(this.m_targetTiled);
+            this.node.destroy();
+        }
     }
 }
