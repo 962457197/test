@@ -321,14 +321,14 @@ export enum BlockLayer
 
 export enum BlockZIndex
 {
-    Bottom = 100,
-    Middle = 200,
-    Top    = 300,
-    TopTop = 400,
+    Bottom = 1000,
+    Middle = 2000,
+    Top    = 3000,
+    TopTop = 4000,
 
 
     //
-    Special = 1000,
+    Special = 10000,
 }
 
 export class BlockerManager {

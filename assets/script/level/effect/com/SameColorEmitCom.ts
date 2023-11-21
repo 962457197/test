@@ -22,6 +22,25 @@ export default class SameColorEmitCom extends cc.Component {
     {
         this.m_targetTiled = targetTiled;
 
+        let convertPos = this.node.parent.convertToNodeSpaceAR(targetTiled.WorldPosition);
+        let targetBlockerPos = new cc.Vec3(convertPos.x, convertPos.y, 0);
+
+        let targetVec = targetBlockerPos.subtract(this.node.position);
+        this.node.width = 0;
+
+        const dotProduct = cc.Vec3.dot(targetVec, cc.Vec3.RIGHT);
+        const magnitude1 = cc.Vec3.len(targetVec);
+        const cosTheta = dotProduct / (magnitude1 * 1);
+        const theta = Math.acos(cosTheta);
+        
+        var degree = theta / Math.PI * 180;
+
+        if (targetBlockerPos.y < 0)
+        {
+            degree = -degree;
+        }
+        this.node.angle = degree;
+
         let timeData = new TimerData();
         timeData.objthis = this;
         timeData.type = TimerType.enOnce;
@@ -29,9 +48,13 @@ export default class SameColorEmitCom extends cc.Component {
         timeData.body = ()=>
         {
             cc.tween(this.node)
-            .to(0.2, { position : cc.v3(targetTiled.LocalPosition.x, targetTiled.LocalPosition.y, 0)})
+            .to(0.2, { width: magnitude1 })
             .call(()=>
             {
+                setTimeout(function () {
+                    this.node.destroy();
+                  }.bind(this), 200);
+                
                 callback(this.m_targetTiled);
             })
             .start();

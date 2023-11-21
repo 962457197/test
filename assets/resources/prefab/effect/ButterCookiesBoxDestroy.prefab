@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "ButterCookiesDestroy",
+    "_name": "ButterCookiesBoxDestroy",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -373,7 +373,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "6b718399-bf97-414d-a233-002512335cca"
+      "__uuid__": "9b16ad22-b19d-4e91-97e8-4b1f5aa06af8"
     },
     "fileId": "e0a6ZSiuZJ8or342pMjqSC",
     "sync": false
@@ -384,7 +384,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "6b718399-bf97-414d-a233-002512335cca"
+      "__uuid__": "9b16ad22-b19d-4e91-97e8-4b1f5aa06af8"
     },
     "fileId": "76Sk4vgmlFd7JToGzZiMBK",
     "sync": false
@@ -398,11 +398,11 @@
     },
     "_enabled": true,
     "_defaultClip": {
-      "__uuid__": "fde5111d-c114-4884-98bc-fd3fed2d4e92"
+      "__uuid__": "1adcc132-68d1-431c-a968-6321a909b47b"
     },
     "_clips": [
       {
-        "__uuid__": "fde5111d-c114-4884-98bc-fd3fed2d4e92"
+        "__uuid__": "1adcc132-68d1-431c-a968-6321a909b47b"
       }
     ],
     "playOnLoad": true,
@@ -414,7 +414,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "6b718399-bf97-414d-a233-002512335cca"
+      "__uuid__": "9b16ad22-b19d-4e91-97e8-4b1f5aa06af8"
     },
     "fileId": "b1my10HfFAlpkSiBsyWNBc",
     "sync": false
@@ -425,7 +425,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "6b718399-bf97-414d-a233-002512335cca"
+      "__uuid__": "9b16ad22-b19d-4e91-97e8-4b1f5aa06af8"
     },
     "fileId": "518DWcYklFNIk2iUJ+Im7h",
     "sync": false
@@ -436,7 +436,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "6b718399-bf97-414d-a233-002512335cca"
+      "__uuid__": "9b16ad22-b19d-4e91-97e8-4b1f5aa06af8"
     },
     "fileId": "",
     "sync": false

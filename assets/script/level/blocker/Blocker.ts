@@ -22,6 +22,7 @@ import { FallingManager } from "../drop/FallingManager";
 import { FSAdpater, FSStateType } from "../fsm/FSBase";
 import ButterCookiesCom from "./ButterCookiesCom";
 import BaseBlockDestroyCom from "./BaseBlockDestroyCom";
+import { EffectZIndex } from "../effect/EffectBase";
 
 export class Blocker {
 
@@ -455,6 +456,11 @@ export class Blocker {
         {
             FallingManager.Instance.AddDelayCount();
 
+            if (this.TableData.Data.CrushAnima == null)
+            {
+                this.SetActive(false);
+            }
+            
             let timerData = new TimerData();
             timerData.objthis = this;
             timerData.interval = this.TableData.Data.CrushTime;
@@ -607,6 +613,10 @@ export class BaseBlocker extends Blocker {
             effect.setParent(TiledMap.getInstance().m_effectRoot);
             let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
             effect.setPosition(spacePos);
+
+            setTimeout(function () {
+                effect.destroy();
+              }.bind(this), 1500);
         });
 
         cc.resources.load("prefab/effect/"+ "BaseBlockDestroy", (err, data: any) =>{
@@ -618,6 +628,10 @@ export class BaseBlocker extends Blocker {
 
             let effectCom = effect.getComponent(BaseBlockDestroyCom);
             effectCom.ChangeSpriteByColor(this.Color);
+
+            setTimeout(function () {
+                effect.destroy();
+              }.bind(this), 1500);
         });
     }
 }
@@ -824,7 +838,9 @@ export class AreaBlocker extends EffectBlocker {
 export class SameColorBlocker extends EffectBlocker {
 
     private static ele_anim_samecolor_generate :string = "ele_anim_samecolor_generate";
+    private static ele_anim_samecolor_ready: string = "ele_anim_samecolor_ready";
     ClassType: BlockerClassType = BlockerClassType.Samecolor;
+    effectGo: cc.Node = null;
 
     static IsSameColorBlocker(id: number)
     {
@@ -844,12 +860,33 @@ export class SameColorBlocker extends EffectBlocker {
         // this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
         // this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
         this.PlayGenerateAnim(SameColorBlocker.ele_anim_samecolor_generate);
-        this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
+        this.m_baseBlockerCom.node.zIndex = BlockZIndex.TopTop;
     }
 
     PlayReadyAnim()
     {
-        this.m_baseBlockerCom.PlayAnim("ele_anim_samecolorblock_ready");
+        cc.resources.load("prefab/effect/SameColorEffect", (err, data: any) =>{
+            var effect = cc.instantiate(data);
+
+            this.effectGo = effect;
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.SelfTiled.WorldPosition);
+            effect.setPosition(spacePos);
+
+            effect.zIndex = EffectZIndex.Layer2;
+        });
+        
+        // this.m_baseBlockerCom.PlayAnim(SameColorBlocker.ele_anim_samecolor_ready);
+    }
+
+    Destroy(tiled: Tiled): Blocker {
+        super.Destroy(tiled);
+        if (this.effectGo != null)
+        {
+            this.effectGo.destroy();
+        }
+        return null;
     }
 }
 
@@ -1213,7 +1250,7 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
     // private static readonly Audio_Match_ButterCookies: number = 204;
     // private static readonly Audio_Match_ButterCookies_Vanish: number = 205;
     
-    // private static readonly ANIM_COM_DESTROY_NAME: string = "ele_anim_buttercookies";
+    private static readonly ANIM_COM_DESTROY_NAME: string = "ele_anim_buttercookies";
     // private static readonly ANIM_RESET_NAME: string = "ele_anim_buttercookies_reset";
 
     ClassType: BlockerClassType = BlockerClassType.None;
@@ -1308,9 +1345,25 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
 
     private RefreshDisplay(): void {
         // this.StopAnimation();
-        // this.m_selfMono.anim.Play(ButterCookiesBlocker.ANIM_COM_DESTROY_NAME);
+        this.m_selfCom.Anim.play(ButterCookiesBlocker.ANIM_COM_DESTROY_NAME);
 
         for (let i = this.m_offsetIndex; i < this.TableData.Data.HP - this.CurHp + this.m_offsetIndex; i++) {
+
+            if (this.m_selfCom.SpriteRenderers[i].node.active)
+            {
+                cc.resources.load("prefab/effect/ButterCookiesDestroy", (err, data: any) =>{
+                    var effect = cc.instantiate(data);
+        
+                    effect.setParent(TiledMap.getInstance().m_effectRoot);
+                    let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition.add(this.m_selfCom.SpriteRenderers[i].node.getPosition()));
+                    effect.setPosition(spacePos);
+    
+                    setTimeout(function () {
+                        effect.destroy();
+                      }.bind(this), 1500);
+                });
+            }
+
             Utils.SetNodeActive(this.m_selfCom.SpriteRenderers[i].node, false);
 
             // this.m_currentDestroyCookiesPos = this.m_selfCom.SpriteRenderers[i].node.getPosition();
@@ -1326,6 +1379,21 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
         } else {
             this.m_offsetIndex = 0;
         }
+    }
+
+    PlayParticle()
+    {
+        cc.resources.load("prefab/effect/ButterCookiesBoxDestroy", (err, data: any) =>{
+            let effect = cc.instantiate(data);
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
+            effect.setPosition(spacePos);
+
+            setTimeout(function () {
+                effect.destroy();
+              }.bind(this), 1500);
+        });
     }
 
     // public DecrNeedTargetCount(): boolean {

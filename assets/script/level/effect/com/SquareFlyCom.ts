@@ -395,9 +395,11 @@ export default class SquareFlyCom extends cc.Component {
 
             setTimeout(function () {
                 this.ArrivedAction(this.m_targetTiled);
-                this.node.destroy();
+              }.bind(this), 200);
 
-              }.bind(this), 0.21 * 1000);
+            setTimeout(function () {
+                this.node.destroy();
+              }.bind(this), 400);
         }
         else
         {

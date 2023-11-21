@@ -5,7 +5,7 @@ import { Timer, TimerManager, TimerData, TimerType } from "../../tools/TimerMana
 import { Utils } from "../../tools/Utils";
 import BaseBlockerCom from "../blocker/BaseBlockerCom";
 import { Blocker, MultiTiledDestroyableComBlocker, SameColorBlocker } from "../blocker/Blocker";
-import { BlockLayer, BlockerID } from "../blocker/BlockerManager";
+import { BlockLayer, BlockZIndex, BlockerID } from "../blocker/BlockerManager";
 import { Direction } from "../data/LevelScriptableData";
 import { FallingManager } from "../drop/FallingManager";
 import { FSM, IntervalExecEffect } from "../fsm/FSBase";
@@ -25,6 +25,13 @@ export class EffectData
     {
         this.IsSuccess = false;
     }
+}
+
+export enum EffectZIndex
+{
+    Layer1 = 0,
+    Layer2 = 1000,
+    Layer3 = 2000,
 }
 
 export class EffectBase
@@ -610,7 +617,7 @@ export class EffectBaseCrush extends EffectBase {
                 effect.setPosition(blkPosition);
 
                 cc.tween(effect)
-                .to(0.3, { position : cc.v3(bornTiled.LocalPosition.x, bornTiled.LocalPosition.y, 0)})
+                .to(0.2, { position : cc.v3(bornTiled.LocalPosition.x, bornTiled.LocalPosition.y, 0)})
                 .call(()=> { effect.destroy() })
                 .start();
 
@@ -700,7 +707,7 @@ export class EffectAreaCrush extends EffectAreaBase
             let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             effect.setPosition(spacePos);
 
-
+            effect.zIndex = EffectZIndex.Layer2;
         });
 
         this.WaitTime = 0.23;
@@ -776,7 +783,7 @@ export class EffectAreaAndArea extends EffectAreaBase
             let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             effect.setPosition(spacePos);
 
-
+            effect.zIndex = EffectZIndex.Layer2;
         });
 
         this.WaitTime = 1.7;
@@ -987,6 +994,8 @@ export class EffectLineCrush extends EffectLineBase {
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
 
+            moveEffectNode.zIndex = EffectZIndex.Layer2;
+
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(this.m_spType, this.m_orign), end1PointTiled.WorldPosition, this.GetTarPos2(this.m_spType, this.m_orign), 
                             end2PointTiled.WorldPosition, iconId,this.EndAction.bind(this), this.CheckMatch.bind(this), this.m_spType);
@@ -1069,6 +1078,8 @@ export class EffectSquareLineCrush extends EffectLineBase {
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
 
+            moveEffectNode.zIndex = EffectZIndex.Layer2;
+
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(this.m_spType, this.m_orign), end1PointTiled.WorldPosition, this.GetTarPos2(this.m_spType, this.m_orign), 
                             end2PointTiled.WorldPosition, iconId, this.EndAction.bind(this), this.CheckMatch.bind(this), this.m_spType);
@@ -1144,6 +1155,8 @@ export class EffectLineAndLine extends EffectLineBase {
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
 
+            moveEffectNode.zIndex = EffectZIndex.Layer2;
+
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(BlockerID.horizontal, this.m_orign), horizontalEnd1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.horizontal, this.m_orign), 
                             horizontalEnd2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.horizontal);
@@ -1162,6 +1175,8 @@ export class EffectLineAndLine extends EffectLineBase {
             moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
+
+            moveEffectNode.zIndex = EffectZIndex.Layer2;
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(BlockerID.vertical, this.m_orign), verticalEnd1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.vertical, this.m_orign), 
@@ -1235,6 +1250,8 @@ export class EffectAreaLine extends EffectLineBase {
                 moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
                 let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(tiled.WorldPosition);
                 moveEffectNode.setPosition(spacePos);
+
+                moveEffectNode.zIndex = EffectZIndex.Layer2;
     
                 let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
                 moveEffectCom.StartMove(tiled, this.GetTarPos1(BlockerID.horizontal, tiled), end1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.horizontal, tiled), 
@@ -1261,6 +1278,8 @@ export class EffectAreaLine extends EffectLineBase {
                 moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
                 let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(tiled.WorldPosition);
                 moveEffectNode.setPosition(spacePos);
+
+                moveEffectNode.zIndex = EffectZIndex.Layer2;
 
                 let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
                 moveEffectCom.StartMove(tiled, this.GetTarPos1(BlockerID.vertical, tiled), end1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.vertical, tiled), 
@@ -1327,6 +1346,8 @@ class EffectSquareBase extends EffectBase {
                 moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
                 let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
                 moveEffectNode.setPosition(spacePos);
+
+                moveEffectNode.zIndex = EffectZIndex.Layer2;
 
                 let flyCom: SquareFlyCom = moveEffectNode.getComponent(SquareFlyCom);
 
@@ -1480,6 +1501,8 @@ export class EffectSquareLineCompose extends EffectSquareBase
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
 
+            moveEffectNode.zIndex = EffectZIndex.Layer2;
+
             let flyCom: SquareFlyCom = moveEffectNode.getComponent(SquareFlyCom);
 
             let targetTiled = TiledMap.getInstance().GetSquareTargetTiled();
@@ -1550,6 +1573,8 @@ export class EffectSquareAreaCompose extends EffectSquareBase
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
 
+            moveEffectNode.zIndex = EffectZIndex.Layer2;
+
             let flyCom: SquareFlyCom = moveEffectNode.getComponent(SquareFlyCom);
 
             let targetTiled = TiledMap.getInstance().GetSquareTargetTiled();
@@ -1608,6 +1633,8 @@ export class EffectSquareAndArea extends EffectSquareBase
             moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
             let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             moveEffectNode.setPosition(spacePos);
+
+            moveEffectNode.zIndex = EffectZIndex.Layer2;
 
             let flyCom: SquareFlyCom = moveEffectNode.getComponent(SquareFlyCom);
 
@@ -1729,7 +1756,10 @@ export class EffectSameColorBase extends EffectSameColorInterface {
         if (this.m_orign.CanMoveBlocker != null)
         {
             this.m_orign.CanMoveBlocker.Color = this.m_mostId;
+            this.m_orign.CanMoveBlocker.SetActive(false);
         }
+
+
     }
 
     MatchCheck()
@@ -1772,6 +1802,8 @@ export class EffectSameColorBase extends EffectSameColorInterface {
                 moveEffectNode.setParent(TiledMap.getInstance().m_effectRoot);
                 let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
                 moveEffectNode.setPosition(spacePos);
+
+                moveEffectNode.zIndex = EffectZIndex.Layer1;
 
                 let com: SameColorEmitCom = moveEffectNode.getComponent(SameColorEmitCom);
                 com.MoveTo(temptiled, waitTime, (tiled: Tiled) => 
@@ -1944,6 +1976,8 @@ export class EffectSameColorOtherEffectBase extends EffectSameColorInterface
                 let spacePos = moveEffectNode.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
                 moveEffectNode.setPosition(spacePos);
 
+                moveEffectNode.zIndex = EffectZIndex.Layer1;
+
                 let com: SameColorEmitCom = moveEffectNode.getComponent(SameColorEmitCom);
                 com.MoveTo(temptiled, waitTime, (tiled: Tiled) => 
                 {
@@ -2037,11 +2071,13 @@ export class EffectSameColorAndSameColor extends EffectBase
         this.m_orign.CanMoveBlocker.MarkMatch = true;
         this.m_orign.CanMoveBlocker.CrushState = true;
         this.m_orign.CanMoveBlocker.MatchEffectType = this.EffType;
+        this.m_orign.CanMoveBlocker.SetActive(false);
 
         this.m_srcBlocker = args as Blocker;
         this.m_srcBlocker.MarkMatch = true;
         this.m_srcBlocker.CrushState = true;
         this.m_srcBlocker.MatchEffectType = this.EffType;
+        this.m_srcBlocker.SetActive(false);
 
         FSM.getInstance().MovingCanMatch = false;
     }
@@ -2057,6 +2093,8 @@ export class EffectSameColorAndSameColor extends EffectBase
             effect.setParent(TiledMap.getInstance().m_effectRoot);
             let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             effect.setPosition(spacePos);
+
+            effect.zIndex = EffectZIndex.Layer2;
 
             setTimeout(function () {
                 effect.destroy();
