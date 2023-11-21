@@ -460,7 +460,7 @@ export class Blocker {
             {
                 this.SetActive(false);
             }
-            
+
             let timerData = new TimerData();
             timerData.objthis = this;
             timerData.interval = this.TableData.Data.CrushTime;
@@ -724,6 +724,20 @@ export class EffectBlocker extends Blocker
     {
         if (this.BornEffect != BornEffect.none && this.BornEffect != BornEffect.samecolor)
         {
+            cc.resources.load("prefab/effect/CommonBornEffect", (err, data: any) =>{
+                var effect = cc.instantiate(data);
+    
+                effect.setParent(TiledMap.getInstance().m_effectRoot);
+                let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
+                effect.setPosition(spacePos);
+
+                effect.zIndex = EffectZIndex.Layer1;
+
+                setTimeout(function () {
+                    effect.destroy();
+                  }.bind(this), 500);
+            });
+
             this.m_baseBlockerCom.PlayAnim(aniName);
         }
     }

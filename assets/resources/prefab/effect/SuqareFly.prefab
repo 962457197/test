@@ -481,7 +481,9 @@
     "Dynamic_02": {
       "__id__": 6
     },
-    "Dynamic_03": null,
+    "Dynamic_03": {
+      "__id__": 8
+    },
     "Anim": {
       "__id__": 10
     },

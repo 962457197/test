@@ -1409,7 +1409,6 @@ export class EffectSquareCrush extends EffectSquareBase {
             let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
             effect.setPosition(spacePos);
 
-
         });
 
         TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker);
@@ -1448,6 +1447,18 @@ export class EffectSquareAndSquare extends EffectSquareBase {
 
     public Play(): void {
         super.Play();
+
+        cc.resources.load("prefab/effect/SquareBigEffect", (err, data: any) =>{
+            var effect = cc.instantiate(data);
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
+            effect.setPosition(spacePos);
+
+            setTimeout(function () {
+                effect.destroy();
+              }.bind(this), 1500);
+        });
 
         TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker);
         TiledMap.getInstance().DestroyBlocker(this.m_otherTiled.CanMoveBlocker);
