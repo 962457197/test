@@ -149,7 +149,24 @@ export default class LineMoveEffectCom extends cc.Component {
             }
         }
 
-        if (this.m_isArrive1Tiled && this.m_isArrive2Tiled && !this.m_isReset)
+        if (this.m_isArrive1Tiled && this.m_isArrive2Tiled)
+        {
+            this.ResetMark();
+        }
+
+        if (this.m_isArrive1 && this.m_isArrive2)
+        {
+            this.ResetMark();
+
+            this.m_isStart = false;
+            this.endAction();
+            this.node.destroy();
+        }
+    }
+
+    ResetMark()
+    {
+        if (!this.m_isReset)
         {
             this.m_isReset = true;
             for (let i = 0; i < this.m_markTileds.length; i++) {
@@ -161,13 +178,6 @@ export default class LineMoveEffectCom extends cc.Component {
                 }
             }
             this.m_markTileds.length = 0;
-        }
-
-        if (this.m_isArrive1 && this.m_isArrive2)
-        {
-            this.m_isStart = false;
-            this.endAction();
-            this.node.destroy();
         }
     }
 
