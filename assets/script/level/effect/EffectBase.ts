@@ -2113,7 +2113,8 @@ export class EffectSameColorAndSameColor extends EffectBase
 
     public Start(): void {
         super.Start();
-        this.WaitTime = 0.5;
+        this.WaitTime = 1;
+
         TiledMap.getInstance().SameColorTriggeringCount++;
 
         cc.resources.load("prefab/effect/SameColorChangeEffect", (err, data: any) =>{
@@ -2127,7 +2128,7 @@ export class EffectSameColorAndSameColor extends EffectBase
 
             setTimeout(function () {
                 effect.destroy();
-              }.bind(this), this.WaitTime * 1000);
+              }.bind(this), 2000);
         });
     }
 
@@ -2145,6 +2146,8 @@ export class EffectSameColorAndSameColor extends EffectBase
         TiledMap.getInstance().DelayDestroyBlockers(this.m_matchItems);
         TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker);
         TiledMap.getInstance().DestroyBlocker(this.m_srcBlocker);
+
+        this.WaitTime = 0.3;
     }
 
     public Finish(): void {
