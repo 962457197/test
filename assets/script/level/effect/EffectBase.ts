@@ -847,11 +847,13 @@ class EffectLineBase extends EffectBase {
     OFFSET: number = 25;
     m_end1PointTiled: Tiled = null;
     m_end2PointTiled: Tiled = null;
+    m_markTiledList: Tiled[] = [];
 
     public Reset(orign: Tiled, callback: (success: boolean, effect: EffectBase) => void, check: EffectData, args: any): void {
         super.Reset(orign, callback, check, args);
         this.m_end1PointTiled = null;
         this.m_end2PointTiled = null;
+        this.m_markTiledList.length = 0;
     }
     
     GetTarPos1(blockerID: BlockerID, tiled: Tiled)
@@ -881,6 +883,8 @@ class EffectLineBase extends EffectBase {
 
     InitEndPoint(spType: BlockerID, origin: Tiled | null = null): void 
     {
+        this.m_markTiledList.length = 0;
+
         if (origin == null) {
           origin = this.m_orign;
         }
@@ -892,6 +896,7 @@ class EffectLineBase extends EffectBase {
                 const tiled = TiledMap.getInstance().GetTiled(origin.Row, j);
                 if (tiled !== null && tiled.IsValidTiled()) {
                     tiled.Marked = true;
+                    this.m_markTiledList.push(tiled);
                 }
                 if (this.m_end1PointTiled === null || this.m_end1PointTiled.Col > tiled.Col) {
                     this.m_end1PointTiled = tiled;
@@ -903,6 +908,7 @@ class EffectLineBase extends EffectBase {
                 const tiled = TiledMap.getInstance().GetTiled(origin.Row, j);
                 if (tiled !== null && tiled.IsValidTiled()) {
                     tiled.Marked = true;
+                    this.m_markTiledList.push(tiled);
                 }
                 if (this.m_end2PointTiled === null || this.m_end2PointTiled.Col < tiled.Col) {
                     this.m_end2PointTiled = tiled;
@@ -916,6 +922,7 @@ class EffectLineBase extends EffectBase {
             const tiled = TiledMap.getInstance().GetTiled(j, origin.Col);
             if (tiled !== null && tiled.IsValidTiled()) {
               tiled.Marked = true;
+              this.m_markTiledList.push(tiled);
               }
               if (this.m_end1PointTiled === null || this.m_end1PointTiled.Row < tiled.Row) {
                 this.m_end1PointTiled = tiled;
@@ -926,6 +933,7 @@ class EffectLineBase extends EffectBase {
             const tiled = TiledMap.getInstance().GetTiled(j, origin.Col);
             if (tiled !== null && tiled.IsValidTiled()) {
               tiled.Marked = true;
+              this.m_markTiledList.push(tiled);
               }
               if (this.m_end2PointTiled === null || this.m_end2PointTiled.Row > tiled.Row) {
                 this.m_end2PointTiled = tiled;
@@ -980,6 +988,7 @@ export class EffectLineCrush extends EffectLineBase {
         this.InitEndPoint(this.m_spType, this.m_orign);
         let end1PointTiled = this.m_end1PointTiled;
         let end2PointTiled = this.m_end2PointTiled;
+        let markTiledList = this.m_markTiledList;
 
         let iconId = 26;
         if (this.m_spType == BlockerID.vertical)
@@ -998,7 +1007,7 @@ export class EffectLineCrush extends EffectLineBase {
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(this.m_spType, this.m_orign), end1PointTiled.WorldPosition, this.GetTarPos2(this.m_spType, this.m_orign), 
-                            end2PointTiled.WorldPosition, iconId,this.EndAction.bind(this), this.CheckMatch.bind(this), this.m_spType);
+                            end2PointTiled.WorldPosition, iconId,this.EndAction.bind(this), this.CheckMatch.bind(this), this.m_spType, markTiledList);
 
             this.CheckOriginAndOtherTiled();
         });
@@ -1070,6 +1079,7 @@ export class EffectSquareLineCrush extends EffectLineBase {
         this.InitEndPoint(this.m_spType, this.m_orign);
         let end1PointTiled = this.m_end1PointTiled;
         let end2PointTiled = this.m_end2PointTiled;
+        let markTiledList = this.m_markTiledList;
 
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
@@ -1082,7 +1092,7 @@ export class EffectSquareLineCrush extends EffectLineBase {
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(this.m_spType, this.m_orign), end1PointTiled.WorldPosition, this.GetTarPos2(this.m_spType, this.m_orign), 
-                            end2PointTiled.WorldPosition, iconId, this.EndAction.bind(this), this.CheckMatch.bind(this), this.m_spType);
+                            end2PointTiled.WorldPosition, iconId, this.EndAction.bind(this), this.CheckMatch.bind(this), this.m_spType, markTiledList);
 
             this.CheckOriginAndOtherTiled();
         });
@@ -1147,6 +1157,8 @@ export class EffectLineAndLine extends EffectLineBase {
         this.InitEndPoint(BlockerID.horizontal, this.m_orign);
         let horizontalEnd1PointTiled = this.m_end1PointTiled;
         let horizontalEnd2PointTiled = this.m_end2PointTiled;
+        let horMarkTiledList = [];
+        horMarkTiledList.push(...this.m_markTiledList)
 
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
@@ -1159,7 +1171,7 @@ export class EffectLineAndLine extends EffectLineBase {
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(BlockerID.horizontal, this.m_orign), horizontalEnd1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.horizontal, this.m_orign), 
-                            horizontalEnd2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.horizontal);
+                            horizontalEnd2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.horizontal, horMarkTiledList);
 
             TiledMap.getInstance().DestroyBlocker(this.m_orign.CanMoveBlocker);
         });
@@ -1168,6 +1180,8 @@ export class EffectLineAndLine extends EffectLineBase {
         this.InitEndPoint(BlockerID.vertical, this.m_orign);
         let verticalEnd1PointTiled = this.m_end1PointTiled;
         let verticalEnd2PointTiled = this.m_end2PointTiled;
+        let verticalMarkTiledList = [];
+        verticalMarkTiledList.push(...this.m_markTiledList);
 
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
@@ -1180,7 +1194,7 @@ export class EffectLineAndLine extends EffectLineBase {
 
             let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
             moveEffectCom.StartMove(this.m_orign, this.GetTarPos1(BlockerID.vertical, this.m_orign), verticalEnd1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.vertical, this.m_orign), 
-                            verticalEnd2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.vertical);
+                            verticalEnd2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.vertical, verticalMarkTiledList);
 
             TiledMap.getInstance().DestroyBlocker(this.m_otherTiled.CanMoveBlocker);
         });
@@ -1243,6 +1257,8 @@ export class EffectAreaLine extends EffectLineBase {
             this.InitEndPoint(BlockerID.horizontal, tiled);
             let end1PointTiled = this.m_end1PointTiled;
             let end2PointTiled = this.m_end2PointTiled;
+            let markTiledList = [];
+            markTiledList.push(...this.m_markTiledList);
 
             cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
                 let moveEffectNode : cc.Node = cc.instantiate(data);
@@ -1255,7 +1271,7 @@ export class EffectAreaLine extends EffectLineBase {
     
                 let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
                 moveEffectCom.StartMove(tiled, this.GetTarPos1(BlockerID.horizontal, tiled), end1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.horizontal, tiled), 
-                                end2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.horizontal);
+                                end2PointTiled.WorldPosition, 26, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.horizontal, markTiledList);
     
             });
         }
@@ -1271,6 +1287,8 @@ export class EffectAreaLine extends EffectLineBase {
             this.InitEndPoint(BlockerID.vertical, tiled);
             let end1PointTiled = this.m_end1PointTiled;
             let end2PointTiled = this.m_end2PointTiled;
+            let markTiledList = [];
+            markTiledList.push(...this.m_markTiledList);
 
             cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
                 let moveEffectNode : cc.Node = cc.instantiate(data);
@@ -1283,7 +1301,7 @@ export class EffectAreaLine extends EffectLineBase {
 
                 let moveEffectCom: LineMoveEffectCom = moveEffectNode.getComponent(LineMoveEffectCom);
                 moveEffectCom.StartMove(tiled, this.GetTarPos1(BlockerID.vertical, tiled), end1PointTiled.WorldPosition, this.GetTarPos2(BlockerID.vertical, tiled), 
-                                end2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.vertical);
+                                end2PointTiled.WorldPosition, 27, this.EndAction.bind(this), this.CheckMatch.bind(this), BlockerID.vertical, markTiledList);
 
             });
         }

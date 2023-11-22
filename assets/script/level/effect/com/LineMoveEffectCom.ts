@@ -41,13 +41,14 @@ export default class LineMoveEffectCom extends cc.Component {
     m_end1Distance: number = 0;
     m_end2Distance: number = 0;
     m_matchBlockers: Blocker[] = [];
-    m_markTileds: Tiled[] = [];
+    m_checkMatchTileds: Tiled[] = [];
     endAction:  ()=> void = null;
     checkMatch: (tiled: Tiled, blockers: Blocker[]) => void = null;
     m_speed: number = 2000;
+    m_markTiledList: Tiled[] = [];
 
     StartMove(originTiled: Tiled, end1Pos: cc.Vec2, end1TiledPos: cc.Vec2, end2Pos: cc.Vec2, end2TiledPos: cc.Vec2, iconId: number, 
-        endAction: ()=> void, checkMatch: (tiled: Tiled, blockers: Blocker[]) => void, spType: BlockerID)
+        endAction: ()=> void, checkMatch: (tiled: Tiled, blockers: Blocker[]) => void, spType: BlockerID, markTiledList: Tiled[])
     {
         if (spType == BlockerID.horizontal)
         {
@@ -83,9 +84,9 @@ export default class LineMoveEffectCom extends cc.Component {
         this.m_end1Distance = this.m_startPos.sub(end1Pos).magSqr();
         this.m_end2Distance = this.m_startPos.sub(end2Pos).magSqr();
 
-
         this.endAction = endAction;
         this.checkMatch = checkMatch;
+        this.m_markTiledList = markTiledList;
         this.m_isStart = true;
     }
 
@@ -169,15 +170,15 @@ export default class LineMoveEffectCom extends cc.Component {
         if (!this.m_isReset)
         {
             this.m_isReset = true;
-            for (let i = 0; i < this.m_markTileds.length; i++) {
-                const element = this.m_markTileds[i];
+            for (let i = 0; i < this.m_markTiledList.length; i++) {
+                const element = this.m_markTiledList[i];
                 if (element != null)
                 {
                     element.Marked = false;
                     element.CheckTriggerFall();
                 }
             }
-            this.m_markTileds.length = 0;
+            this.m_markTiledList.length = 0;
         }
     }
 
@@ -186,11 +187,11 @@ export default class LineMoveEffectCom extends cc.Component {
         const { row, col } = Utils.GetTiledRowAndCol(curPos);
         let tiled = TiledMap.getInstance().GetTiled(row, col);
         this.m_matchBlockers.length = 0;
-        if (tiled != null)
+        if (tiled != null && tiled.IsValidTiled())
         {
-            if (!this.m_markTileds.includes(tiled))
+            if (!this.m_checkMatchTileds.includes(tiled))
             {
-                this.m_markTileds.push(tiled);
+                this.m_checkMatchTileds.push(tiled);
 
                 this.checkMatch(tiled, this.m_matchBlockers);
                 if (this.m_matchBlockers.length > 0)
