@@ -885,7 +885,7 @@ export class SameColorBlocker extends EffectBlocker {
             this.effectGo = effect;
 
             effect.setParent(TiledMap.getInstance().m_effectRoot);
-            let spacePos = effect.parent.convertToNodeSpaceAR(this.SelfTiled.WorldPosition);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
             effect.setPosition(spacePos);
 
             effect.zIndex = EffectZIndex.Layer2;

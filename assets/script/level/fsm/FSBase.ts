@@ -208,7 +208,6 @@ export class FSM extends FSBase
 
     IsGameEnd()
     {
-        return false;
         return TiledMap.getInstance().UseStep >= 3;
     }
 }
@@ -514,7 +513,7 @@ export class FSSwitch extends FSBase {
         }
     }
 
-    MoveTime: number = 0.25;
+    MoveTime: number = 0.15;
 
     private OnPlaySwitchAnimation(fsdata: FSSwitchData, action: () => void, isBackMove: boolean = false): void {
 

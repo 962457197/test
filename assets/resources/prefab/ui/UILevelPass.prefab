@@ -174,8 +174,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 1080,
-      "height": 1920
+      "width": 1500,
+      "height": 2500
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -281,8 +281,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 1080,
-      "height": 1920
+      "width": 477.5,
+      "height": 476.55
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -300,8 +300,8 @@
         0,
         0,
         1,
-        1,
-        1,
+        1.8,
+        1.8,
         1
       ]
     },
@@ -332,7 +332,7 @@
       }
     ],
     "paused": false,
-    "defaultSkin": "level",
+    "defaultSkin": "default",
     "defaultAnimation": "levelpass_victory",
     "_preCacheMode": 0,
     "_cacheMode": 0,
@@ -368,7 +368,7 @@
     "asset": {
       "__uuid__": "b1f97a98-5d32-4d69-8b88-cf520add99bd"
     },
-    "fileId": "7e036aOohCnJpcFk9gBymk",
+    "fileId": "4caRwnL1BLJY4RwQnBzddA",
     "sync": false
   },
   {
