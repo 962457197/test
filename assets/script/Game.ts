@@ -58,12 +58,6 @@ export default class Game extends cc.Component {
     @property(cc.Node)
     UIRoot: cc.Node = null;
 
-    @property(cc.AudioSource)
-    AudioSource: cc.AudioSource = null;
-
-    @property(cc.AudioSource)
-    AudioSourceLoop: cc.AudioSource = null;
-
     static CC_SIZE_MULTI = 100;
     // static GROUP_BLOCK = "block";
 
@@ -98,15 +92,13 @@ export default class Game extends cc.Component {
             Game.LoadingAssetCount--;
         });
 
-        cc.resources.load("audio/audio_music_gameplay", cc.AudioClip, null, (err, clip: any) =>{
-            cc.audioEngine.playMusic(clip, true);
-        });
+        // cc.resources.load("audio/audio_music_gameplay", cc.AudioClip, null, (err, clip: any) =>{
+        //     cc.audioEngine.playMusic(clip, true);
+        // });
 
         CameraManager.getInstance().MainCamera = this.MainCamera;
         CameraManager.getInstance().Adapter(this.CanvasNode, this.BgRoot);
         UIManager.Instance.UIRoot = this.UIRoot;
-        AudioManager.Instance.AudioSource = this.AudioSource;
-        AudioManager.Instance.AudioSourceLoop = this.AudioSourceLoop;
 
         TiledMapTouchHandler.getInstance().Init();
         Game.m_gameState = GameState.LoadData;

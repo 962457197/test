@@ -209,8 +209,7 @@ export class FSM extends FSBase
 
     IsGameEnd()
     {
-        return false;
-        return TiledMap.getInstance().UseStep >= 3;
+        return TiledMap.getInstance().UseStep >= 3 || TiledMap.getInstance().TotalTargetCount <= 0;
     }
 }
 

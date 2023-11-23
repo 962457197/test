@@ -1342,7 +1342,7 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
             super.Destroy(this.SelfTiled);
         } else {
             AudioManager.Instance.PlaySource("Audio_Match_ButterCookies");
-
+            TiledMap.getInstance().CheckNeedDecrTargetCount(BlockerID.butter_cookies_a_id);
             this.MarkMatch = false;
         }
 

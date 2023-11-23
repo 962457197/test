@@ -6,18 +6,29 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 const {ccclass, property} = cc._decorator;
+declare var mraid: any;
 
 @ccclass
 export default class UILevelPass extends cc.Component {
-
-    static SKIN_LEVEL_COMPLETE: string = "level";
-    static ANIM_LEVEL_COMPLETE: string = "levelpass_victory";
+    @property(cc.Button)
+    DownloadBtn: cc.Button = null;
 
     @property(sp.Skeleton)
     SpineSkeleton: sp.Skeleton = null;
 
     start () {
-        // this.SpineSkeleton.setSkin(UILevelPass.SKIN_LEVEL_COMPLETE);
-        // this.SpineSkeleton.setAnimation(0, UILevelPass.ANIM_LEVEL_COMPLETE, false);
+        this.DownloadBtn.node.on('click', this.callback, this);
+    }
+
+    callback(button: any) {
+        let url = 'https://play.google.com/store/apps/details?id=com.dream.free.games.match3';
+        mraid.open(url);
+
+        
+        if (mraid && mraid.open) {
+            
+          } else {
+            cc.error("mraid.open() is not available.");
+          }
     }
 }

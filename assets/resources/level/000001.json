@@ -4,7 +4,7 @@
   "levelNum": 144,
   "limitType": 0,
   "limit": 25,
-  "colorLimit": 2,
+  "colorLimit": 3,
   "stars": [
     10000,
     20000,
@@ -19,8 +19,8 @@
   "checkFalling": false,
   "targetList": [
     {
-      "type": 178,
-      "count": 80
+      "type": 182,
+      "count": 200
     }
   ],
   "dropDataList": [
@@ -1759,7 +1759,11 @@
     {
       "type": 2,
       "direction": 1,
-      "blockDataList": [],
+      "blockDataList": [
+        {
+          "id": 9
+        }
+      ],
       "borderDataList": [],
       "recylceList": [],
       "IsEnterPoint": false,
@@ -6959,6 +6963,7 @@
   "SplitList": [],
   "CantAsGreedyTargetList": [],
   "ColorLimitList": [
+    9,
     10,
     11
   ],

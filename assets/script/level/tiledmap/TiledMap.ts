@@ -141,6 +141,7 @@ export class TiledMap {
         this.BuildDropData();
         this.m_squareTargetTileds.length = 0;
         this.m_squareTargetTileds.push(...this.m_lvlData.squareTargetList);
+        this.InitTotalTargetCount();
     }
 
     GetSquareTargetTiled() : Tiled
@@ -987,5 +988,28 @@ export class TiledMap {
             return BlockerID.horizontal;
         }
         return BlockerID.vertical;
+    }
+
+    InitTotalTargetCount()
+    {
+        for (let i = 0; i < this.m_lvlData.targetList.length; i++) {
+            const element = this.m_lvlData.targetList[i];
+            element.RealCount = element.count;
+            this.TotalTargetCount += element.count;
+        }
+    }
+
+    TotalTargetCount = 0;
+    CheckNeedDecrTargetCount(blockerID: BlockerID)
+    {
+        for (let i = 0; i < this.m_lvlData.targetList.length; i++) {
+            const element = this.m_lvlData.targetList[i];
+            if (element.type == blockerID && element.RealCount > 0)
+            {
+                element.RealCount--;
+                this.TotalTargetCount--;
+                break;
+            }
+        }
     }
 }

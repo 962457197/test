@@ -14,12 +14,10 @@ export class AudioManager {
 
     m_loopCount: number = 0;
 
-    AudioSource: cc.AudioSource = null;
-    AudioSourceLoop: cc.AudioSource = null;
-
     PlaySource(clipName: string)
     {
         cc.resources.load("audio/" + clipName, cc.AudioClip, null, (err, clip: any) =>{
+
             // var audioSource = this.AudioSource.addComponent(cc.AudioSource);
 
             // setTimeout(function () {
@@ -33,30 +31,30 @@ export class AudioManager {
         });
     }
 
-    PlaySourceLoop(clipName: string)
-    {
-        if (this.AudioSourceLoop.clip != null && this.AudioSourceLoop.clip.name == clipName)
-        {
-            this.m_loopCount++;
-            return;
-        }
+    // PlaySourceLoop(clipName: string)
+    // {
+    //     if (this.AudioSourceLoop.clip != null && this.AudioSourceLoop.clip.name == clipName)
+    //     {
+    //         this.m_loopCount++;
+    //         return;
+    //     }
 
-        cc.resources.load("audio/" + clipName, cc.AudioClip, null, (err, clip: any) =>{
-            this.AudioSourceLoop.clip = clip;
-            this.AudioSourceLoop.loop = true;
-            this.AudioSourceLoop.volume = 1;
-            this.AudioSourceLoop.play();
-        });
-    }
+    //     cc.resources.load("audio/" + clipName, cc.AudioClip, null, (err, clip: any) =>{
+    //         this.AudioSourceLoop.clip = clip;
+    //         this.AudioSourceLoop.loop = true;
+    //         this.AudioSourceLoop.volume = 1;
+    //         this.AudioSourceLoop.play();
+    //     });
+    // }
 
-    StopSourceLoop()
-    {
-        this.m_loopCount--;
-        if (this.m_loopCount <= 0)
-        {
-            this.AudioSourceLoop.loop = false;
-            this.AudioSourceLoop.clip = null;
-            this.AudioSourceLoop.stop();
-        }
-    }
+    // StopSourceLoop()
+    // {
+    //     this.m_loopCount--;
+    //     if (this.m_loopCount <= 0)
+    //     {
+    //         this.AudioSourceLoop.loop = false;
+    //         this.AudioSourceLoop.clip = null;
+    //         this.AudioSourceLoop.stop();
+    //     }
+    // }
 }

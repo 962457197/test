@@ -924,6 +924,7 @@ abstract class LevelBaseData {
 class LevelTargetData extends LevelBaseData {
     public type: number;
     public count: number;
+    public RealCount: number;
 
     // public Serialize(helper: BinaryHelper): void {
     //     helper.WriteInt(this.type);
