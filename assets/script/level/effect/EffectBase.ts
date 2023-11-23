@@ -1,5 +1,6 @@
 import Game from "../../Game";
 import { BlockerAttribute } from "../../table/BlockTable";
+import { AudioManager } from "../../tools/AudioManager";
 import { MatchHelper } from "../../tools/MatchHelper";
 import { Timer, TimerManager, TimerData, TimerType } from "../../tools/TimerManager";
 import { Utils } from "../../tools/Utils";
@@ -9,6 +10,7 @@ import { BlockLayer, BlockZIndex, BlockerID } from "../blocker/BlockerManager";
 import { Direction } from "../data/LevelScriptableData";
 import { FallingManager } from "../drop/FallingManager";
 import { FSM, IntervalExecEffect } from "../fsm/FSBase";
+import { LevelManager } from "../tiledmap/LevelManager";
 import { BornEffect, NormalTiled, Tiled } from "../tiledmap/Tiled";
 import { TiledMap } from "../tiledmap/TiledMap";
 import { EffectController, EffectType } from "./EffectController";
@@ -404,6 +406,7 @@ export class EffectBaseCrush extends EffectBase {
     public Play(): void {
         if (this.m_matchItems.length >= 3) {
             this.m_matchSuccess = true;
+            LevelManager.Instance.CombCount++;
         }
     }
 
@@ -700,6 +703,8 @@ export class EffectAreaCrush extends EffectAreaBase
     public Play(): void {
         super.Play();
 
+        AudioManager.Instance.PlaySource("Audio_Match_AreaCrusher");
+
         cc.resources.load("prefab/effect/AreaEffect", (err, data: any) =>{
             var effect = cc.instantiate(data);
 
@@ -776,6 +781,8 @@ export class EffectAreaAndArea extends EffectAreaBase
     public Play(): void {
         super.Play();
 
+        AudioManager.Instance.PlaySource("Audio_Match_BigBomb_Shake");
+
         cc.resources.load("prefab/effect/AreaAreaEffect", (err, data: any) =>{
             var effect = cc.instantiate(data);
 
@@ -825,6 +832,9 @@ export class EffectSquareAreaCrush extends EffectAreaBase
 
     public Play(): void {
         super.Play();
+
+        AudioManager.Instance.PlaySource("Audio_Match_AreaCrusher");
+
     }
 
     public Finish(): void {
@@ -996,6 +1006,8 @@ export class EffectLineCrush extends EffectLineBase {
             iconId = 27;
         }
 
+        AudioManager.Instance.PlaySource("Audio_Match_LineCrusher");
+
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
 
@@ -1081,6 +1093,8 @@ export class EffectSquareLineCrush extends EffectLineBase {
         let end2PointTiled = this.m_end2PointTiled;
         let markTiledList = this.m_markTiledList;
 
+        AudioManager.Instance.PlaySource("Audio_Match_LineCrusher");
+
         cc.resources.load("prefab/effect/" + "LineMoveEffect", (err, data: any) =>{
             let moveEffectNode : cc.Node = cc.instantiate(data);
 
@@ -1143,6 +1157,7 @@ export class EffectLineAndLine extends EffectLineBase {
         {
             this.m_otherTiled = args as Tiled;
         }
+        this.m_moveEffectCount = 0;
     }
 
     public Start(): void {
@@ -1151,7 +1166,8 @@ export class EffectLineAndLine extends EffectLineBase {
 
     public Play(): void {
         super.Play();
-        this.m_moveEffectCount = 0;
+
+        AudioManager.Instance.PlaySource("Audio_Match_LineAndLineCrusher");
 
         this.m_moveEffectCount++;
         this.InitEndPoint(BlockerID.horizontal, this.m_orign);
@@ -1245,6 +1261,9 @@ export class EffectAreaLine extends EffectLineBase {
     public Play(): void {
         super.Play();
         this.m_moveEffectCount = 0;
+
+        AudioManager.Instance.PlaySource("Audio_Match_LineAndAreaCrusher");
+
 
         for (let i = this.m_orign.Row - 1; i <= this.m_orign.Row + 1; i++) {
             let tiled = TiledMap.getInstance().GetTiled(i, this.m_orign.Col);
@@ -1383,6 +1402,8 @@ class EffectSquareBase extends EffectBase {
         TiledMap.getInstance().DelayDestroyBlockers(this.m_matchItems);
 
         this.m_flyTotalCount--;
+
+        AudioManager.Instance.PlaySource("Audio_Match_Rocket_Explode");
     }
 
     public ExecuteFinishCondition(): boolean {
@@ -1698,6 +1719,7 @@ class EffectSameColorInterface extends EffectBase {
     protected m_mostId: number = 0;
     protected m_tiledlst: Tiled[] = [];
     protected m_tempTiledLst: Tiled[] = [];
+    protected m_sameColorCrusherStandbyId = 0;
 
     constructor(type: EffectType) {
         super(type);
@@ -1720,6 +1742,7 @@ class EffectSameColorInterface extends EffectBase {
         FSM.getInstance().MovingCanMatch = false;
         this.m_tiledlst = [];
         this.m_tempTiledLst = [];
+        this.m_sameColorCrusherStandbyId = 0;
     }
 
     Start(): void {
@@ -1730,6 +1753,12 @@ class EffectSameColorInterface extends EffectBase {
             this.m_samecolor = this.m_srcBlocker as SameColorBlocker;
         }
         this.m_samecolor.PlayReadyAnim();
+
+        cc.resources.load("audio/Audio_Match_SameColorCrusherStandby", cc.AudioClip, null, (err, clip: any) =>{
+            this.m_sameColorCrusherStandbyId = cc.audioEngine.playEffect(clip, true);
+        });
+
+        // AudioManager.Instance.PlaySourceLoop("Audio_Match_SameColorCrusherStandby");
     }
 
     InitWaitTimeByLessCount(): void {
@@ -1754,6 +1783,11 @@ class EffectSameColorInterface extends EffectBase {
         super.Finish();
         this.m_Data.IsSuccess = true;
         FSM.getInstance().MovingCanMatch = true;
+
+        cc.audioEngine.stopEffect(this.m_sameColorCrusherStandbyId);
+
+        // AudioManager.Instance.StopSourceLoop();
+        AudioManager.Instance.PlaySource("Audio_Match_SameColorCrusherExplode");
     }
 }
 
@@ -2114,6 +2148,8 @@ export class EffectSameColorAndSameColor extends EffectBase
     public Start(): void {
         super.Start();
         this.WaitTime = 1;
+
+        AudioManager.Instance.PlaySource("Audio_Match_SameColorCrusherBoom");
 
         TiledMap.getInstance().SameColorTriggeringCount++;
 

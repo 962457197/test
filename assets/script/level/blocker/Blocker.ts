@@ -23,6 +23,7 @@ import { FSAdpater, FSStateType } from "../fsm/FSBase";
 import ButterCookiesCom from "./ButterCookiesCom";
 import BaseBlockDestroyCom from "./BaseBlockDestroyCom";
 import { EffectZIndex } from "../effect/EffectBase";
+import { AudioManager } from "../../tools/AudioManager";
 
 export class Blocker {
 
@@ -606,12 +607,18 @@ export class BaseBlocker extends Blocker {
     PlayParticle()
     {
         this.m_baseBlockerCom.PlayAnim(BaseBlocker.COMMON_DESTROY);
+        let position = this.WorldPosition;
+
+        if (this.MatchEffectType == EffectType.SameColorBase)
+        {
+            AudioManager.Instance.PlaySource("Audio_Match_ElementsCracked");
+        }
 
         cc.resources.load("prefab/effect/"+ "BaseDestroyEffect", (err, data: any) =>{
             let effect = cc.instantiate(data);
 
             effect.setParent(TiledMap.getInstance().m_effectRoot);
-            let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
+            let spacePos = effect.parent.convertToNodeSpaceAR(position);
             effect.setPosition(spacePos);
 
             setTimeout(function () {
@@ -623,7 +630,7 @@ export class BaseBlocker extends Blocker {
             let effect = cc.instantiate(data);
 
             effect.setParent(TiledMap.getInstance().m_effectRoot);
-            let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
+            let spacePos = effect.parent.convertToNodeSpaceAR(position);
             effect.setPosition(spacePos);
 
             let effectCom = effect.getComponent(BaseBlockDestroyCom);
@@ -720,7 +727,7 @@ export class EffectBlocker extends Blocker
         this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
     }
 
-    PlayGenerateAnim(aniName: string)
+    PlayGenerateAnim(aniName: string, audioName: string)
     {
         if (this.BornEffect != BornEffect.none && this.BornEffect != BornEffect.samecolor)
         {
@@ -737,6 +744,8 @@ export class EffectBlocker extends Blocker
                     effect.destroy();
                   }.bind(this), 500);
             });
+
+            AudioManager.Instance.PlaySource(audioName);
 
             this.m_baseBlockerCom.PlayAnim(aniName);
         }
@@ -776,7 +785,7 @@ export class LineBlocker extends EffectBlocker {
             this.m_baseBlockerCom.Icon.node.angle = -90;
         }
 
-        this.PlayGenerateAnim(LineBlocker.ele_anim_line_generate);
+        this.PlayGenerateAnim(LineBlocker.ele_anim_line_generate, "Audio_Match_LineCrushAppear");
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
 
         if (this.BornEffect == BornEffect.samecolor)
@@ -808,7 +817,7 @@ export class SquareBlocker extends EffectBlocker {
         super.OnCreated();
         // this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
         // this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
-        this.PlayGenerateAnim(SquareBlocker.ele_anim_square_generate);
+        this.PlayGenerateAnim(SquareBlocker.ele_anim_square_generate, "Audio_Match_RocketAppear");
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
 
         if (this.BornEffect == BornEffect.samecolor)
@@ -839,7 +848,7 @@ export class AreaBlocker extends EffectBlocker {
     protected OnCreated(): void {
         super.OnCreated();
         // this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
-        this.PlayGenerateAnim(AreaBlocker.ele_anim_area_generate);
+        this.PlayGenerateAnim(AreaBlocker.ele_anim_area_generate, "Audio_Match_BombAppear");
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
 
         if (this.BornEffect == BornEffect.samecolor)
@@ -873,7 +882,7 @@ export class SameColorBlocker extends EffectBlocker {
         super.OnCreated();
         // this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
         // this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
-        this.PlayGenerateAnim(SameColorBlocker.ele_anim_samecolor_generate);
+        this.PlayGenerateAnim(SameColorBlocker.ele_anim_samecolor_generate, "Audio_Match_SameColorCrusherAppear");
         this.m_baseBlockerCom.node.zIndex = BlockZIndex.TopTop;
     }
 
@@ -1327,11 +1336,13 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
 
         this.RefreshDisplay();
         if (this.CurHp <= 0) {
-            // AudiosManager.Instance.PlayLimitSound(ButterCookiesBlocker.Audio_Match_ButterCookies_Vanish);
+            AudioManager.Instance.PlaySource("Audio_Match_ButterCookies_Vanish");
+
             this.IsTabDestroy = true;
             super.Destroy(this.SelfTiled);
         } else {
-            // AudiosManager.Instance.PlayLimitSound(ButterCookiesBlocker.Audio_Match_ButterCookies);
+            AudioManager.Instance.PlaySource("Audio_Match_ButterCookies");
+
             this.MarkMatch = false;
         }
 
@@ -1397,11 +1408,12 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
 
     PlayParticle()
     {
+        let pos = this.WorldPosition;
         cc.resources.load("prefab/effect/ButterCookiesBoxDestroy", (err, data: any) =>{
             let effect = cc.instantiate(data);
 
             effect.setParent(TiledMap.getInstance().m_effectRoot);
-            let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
+            let spacePos = effect.parent.convertToNodeSpaceAR(pos);
             effect.setPosition(spacePos);
 
             setTimeout(function () {

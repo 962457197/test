@@ -6,6 +6,7 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import Game from "../../../Game";
+import { AudioManager } from "../../../tools/AudioManager";
 import { TimerData, TimerManager, TimerType } from "../../../tools/TimerManager";
 import { Utils } from "../../../tools/Utils";
 import BaseBlockerCom from "../../blocker/BaseBlockerCom";
@@ -82,6 +83,7 @@ export default class SquareFlyCom extends cc.Component {
     m_indexNumber: number = 0;
     ArrivedAction: (tiled: Tiled) => void = null;
     m_squareFlyEffectCom : SquareFlyEffectCom = null;
+    m_audioId: number = 0;
 
     CalculateBezierPoint(p0: cc.Vec3, p1: cc.Vec3, p2: cc.Vec3, p3: cc.Vec3, t: number): cc.Vec3 {
         const u = 1 - t;
@@ -114,6 +116,7 @@ export default class SquareFlyCom extends cc.Component {
 
     public InitSquareData(originTiled: Tiled, otherTiled: Tiled, targetTiled: Tiled, effectType: EffectType, indexNumber: number, arrivedAction: (tiled: Tiled) => void, iconId: number): void {
 
+        this.m_IsStartPlayAni = true;
         this.m_squareFlyEffectCom = null;
 
         if (effectType != EffectType.SquareCrush && effectType != EffectType.SquareAndSquare
@@ -187,6 +190,16 @@ export default class SquareFlyCom extends cc.Component {
             }
 
             this.Anim.play("ele_anim_squarefly");
+
+            cc.resources.load("audio/Audio_Match_Rocket_FlyRotate", cc.AudioClip, null, (err, clip: any) =>{
+                if (!this.m_IsStartPlayAni)
+                {
+                    return;
+                }
+                this.m_audioId = cc.audioEngine.playEffect(clip, true);
+            });
+
+            // AudioManager.Instance.PlaySourceLoop("Audio_Match_Rocket_FlyRotate");
         }
         else
         {
@@ -202,6 +215,16 @@ export default class SquareFlyCom extends cc.Component {
                 this.m_squareFlyEffectCom = effect.getComponent(SquareFlyEffectCom);
                 this.m_squareFlyEffectCom.PlayStartFlyAnim();
             });
+
+            cc.resources.load("audio/Audio_Match_Rocket_Flying", cc.AudioClip, null, (err, clip: any) =>{
+                if (!this.m_IsStartPlayAni)
+                {
+                    return;
+                }
+                this.m_audioId = cc.audioEngine.playEffect(clip, true);
+            });
+
+            // AudioManager.Instance.PlaySourceLoop("Audio_Match_Rocket_Flying");
         }
 
         this.m_targetTiled = targetTiled;
@@ -299,7 +322,6 @@ export default class SquareFlyCom extends cc.Component {
     
         this.m_distCovered = 0;
         this.m_isOrigin = false;
-        this.m_IsStartPlayAni = true;
     }
 
     private GetStartAndTargetHandle(start: cc.Vec3, target: cc.Vec3, startHandle: cc.Vec3, targetHandle: cc.Vec3, reverse: boolean = false): void {
@@ -394,6 +416,10 @@ export default class SquareFlyCom extends cc.Component {
             this.m_squareFlyEffectCom.PlayFlyEndAnim();
 
             setTimeout(function () {
+                
+                cc.audioEngine.stopEffect(this.m_audioId);
+                // AudioManager.Instance.StopSourceLoop();
+
                 this.ArrivedAction(this.m_targetTiled);
               }.bind(this), 200);
 

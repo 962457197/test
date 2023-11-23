@@ -13,6 +13,7 @@ import { FallingManager } from "../drop/FallingManager";
 import { TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
 import { UIManager } from "../../ui/UIManager";
 import { MatchTipsManager } from "../../tools/MatchTipsManager";
+import { AudioManager } from "../../tools/AudioManager";
 
 export class FSBase {
     public PreState: FSBase | null = null;
@@ -208,6 +209,7 @@ export class FSM extends FSBase
 
     IsGameEnd()
     {
+        return false;
         return TiledMap.getInstance().UseStep >= 3;
     }
 }
@@ -898,9 +900,9 @@ export class FSCheck extends FSBase {
         //     }
         // }
         if (!issucced) {
-            // if (this.m_data.src != null && this.m_data.dest != null && !this.m_data.isCheck && !this.m_data.isUseItem) {
-            //     AudiosManager.Instance.PlayOneShot(this.m_WrongMatchAudio);
-            // }
+            if (this.m_data.src != null && this.m_data.dest != null && !this.m_data.isCheck && !this.m_data.isUseItem) {
+                AudioManager.Instance.PlaySource("Audio_Match_WrongMatch");
+            }
             this.BackMove(this.m_data);
         }
         else {
