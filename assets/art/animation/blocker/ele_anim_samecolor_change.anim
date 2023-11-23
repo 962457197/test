@@ -3,7 +3,7 @@
   "_name": "ele_anim_samecolor_change",
   "_objFlags": 0,
   "_native": "",
-  "_duration": 1.2666666666666666,
+  "_duration": 1.4333333333333333,
   "sample": 30,
   "speed": 1,
   "wrapMode": 1,
@@ -213,11 +213,11 @@
               "value": 255
             },
             {
-              "frame": 1.1,
+              "frame": 1.2666666666666666,
               "value": 255
             },
             {
-              "frame": 1.2666666666666666,
+              "frame": 1.4333333333333333,
               "value": 0
             }
           ],
@@ -239,7 +239,7 @@
               }
             },
             {
-              "frame": 1.2666666666666666,
+              "frame": 1.4333333333333333,
               "value": {
                 "__type__": "cc.Vec2",
                 "x": 7,
