@@ -500,14 +500,16 @@ export class BlockerManager {
     }
 
     Push(blocker: Blocker | null, name: string, obj: cc.Node): void {
-        obj.setParent(this.m_blockersPoolRoot);
+        obj.destroy();
+        
+        // obj.setParent(this.m_blockersPoolRoot);
 
-        if (blocker) {
-            blocker.SetActive(false, true);
-        } else {
-            obj.setPosition(this.RecyclePosition);
-            Utils.SetNodeActive(obj, false);
-        }
+        // if (blocker) {
+        //     blocker.SetActive(false, true);
+        // } else {
+        //     obj.setPosition(this.RecyclePosition);
+        //     Utils.SetNodeActive(obj, false);
+        // }
 
         // let objLst = this.m_poolDic.get(name);
         // if (!objLst) {

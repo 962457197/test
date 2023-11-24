@@ -411,15 +411,13 @@ export default class SquareFlyCom extends cc.Component {
     
     OnMoveEnd()
     {
+        cc.audioEngine.stopEffect(this.m_audioId);
+
         if (this.m_squareFlyEffectCom != null)
         {
             this.m_squareFlyEffectCom.PlayFlyEndAnim();
 
             setTimeout(function () {
-                
-                cc.audioEngine.stopEffect(this.m_audioId);
-                // AudioManager.Instance.StopSourceLoop();
-
                 this.ArrivedAction(this.m_targetTiled);
               }.bind(this), 200);
 
