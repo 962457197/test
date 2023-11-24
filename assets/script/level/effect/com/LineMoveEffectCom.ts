@@ -46,10 +46,16 @@ export default class LineMoveEffectCom extends cc.Component {
     checkMatch: (tiled: Tiled, blockers: Blocker[]) => void = null;
     m_speed: number = 2000;
     m_markTiledList: Tiled[] = [];
+    m_spType: BlockerID = BlockerID.none;
+    m_originTiled: Tiled = null;
+    m_currentTimer: number = 0.02;
+    m_offsetIndex: number = 0;
 
     StartMove(originTiled: Tiled, end1Pos: cc.Vec2, end1TiledPos: cc.Vec2, end2Pos: cc.Vec2, end2TiledPos: cc.Vec2, iconId: number, 
         endAction: ()=> void, checkMatch: (tiled: Tiled, blockers: Blocker[]) => void, spType: BlockerID, markTiledList: Tiled[])
     {
+        this.m_originTiled = originTiled;
+        this.m_spType = spType;
         if (spType == BlockerID.horizontal)
         {
             this.end1Node.angle = 0;
@@ -88,6 +94,8 @@ export default class LineMoveEffectCom extends cc.Component {
         this.checkMatch = checkMatch;
         this.m_markTiledList = markTiledList;
         this.m_isStart = true;
+        this.m_currentTimer = 0.02;
+        this.m_offsetIndex = 0;
     }
 
     update (dt) {
@@ -101,13 +109,17 @@ export default class LineMoveEffectCom extends cc.Component {
             return;
         }
 
-        if (!this.m_isArrive1)
+        this.m_currentTimer -= dt;
+        if (this.m_currentTimer <= 0)
         {
-            if (!this.m_isArrive1Tiled)
-            {
-                this.OnCheckMatch(this.m_currentPos1);
-            }
-            
+            this.m_currentTimer = 0.02;
+            this.m_offsetIndex++;
+            this.OnCheckMatch(this.m_offsetIndex);
+            this.OnCheckMatch(-this.m_offsetIndex);
+        }
+
+        if (!this.m_isArrive1)
+        {    
             let distance = this.m_currentPos1.sub(this.m_startPos).magSqr();
             if (distance >= this.m_end1Distance)
             {
@@ -128,11 +140,6 @@ export default class LineMoveEffectCom extends cc.Component {
 
         if (!this.m_isArrive2)
         {
-            // let curPos = this.end2Node.convertToWorldSpaceAR(cc.Vec2.ZERO);
-            if (!this.m_isArrive2Tiled)
-            {
-                this.OnCheckMatch(this.m_currentPos2);
-            }
             let distance = this.m_currentPos2.sub(this.m_startPos).magSqr();
             if (distance >= this.m_end2Distance)
             {
@@ -182,10 +189,18 @@ export default class LineMoveEffectCom extends cc.Component {
         }
     }
 
-    OnCheckMatch(curPos: cc.Vec2)
+    OnCheckMatch(offsetIndex: number)
     {
-        const { row, col } = Utils.GetTiledRowAndCol(curPos);
-        let tiled = TiledMap.getInstance().GetTiled(row, col);
+        let tiled:Tiled = null;
+        if (this.m_spType == BlockerID.horizontal)
+        {
+            tiled = TiledMap.getInstance().GetTiled(this.m_originTiled.Row, this.m_originTiled.Col + offsetIndex);
+        }
+        else
+        {
+            tiled = TiledMap.getInstance().GetTiled(this.m_originTiled.Row + offsetIndex, this.m_originTiled.Col);
+        }
+        
         this.m_matchBlockers.length = 0;
         if (tiled != null && tiled.IsValidTiled())
         {
