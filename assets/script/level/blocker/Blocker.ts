@@ -1342,7 +1342,6 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
             super.Destroy(this.SelfTiled);
         } else {
             AudioManager.Instance.PlaySource("Audio_Match_ButterCookies");
-            TiledMap.getInstance().CheckNeedDecrTargetCount(BlockerID.butter_cookies_a_id);
             this.MarkMatch = false;
         }
 
@@ -1376,6 +1375,8 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
 
             if (this.m_selfCom.SpriteRenderers[i].node.active)
             {
+                TiledMap.getInstance().CheckNeedDecrTargetCount(BlockerID.butter_cookies_a_id);
+                
                 cc.resources.load("prefab/effect/ButterCookiesDestroy", (err, data: any) =>{
                     var effect = cc.instantiate(data);
         
