@@ -5,6 +5,8 @@
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
+import { AudioManager } from "../tools/AudioManager";
+
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -16,6 +18,7 @@ export default class UILevelPass extends cc.Component {
     SpineSkeleton: sp.Skeleton = null;
 
     start () {
+        AudioManager.Instance.PlaySource("Audio_UI_Win");
         this.DownloadBtn.node.on('click', this.callback, this);
     }
 
