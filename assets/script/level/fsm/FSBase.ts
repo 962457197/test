@@ -542,7 +542,7 @@ export class FSSwitch extends FSBase {
         let timeData = new TimerData();
         timeData.objthis = this;
         timeData.type = TimerType.enOnce;
-        timeData.interval = this.MoveTime;
+        timeData.interval = this.MoveTime + TimerManager.Instance.GetDeltaTime();
         timeData.body = ()=>
         {
             action();
