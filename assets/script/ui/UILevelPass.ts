@@ -6,7 +6,6 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 const {ccclass, property} = cc._decorator;
-declare var mraid: any;
 
 @ccclass
 export default class UILevelPass extends cc.Component {
@@ -21,14 +20,6 @@ export default class UILevelPass extends cc.Component {
     }
 
     callback(button: any) {
-        let url = 'https://play.google.com/store/apps/details?id=com.dream.free.games.match3';
-        mraid.open(url);
-
-        
-        if (mraid && mraid.open) {
-            
-          } else {
-            cc.error("mraid.open() is not available.");
-          }
+        window["mraid"] && window["mraid"].open();
     }
 }

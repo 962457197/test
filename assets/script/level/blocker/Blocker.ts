@@ -731,19 +731,19 @@ export class EffectBlocker extends Blocker
     {
         if (this.BornEffect != BornEffect.none && this.BornEffect != BornEffect.samecolor)
         {
-            cc.resources.load("prefab/effect/CommonBornEffect", (err, data: any) =>{
-                var effect = cc.instantiate(data);
+            // cc.resources.load("prefab/effect/CommonBornEffect", (err, data: any) =>{
+            //     var effect = cc.instantiate(data);
     
-                effect.setParent(TiledMap.getInstance().m_effectRoot);
-                let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
-                effect.setPosition(spacePos);
+            //     effect.setParent(TiledMap.getInstance().m_effectRoot);
+            //     let spacePos = effect.parent.convertToNodeSpaceAR(this.WorldPosition);
+            //     effect.setPosition(spacePos);
 
-                effect.zIndex = EffectZIndex.Layer1;
+            //     effect.zIndex = EffectZIndex.Layer1;
 
-                setTimeout(function () {
-                    effect.destroy();
-                  }.bind(this), 500);
-            });
+            //     setTimeout(function () {
+            //         effect.destroy();
+            //       }.bind(this), 500);
+            // });
 
             AudioManager.Instance.PlaySource(audioName);
 

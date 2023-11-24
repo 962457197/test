@@ -9,9 +9,7 @@
     ]
   ],
   "excluded-modules": [
-    "Audio",
     "AudioSource",
-    "Button",
     "Collider",
     "Dynamic Atlas",
     "DragonBones",
@@ -63,7 +61,7 @@
     "height": 640,
     "width": 960
   },
-  "last-module-event-record-time": 1697599346161,
+  "last-module-event-record-time": 1700702691868,
   "assets-sort-type": "name",
   "facebook": {
     "appID": "",
