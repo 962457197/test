@@ -49,8 +49,8 @@ export default class Game extends cc.Component {
     @property(cc.Camera)
     MainCamera: cc.Camera = null;
 
-    @property(cc.Node)
-    CanvasNode: cc.Node = null;
+    @property(cc.Canvas)
+    CanvasNode: cc.Canvas = null;
 
     @property(cc.Node)
     BgRoot: cc.Node = null;
@@ -69,6 +69,8 @@ export default class Game extends cc.Component {
     m_levelData: LevelScriptableData = new LevelScriptableData();
 
     onLoad () {
+        cc.view.resizeWithBrowserSize(true);
+        
         TiledMap.getInstance().m_effectRoot = this.effectRoot;
 
         Game.LoadingAssetCount++;

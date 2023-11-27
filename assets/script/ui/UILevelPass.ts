@@ -6,6 +6,7 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import { AudioManager } from "../tools/AudioManager";
+import { CameraManager } from "../tools/CameraManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -17,9 +18,13 @@ export default class UILevelPass extends cc.Component {
     @property(sp.Skeleton)
     SpineSkeleton: sp.Skeleton = null;
 
+    @property(cc.Node)
+    Bg: cc.Node = null;
+
     start () {
         AudioManager.Instance.PlaySource("Audio_UI_Win");
         this.DownloadBtn.node.on('click', this.callback, this);
+        this.Bg.setScale(CameraManager.getInstance().MaxRate, CameraManager.getInstance().MaxRate);
     }
 
     callback(button: any) {

@@ -11,7 +11,7 @@ ImageFilePath = "build/web-mobile/assets"
 
 
 # apiKey = "qph1x27ygZlq3QX8b2VDx0mZSkVdsJdS"
-apiKey = "yC0ZKNy6LnzGzskHV01vWkWpkH6lkGQS"
+apiKey = "f000RSNVVvzH8xXcC19DvkSWTgRcgWZB"
 assert len(apiKey) > 0, "API KEY is necessary, goto https://tinypng.com, sign up and get your own."
 tinify.key = apiKey
 
