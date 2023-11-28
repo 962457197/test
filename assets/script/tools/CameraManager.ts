@@ -30,11 +30,17 @@ export class CameraManager
     MaxRate: number = 0;
 
     CanvasNode: cc.Node = null;
+    BgRoot: cc.Node = null;
 
-    Adapter(canvasNode: cc.Canvas, bgRoot: cc.Node)
+    OnStart(bgRoot: cc.Node)
     {
-        this.CanvasNode = canvasNode.node;
+        this.BgRoot = bgRoot;
+        this.Adapter();
+        cc.view.on('canvas-resize', this.Adapter, this);
+    }
 
+    Adapter()
+    {
         const height: number = cc.view.getFrameSize().height;
         const width: number = cc.view.getFrameSize().width;
 
@@ -57,17 +63,19 @@ export class CameraManager
         }
 
         let scaleForShowAll = Math.min(
-            width / canvasNode.node.width, 
-            height / canvasNode.node.height
+            width / cc.Canvas.instance.node.width, 
+            height / cc.Canvas.instance.node.height
           );
-          let realWidth = canvasNode.node.width * scaleForShowAll;
-          let realHeight = canvasNode.node.height * scaleForShowAll;
-          
-          this.MaxRate = Math.max(
-            width / realWidth, 
-            height / realHeight
-           );
-          bgRoot.scale = this.MaxRate;
+        let realWidth = cc.Canvas.instance.node.width * scaleForShowAll;
+        let realHeight = cc.Canvas.instance.node.height * scaleForShowAll;
+        
+        this.MaxRate = Math.max(
+        width / realWidth, 
+        height / realHeight
+        );
+        this.BgRoot.scale = this.MaxRate;
+
+        cc.error("adpater !!! ");
     }
 
     ScreenPosToTiledPos(screenPos: cc.Vec2): { row: number, col: number } {

@@ -99,7 +99,7 @@ export default class Game extends cc.Component {
         // });
 
         CameraManager.getInstance().MainCamera = this.MainCamera;
-        CameraManager.getInstance().Adapter(this.CanvasNode, this.BgRoot);
+        CameraManager.getInstance().OnStart(this.BgRoot);
         UIManager.Instance.UIRoot = this.UIRoot;
 
         TiledMapTouchHandler.getInstance().Init();
