@@ -24,6 +24,11 @@ export default class UILevelPass extends cc.Component {
     start () {
         AudioManager.Instance.PlaySource("Audio_UI_Win");
         this.DownloadBtn.node.on('click', this.callback, this);
+        this.Adpater();
+    }
+
+    Adpater()
+    {
         this.Bg.scale = CameraManager.getInstance().MaxRate;
     }
 

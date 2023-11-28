@@ -216,10 +216,10 @@ export class FSM extends FSBase
 
     OnUpdate()
     {
-        if (this.IsGameEnd() && FallingManager.Instance.IsStopFalling())
-        {
-            UIManager.Instance.OpenLevelPass();
-        }
+        // if (this.IsGameEnd() && FallingManager.Instance.IsStopFalling())
+        // {
+        //     UIManager.Instance.OpenLevelPass();
+        // }
     }
 }
 

@@ -1,6 +1,7 @@
 import Game from "../Game";
 import { Tiled } from "../level/tiledmap/Tiled";
 import { TiledMap } from "../level/tiledmap/TiledMap";
+import { UIManager } from "../ui/UIManager";
 import { Utils } from "./Utils";
 
 export class CameraManager
@@ -75,7 +76,7 @@ export class CameraManager
         );
         this.BgRoot.scale = this.MaxRate;
 
-        cc.error("adpater !!! ");
+        UIManager.Instance.Adpater();
     }
 
     ScreenPosToTiledPos(screenPos: cc.Vec2): { row: number, col: number } {

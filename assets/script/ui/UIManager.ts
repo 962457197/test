@@ -1,3 +1,5 @@
+import UILevelPass from "./UILevelPass";
+
 export class UIManager
 {
     private static instance: UIManager | null = null;
@@ -18,6 +20,7 @@ export class UIManager
     UIRoot: cc.Node = null;
 
     m_isOpenLevelPass = false;
+    m_uiLevelPass: UILevelPass = null;
 
     OpenLevelPass()
     {
@@ -28,10 +31,18 @@ export class UIManager
         this.m_isOpenLevelPass = true;
 
         cc.resources.load("prefab/ui/UILevelPass", (err, data: any) =>{
-            let levelpass = cc.instantiate(data);
+            let levelpass: cc.Node = cc.instantiate(data);
+            this.m_uiLevelPass = levelpass.getComponent(UILevelPass);
             levelpass.setParent(this.UIRoot);
             levelpass.setPosition(cc.Vec2.ZERO);
         });
     }
 
+    Adpater()
+    {
+        if (this.m_uiLevelPass != null)
+        {
+            this.m_uiLevelPass.Adpater();
+        }
+    }
 }
