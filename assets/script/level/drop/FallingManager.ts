@@ -81,7 +81,7 @@ export class FallingManager {
         this.m_isPauseFallingCount--;
     }
     
-    private IsStopFalling(): boolean {
+    public IsStopFalling(): boolean {
         return (this.m_anims.length <= 0
             && this.AdpaterStates.length <= 0
             && this.m_emptyLst.length <= 0

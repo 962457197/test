@@ -1,6 +1,7 @@
 import Game from "../Game";
 import { BlockerID } from "../level/blocker/BlockerManager";
 import { Direction } from "../level/data/LevelScriptableData";
+import { FallingManager } from "../level/drop/FallingManager";
 import { FSM } from "../level/fsm/FSBase";
 import { Tiled } from "../level/tiledmap/Tiled";
 import { TiledMap } from "../level/tiledmap/TiledMap";
@@ -36,8 +37,30 @@ export class TiledMapTouchHandler
 
     // 玩家操作检测
     private onTouchStart(event: cc.Event.EventTouch) {
+
+        // if (FSM.getInstance().m_prepareState.length > 0)
+        //     {
+        //         for (let i = 0; i < FSM.getInstance().m_prepareState.length; i++) {
+        //             const element = FSM.getInstance().m_prepareState[i];
+
+        //             let nextState = "";
+        //             let state = element.NextState;
+        //             while(state != null)
+        //             {
+        //                 nextState += cc.js.getClassName(state);
+        //                 state = state.NextState;
+        //             }
+        //             cc.error("CheckGameEnd " + " i = " + i + " nextState = " + nextState);
+        //         }
+        //     }
+
+        // cc.error("CheckGameEnd " + FallingManager.Instance.IsStopFalling() + " anims = " + FallingManager.Instance.m_anims.length
+        //             + " adpaterStates  = " + FallingManager.Instance.AdpaterStates.length + " emptylst = " + FallingManager.Instance.m_emptyLst.length
+        //             + " cachedLIst = " + FallingManager.Instance.m_cachedList.length + " delayCount = " + FallingManager.Instance.DelayCount);
+
         if (Game.IsPlayState()) {
             this.touchStartPos = event.getLocation();
+
             //cc.warn("event  = " + event.currentTarget.group + " touchStartPos = " + this.touchStartPos);
             // 玩家触摸开始时的操作
 

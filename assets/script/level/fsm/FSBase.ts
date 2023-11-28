@@ -127,6 +127,7 @@ export class FSM extends FSBase
         MatchTipsManager.Instance.StopMatchTipsAnimation();
 
         let fsprepare = StateFactory.Instance.Create(FSStateType.enPrepare);
+        this.m_prepareState.push(fsprepare);
 
         let data = fsprepare.GetData() as FSPrepareData;
         data.curPos.x = row;
@@ -135,8 +136,6 @@ export class FSM extends FSBase
         data.Neighbor = tiled;
         data.Direction = direction;
         fsprepare.Start(this);
-
-        this.m_prepareState.push(fsprepare);
     }
 
     OnDoubleClick(row: number, col: number)
@@ -144,6 +143,7 @@ export class FSM extends FSBase
         MatchTipsManager.Instance.StopMatchTipsAnimation();
 
         let fsprepare = StateFactory.Instance.Create(FSStateType.enPrepare);
+        this.m_prepareState.push(fsprepare);
 
         let data = fsprepare.GetData() as FSPrepareData;
         data.curPos.x = row;
@@ -151,9 +151,7 @@ export class FSM extends FSBase
         data.startType = FSStartType.enDoubleClick;
         data.Neighbor = null;
         data.Direction = Direction.None;
-        fsprepare.Start(this);
-
-        this.m_prepareState.push(fsprepare);
+        fsprepare.Start(this);   
     }
 
     CanOperate()
@@ -172,11 +170,13 @@ export class FSM extends FSBase
     OnFinish(nextState: FSBase)
     {
         this.CheckFinish(nextState);
+        // cc.error("CheckGameEnd OnFinish !!! " + this.m_prepareState.length);
     }
 
     BackMove(data: FSDataBase, nextState: FSBase): void 
     {
         this.CheckFinish(nextState);
+        // cc.error("CheckGameEnd BackMove !!! " + this.m_prepareState.length);
     }
 
     CheckFinish(nextState: FSBase)
@@ -197,6 +197,8 @@ export class FSM extends FSBase
 
     CheckGameEnd()
     {
+        // cc.error("CheckGameEnd !!! ");
+
         if (this.IsGameEnd())
         {
             UIManager.Instance.OpenLevelPass();
@@ -210,6 +212,14 @@ export class FSM extends FSBase
     IsGameEnd()
     {
         return TiledMap.getInstance().UseStep >= 3 || TiledMap.getInstance().TotalTargetCount <= 0;
+    }
+
+    OnUpdate()
+    {
+        if (this.IsGameEnd() && FallingManager.Instance.IsStopFalling())
+        {
+            UIManager.Instance.OpenLevelPass();
+        }
     }
 }
 

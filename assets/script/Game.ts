@@ -158,5 +158,6 @@ export default class Game extends cc.Component {
 
         TimerManager.Instance.OnUpdate(dt);
         FallingManager.Instance.OnUpdate();
+        FSM.getInstance().OnUpdate();
     }
 }
