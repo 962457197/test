@@ -29,57 +29,61 @@ export class CameraManager
 
     MaxRate: number = 0;
 
+    CanvasNode: cc.Node = null;
+
     Adapter(canvasNode: cc.Canvas, bgRoot: cc.Node)
     {
-        let isPad: boolean = false;
-        let hWRate: number = 0;
-        
+        this.CanvasNode = canvasNode.node;
+
         const height: number = cc.view.getFrameSize().height;
         const width: number = cc.view.getFrameSize().width;
 
-        hWRate = height / width;
-        let basehWRate = cc.view.getDesignResolutionSize().height / cc.view.getDesignResolutionSize().width;
-        
-        if (hWRate >= this.PAD_MIN_RATE && hWRate <= this.PAD_MAX_RATE) {
-            isPad = true;
-        }
-
-        let h: number;
-
-        if (isPad) {
-            h = this.ANDROID_PAD_K * hWRate + this.ANDROID_PAD_B;
-        } else {
-
-            if (hWRate >= 1) {
-                h = 9 * hWRate / 2 + (1.8 / basehWRate * hWRate);
-            } else {
-                h = 9.6;
-            }
-
-            if (isNaN(h)) {
-                h = 10;
-            }
-        }
-
-        this.MainCamera.orthoSize = h * Game.CC_SIZE_MULTI;
-
-        let scale = h / 9.6;
-        let heightRate = cc.view.getDesignResolutionSize().height / height;
-        let widthRate =  cc.view.getDesignResolutionSize().width / width;
-        this.MaxRate = heightRate > widthRate ? heightRate : widthRate;
-        this.MaxRate = this.MaxRate > scale ? this.MaxRate : scale;
-        if (this.MaxRate > 1)
+        let screeWHRate = width / height;
+        let designWHRate = cc.view.getDesignResolutionSize().width / cc.view.getDesignResolutionSize().height;
+        if (screeWHRate <= 1)
         {
-            bgRoot.setScale(this.MaxRate, this.MaxRate);
+            if (screeWHRate <= designWHRate)
+            {
+                this.SetFitWidth();
+            }
+            else
+            {
+                this.SetFitHeight();
+            }
         }
+        else
+        {
+            this.SetFitHeight();
+        }
+
+        let scaleForShowAll = Math.min(
+            width / canvasNode.node.width, 
+            height / canvasNode.node.height
+          );
+          let realWidth = canvasNode.node.width * scaleForShowAll;
+          let realHeight = canvasNode.node.height * scaleForShowAll;
+          
+          this.MaxRate = Math.max(
+            width / realWidth, 
+            height / realHeight
+           );
+          bgRoot.scale = this.MaxRate;
     }
 
     ScreenPosToTiledPos(screenPos: cc.Vec2): { row: number, col: number } {
-        // let worldPos = this.MainCamera.node.convertToNodeSpaceAR(screenPos);
+        let worldPos = this.MainCamera.getScreenToWorldPoint(screenPos);
+        return Utils.GetTiledRowAndCol(new cc.Vec2(worldPos.x, worldPos.y));
+    }
 
-        let worldPos: cc.Vec2 = cc.v2();
-        this.MainCamera.getScreenToWorldPoint(screenPos, worldPos);
+    SetFitHeight()
+    {
+        cc.Canvas.instance.fitHeight = true;
+        cc.Canvas.instance.fitWidth = false;
+    }
 
-        return Utils.GetTiledRowAndCol(worldPos);
+    SetFitWidth()
+    {
+        cc.Canvas.instance.fitHeight = false;
+        cc.Canvas.instance.fitWidth = true;
     }
 }
