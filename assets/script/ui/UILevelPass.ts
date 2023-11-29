@@ -10,6 +10,8 @@ import { CameraManager } from "../tools/CameraManager";
 
 const {ccclass, property} = cc._decorator;
 
+declare var mraid: any;
+
 @ccclass
 export default class UILevelPass extends cc.Component {
     @property(cc.Button)
@@ -33,6 +35,17 @@ export default class UILevelPass extends cc.Component {
     }
 
     callback(button: any) {
-        window["mraid"] && window["mraid"].open();
+        let url = "";
+        if (cc.sys.os === cc.sys.OS_IOS) {
+            url = "https://apps.apple.com/app/id1597696999";
+        } else {
+            url = "https://play.google.com/store/apps/details?id=com.dream.free.games.match3";
+        }
+        
+        try {
+            mraid.open(url);
+        } catch (error) {
+            cc.error("mraid.open error ");
+        }
     }
 }
