@@ -20,14 +20,10 @@ export class CameraManager
         return CameraManager.instance;
     }
 
+    DefaultCameraOrthographicSize: number = 9.6;
+
     MainCamera: cc.Camera = null;
-
-    PAD_MIN_RATE: number = 1.3;
-    PAD_MAX_RATE: number = 1.6;
-    //y = kX + b
-    ANDROID_PAD_K: number = 0.2889;
-    ANDROID_PAD_B: number = 9.534;
-
+    
     MaxRate: number = 0;
 
     CanvasNode: cc.Node = null;

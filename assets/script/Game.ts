@@ -35,6 +35,9 @@ export enum GameState
 export default class Game extends cc.Component {
 
     @property(cc.Node)
+    TiledMap: cc.Node = null;
+
+    @property(cc.Node)
     tiledMapRoot: cc.Node = null;
 
     @property(cc.Node)
@@ -60,6 +63,8 @@ export default class Game extends cc.Component {
 
     static CC_SIZE_MULTI = 100;
     // static GROUP_BLOCK = "block";
+    @property
+    TiledMapScale: number = 0;
 
     static m_blockTable: BlockTable = new BlockTable();
     static m_iconTable: IconTable = new IconTable();
@@ -70,8 +75,10 @@ export default class Game extends cc.Component {
 
     onLoad () {
         cc.view.resizeWithBrowserSize(true);
-        
+
         TiledMap.getInstance().m_effectRoot = this.effectRoot;
+        this.TiledMap.scale = this.TiledMapScale;
+        TiledMap.getInstance().TiledMapScale = this.TiledMapScale;
 
         Game.LoadingAssetCount++;
         cc.resources.load("table/" + BlockTable.NAME, cc.JsonAsset, (err, jsonAsset: any) =>{

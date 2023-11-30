@@ -10,24 +10,24 @@ import { TimerManager, TimerData, TimerType } from "./TimerManager";
 export enum ComposeMode
 {
     SameColorAndOther,
+    SameColorAndSameColor,
 
     None,
-    Comp_SameColor = 10,
+    Comp_SameColor,
     Comp_Area,
     Comp_Line,
     Comp_Square,
 
-    SameColorAndSameColor = 20,
     LineAndArea,
     DoubleLineOrArea,
     SquareAndOther,
     DoubleSquare,
 
-    NormalThreeMatch = 40,
+    NormalThreeMatch,
 
-    SpecialAndNormal = 60,
+    SpecialAndNormal,
 
-    SingleSpecial = 80
+    SingleSpecial
 }
 
 class MatchTipsData {

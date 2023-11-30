@@ -35,6 +35,7 @@ export class TiledMap {
     public static CC_OFFSET = 100;
     public static ENTRY_GUID_OFFSET: number = 1000;
 
+    TiledMapScale: number = 0;
     m_lvlData: LevelScriptableData = null;
     m_tiledMapRoot: cc.Node = null;
     m_blockerRoot: cc.Node = null;
@@ -77,16 +78,26 @@ export class TiledMap {
         let posx = -((this.m_lvlData.maxCols / 2 * Tiled.WIDTH) - Tiled.WIDTH / 2);
         let posy = (this.m_lvlData.maxRows / 2 * Tiled.HEIGHT) - Tiled.HEIGHT / 2;
 
-        if (this.m_lvlData.realRows !== 0 && this.m_lvlData.realCols !== 0) {
-            const rem_X: number = (this.m_lvlData.maxCols - this.m_lvlData.realCols) % 2;
-            if (rem_X === 1) {
-                posx += ((this.m_lvlData.maxCols - this.m_lvlData.realCols) * 0.5 * Tiled.WIDTH);
-            }
-            const rem_Y: number = (this.m_lvlData.maxRows - this.m_lvlData.realRows) % 2;
-            if (rem_Y === 1) {
-                posy -= ((this.m_lvlData.maxRows - this.m_lvlData.realRows) * 0.5 * Tiled.HEIGHT);
-            }
+        if (this.m_lvlData.realCols % 2 == 1)
+        {
+            posx += 0.5 * Tiled.WIDTH;
         }
+        if (this.m_lvlData.realRows % 2 == 1)
+        {
+            posy -= 0.5 * Tiled.HEIGHT;
+        }
+
+        // if (this.m_lvlData.realRows !== 0 && this.m_lvlData.realCols !== 0) {
+        //     const rem_X: number = (this.m_lvlData.maxCols - this.m_lvlData.realCols) % 2;
+        //     if (rem_X === 1) {
+        //         posx += ((this.m_lvlData.maxCols - this.m_lvlData.realCols) * 0.5 * Tiled.WIDTH);
+        //     }
+        //     const rem_Y: number = (this.m_lvlData.maxRows - this.m_lvlData.realRows) % 2;
+        //     if (rem_Y === 1) {
+        //         posy -= ((this.m_lvlData.maxRows - this.m_lvlData.realRows) * 0.5 * Tiled.HEIGHT);
+        //     }
+        // }
+
         this.m_tiledMapRoot.setPosition(posx, posy);
 
         this.TiledArray = new Array<Tiled>(TiledMap.MAX_COL * TiledMap.MAX_ROW);

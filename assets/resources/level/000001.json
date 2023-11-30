@@ -13,8 +13,8 @@
   "randomSeed": 0,
   "maxCols": 18,
   "maxRows": 18,
-  "realRows": 18,
-  "realCols": 18,
+  "realRows": 16,
+  "realCols": 8,
   "boostEffectiveStep": 0,
   "checkFalling": false,
   "targetList": [
@@ -3318,7 +3318,7 @@
       "direction": 1,
       "blockDataList": [
         {
-          "id": 25
+          "id": 26
         }
       ],
       "borderDataList": [],

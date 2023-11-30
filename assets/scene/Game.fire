@@ -15,6 +15,9 @@
     "_children": [
       {
         "__id__": 2
+      },
+      {
+        "__id__": 3
       }
     ],
     "_active": false,
@@ -62,6 +65,64 @@
   },
   {
     "__type__": "cc.Node",
+    "_name": "New Node",
+    "_objFlags": 0,
+    "_parent": {
+      "__id__": 1
+    },
+    "_children": [],
+    "_active": true,
+    "_components": [],
+    "_prefab": null,
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 0,
+      "height": 0
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_trs": {
+      "__type__": "TypedArray",
+      "ctor": "Float64Array",
+      "array": [
+        -446,
+        1946,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "_eulerAngles": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "_is3DNode": false,
+    "_groupIndex": 0,
+    "groupIndex": 0,
+    "_id": "e4i8E7JepBdIem5DzKUHF9"
+  },
+  {
+    "__type__": "cc.Node",
     "_name": "Canvas",
     "_objFlags": 0,
     "_parent": {
@@ -69,28 +130,28 @@
     },
     "_children": [
       {
-        "__id__": 3
+        "__id__": 4
       },
       {
-        "__id__": 5
+        "__id__": 6
       },
       {
-        "__id__": 7
-      },
-      {
-        "__id__": 11
+        "__id__": 8
       },
       {
         "__id__": 12
+      },
+      {
+        "__id__": 13
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 13
+        "__id__": 14
       },
       {
-        "__id__": 14
+        "__id__": 15
       }
     ],
     "_prefab": null,
@@ -146,13 +207,13 @@
     "_name": "Main Camera",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 2
+      "__id__": 3
     },
     "_children": [],
     "_active": true,
     "_components": [
       {
-        "__id__": 4
+        "__id__": 5
       }
     ],
     "_prefab": null,
@@ -180,7 +241,7 @@
       "array": [
         0,
         0,
-        481.51012450414794,
+        553.7014608977414,
         0,
         0,
         0,
@@ -208,7 +269,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 3
+      "__id__": 4
     },
     "_enabled": true,
     "_cullingMask": 4294967295,
@@ -244,13 +305,13 @@
     "_name": "Bg",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 2
+      "__id__": 3
     },
     "_children": [],
     "_active": true,
     "_components": [
       {
-        "__id__": 6
+        "__id__": 7
       }
     ],
     "_prefab": null,
@@ -306,7 +367,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 5
+      "__id__": 6
     },
     "_enabled": true,
     "_materials": [
@@ -338,11 +399,11 @@
     "_name": "TiledMap",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 2
+      "__id__": 3
     },
     "_children": [
       {
-        "__id__": 8
+        "__id__": 9
       }
     ],
     "_active": true,
@@ -377,8 +438,8 @@
         0,
         0,
         1,
-        1,
-        1,
+        0.8,
+        0.8,
         1
       ]
     },
@@ -400,14 +461,14 @@
     "_name": "TiledMapRoot",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 7
+      "__id__": 8
     },
     "_children": [
       {
-        "__id__": 9
+        "__id__": 10
       },
       {
-        "__id__": 10
+        "__id__": 11
       }
     ],
     "_active": true,
@@ -465,7 +526,7 @@
     "_name": "TiledRoot",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 8
+      "__id__": 9
     },
     "_children": [],
     "_active": true,
@@ -523,7 +584,7 @@
     "_name": "BlockerRoot",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 8
+      "__id__": 9
     },
     "_children": [],
     "_active": true,
@@ -581,7 +642,7 @@
     "_name": "UIRoot",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 2
+      "__id__": 3
     },
     "_children": [],
     "_active": true,
@@ -639,7 +700,7 @@
     "_name": "EffectRoot",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 2
+      "__id__": 3
     },
     "_children": [],
     "_active": true,
@@ -697,7 +758,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 2
+      "__id__": 3
     },
     "_enabled": true,
     "_designResolution": {
@@ -714,33 +775,37 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 2
+      "__id__": 3
     },
     "_enabled": true,
-    "tiledMapRoot": {
+    "TiledMap": {
       "__id__": 8
     },
-    "tiledRoot": {
+    "tiledMapRoot": {
       "__id__": 9
     },
-    "blockerRoot": {
+    "tiledRoot": {
       "__id__": 10
     },
-    "effectRoot": {
-      "__id__": 12
-    },
-    "MainCamera": {
-      "__id__": 4
-    },
-    "CanvasNode": {
-      "__id__": 13
-    },
-    "BgRoot": {
-      "__id__": 5
-    },
-    "UIRoot": {
+    "blockerRoot": {
       "__id__": 11
     },
+    "effectRoot": {
+      "__id__": 13
+    },
+    "MainCamera": {
+      "__id__": 5
+    },
+    "CanvasNode": {
+      "__id__": 14
+    },
+    "BgRoot": {
+      "__id__": 6
+    },
+    "UIRoot": {
+      "__id__": 12
+    },
+    "TiledMapScale": 1,
     "_id": "8b/4+A8btMua2//RYlRlrx"
   }
 ]

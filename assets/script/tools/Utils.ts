@@ -16,7 +16,8 @@ export class Utils {
     }
 
     static IsZero(value: number, tolerance: number = 1e-5): boolean {
-        return Math.abs(value) < tolerance;
+        return value > -0.01 && value < 0.01;
+        // return Math.abs(value) < tolerance;
     }
 
     static GetTiledRowAndCol(worldPos: cc.Vec2): { row: number, col: number } {
@@ -25,8 +26,8 @@ export class Utils {
         localWorldPos.x -= TiledMap.getInstance().MapRootPosition.x;
         localWorldPos.y -= TiledMap.getInstance().MapRootPosition.y;
 
-        const row = Math.round(Math.abs(localWorldPos.y / Tiled.HEIGHT));
-        const col = Math.round(Math.abs(localWorldPos.x / Tiled.WIDTH));
+        const row = Math.round(Math.abs(localWorldPos.y / (Tiled.HEIGHT * TiledMap.getInstance().TiledMapScale)));
+        const col = Math.round(Math.abs(localWorldPos.x / (Tiled.WIDTH * TiledMap.getInstance().TiledMapScale)));
 
         //cc.log("ScreenPosToTiledPos row = " + row + " col = " + col);
     
