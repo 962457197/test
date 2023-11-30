@@ -1,7 +1,7 @@
 {
-  "MyVersion": 27,
+  "MyVersion": 29,
   "customizeItemAction": false,
-  "levelNum": 144,
+  "levelNum": 1,
   "limitType": 0,
   "limit": 25,
   "colorLimit": 3,
@@ -3318,7 +3318,7 @@
       "direction": 1,
       "blockDataList": [
         {
-          "id": 24
+          "id": 25
         }
       ],
       "borderDataList": [],
