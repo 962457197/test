@@ -175,12 +175,16 @@ p.footer {
   </div>
 
   <!-- //resMap -->
-  <!-- <script type="text/javascript" charset="utf-8">
-    {#resMap}
-  </script> -->
-  <!-- //resMap -->
-  <script src="res.js"></script>
+  <script src="js/res.js" charset="utf-8"></script>
   
+  <!-- //facebookCTA -->
+  <script type="text/javascript" charset="utf-8">
+    window.FBPlayableOnCTAClick = () => { 
+      (typeof FbPlayableAd === 'undefined') ?
+        alert('FBPlayableAd.onCTAClick error!') : FbPlayableAd.onCTAClick();
+    }
+    </script>
+    
   <!-- //settings -->
   <script type="text/javascript" charset="utf-8">
     {#settings}

@@ -81,9 +81,15 @@ def addPlistSupport(mainStr):
     newMainStr = mainStr.replace("json: jsonBufferHandler,", "json: jsonBufferHandler, plist: jsonBufferHandler,", 1)
     return newMainStr
 
-def integrate(projectRootPath):
-    htmlPath = projectRootPath + '/build/web-mobile/index.html'
-    newHtmlPath = './index.html'
+def integrate(projectRootPath, channel):
+    if channel == 'facebook':
+        htmlPath = projectRootPath + '/build/web-mobile/'+"index_facebook.html"
+    else:
+        htmlPath = projectRootPath + '/build/web-mobile/index.html'
+    save_root = './build/'+channel + '/'
+    if not os.path.exists(save_root):
+        os.makedirs(save_root)
+    newHtmlPath = save_root + 'index.html'
     settingScrPath = projectRootPath + '/build/web-mobile/src/settings.js'
     mainScrPath = projectRootPath + '/build/web-mobile/main.js'
     engineScrPath = projectRootPath + '/build/web-mobile/cocos2d-js-min.js'
@@ -107,7 +113,13 @@ def integrate(projectRootPath):
     htmlStr = htmlStr.replace(engineMatchKey, engineStr, 1)
 
     resStr = getResMapScript(resPath)
-    htmlStr = htmlStr.replace(resMapMatchKey, resStr, 1)
+    if channel == 'common':
+        htmlStr = htmlStr.replace(resMapMatchKey, resStr, 1)
+    else:
+        save_js_path = save_root + "js/"
+        if not os.path.exists(save_js_path):
+            os.makedirs(save_js_path)
+        writeToPath(save_js_path + 'res.js', resStr)
 
     writeToPath(newHtmlPath, htmlStr)
 
