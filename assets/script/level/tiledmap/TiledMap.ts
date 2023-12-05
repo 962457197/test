@@ -35,7 +35,6 @@ export class TiledMap {
     public static CC_OFFSET = 100;
     public static ENTRY_GUID_OFFSET: number = 1000;
 
-    TiledMapScale: number = 0;
     m_lvlData: LevelScriptableData = null;
     m_tiledMapRoot: cc.Node = null;
     m_blockerRoot: cc.Node = null;
@@ -67,6 +66,16 @@ export class TiledMap {
     get TotalMoves()
     {
         return this.m_lvlData.limit;
+    }
+
+    get SawmillBlockDatas()
+    {
+        return this.m_lvlData.SawmillList;
+    }
+
+    get RomanColumnBlockDatas()
+    {
+        return this.m_lvlData.RomanColumnList;
     }
 
     public OnCreate(levelData: LevelScriptableData, tiledMapRoot: cc.Node, tiledRoot: cc.Node, blockerRoot: cc.Node): void 

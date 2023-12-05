@@ -9,10 +9,10 @@ import Game from "../../Game";
 import { FirstActionType } from "../../table/BlockTable";
 import { Timer, TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
 import { Utils } from "../../tools/Utils";
-import { Blocker, MultiTiledBlocker } from "../blocker/Blocker";
+import { Blocker, DynamicRemoveComBlocker, MultiTiledBlocker } from "../blocker/Blocker";
 import { BlockLayer, BlockSubType, BlockZIndex, BlockerID, BlockerManager } from "../blocker/BlockerManager";
 import { ColorManager } from "../blocker/ColorManager";
-import { Direction, TiledType } from "../data/LevelScriptableData";
+import { Direction, SawmillAndRomanBlockData, TiledType } from "../data/LevelScriptableData";
 import { LevelTiledData } from "../data/LevelScriptableData";
 import { FallingManager } from "../drop/FallingManager";
 import { EffectBaseCrush } from "../effect/EffectBase";
@@ -1286,11 +1286,11 @@ export class Tiled {
             //     LevelManager.Instance.WaitTimes++;
             // } else if (block instanceof CommonDestroyableComBlocker) {
             //     (block as CommonDestroyableComBlocker).DecrHpJudgeGuid(this.IsSameColorBaseDestroy(effectType), triggerBlocker.MatchGuid);
-            // } else if (block instanceof DynamicRemoveComBlocker) {
-            //     (block as DynamicRemoveComBlocker).DecrHpJudgeGuid(this.IsSameColorBaseDestroy(effectType), triggerBlocker.MatchGuid);
+            /*} else */ if (block instanceof DynamicRemoveComBlocker) {
+                (block as DynamicRemoveComBlocker).DecrHpJudgeGuid(this.IsSameColorBaseDestroy(effectType), triggerBlocker.MatchGuid);
             // } else if (block instanceof JuiceComBlocker) {
             //     (block as JuiceComBlocker).DecrHpJudgeColor(triggerBlocker.Color);
-            // } else 
+            } else 
             {
                 block.DecrHP();
                 // // TODO: 收集排队飞
@@ -1742,54 +1742,54 @@ export class NormalTiled extends Tiled{
         const multiTiledBlocker = BlockerManager.getInstance().BuildMultiTiledBlocker(id, this, realRow, realCol) as MultiTiledBlocker;
     
         if (multiTiledBlocker) {
-            // if (multiTiledBlocker.IsRomanColumn() || multiTiledBlocker.IsSawmill()) {
-            //     const dataList = multiTiledBlocker.IsSawmill()
-            //         ? LevelManager.Instance.Map.SawmillBlockDatas
-            //         : LevelManager.Instance.Map.RomanColumnBlockDatas;
-            //     let data: SawmillAndRomanBlockData = new SawmillAndRomanBlockData();
-            //     for (let i = 0; i < dataList.length; i++) {
-            //         if (dataList[i].Index === this.Guid) {
-            //             data = dataList[i];
-            //             break;
-            //         }
-            //     }
+            if (multiTiledBlocker.IsRomanColumn() || multiTiledBlocker.IsSawmill()) {
+                const dataList = multiTiledBlocker.IsSawmill()
+                    ? TiledMap.getInstance().SawmillBlockDatas
+                    : TiledMap.getInstance().RomanColumnBlockDatas;
+                let data: SawmillAndRomanBlockData = new SawmillAndRomanBlockData();
+                for (let i = 0; i < dataList.length; i++) {
+                    if (dataList[i].Index === this.Guid) {
+                        data = dataList[i];
+                        break;
+                    }
+                }
     
-            //     switch (data.Direction) {
-            //         case Direction.Left:
-            //             for (let i = 0; i < data.TotalCount; i++) {
-            //                 const comTiled = Map.GetTiled(multiTiledBlocker.SelfTiled.Row, multiTiledBlocker.SelfTiled.Col - i);
-            //                 if (comTiled.IsValidTiled()) {
-            //                     multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
-            //                 }
-            //             }
-            //             break;
-            //         case Direction.Up:
-            //             for (let i = 0; i < data.TotalCount; i++) {
-            //                 const comTiled = Map.GetTiled(multiTiledBlocker.SelfTiled.Row - i, multiTiledBlocker.SelfTiled.Col);
-            //                 if (comTiled.IsValidTiled()) {
-            //                     multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
-            //                 }
-            //             }
-            //             break;
-            //         case Direction.Right:
-            //             for (let i = 0; i < data.TotalCount; i++) {
-            //                 const comTiled = m_map.GetTiled(multiTiledBlocker.SelfTiled.Row, multiTiledBlocker.SelfTiled.Col + i);
-            //                 if (comTiled.IsValidTiled()) {
-            //                     multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
-            //                 }
-            //             }
-            //             break;
-            //         case Direction.Down:
-            //             for (let i = 0; i < data.TotalCount; i++) {
-            //                 const comTiled = m_map.GetTiled(multiTiledBlocker.SelfTiled.Row + i, multiTiledBlocker.SelfTiled.Col);
-            //                 if (comTiled.IsValidTiled()) {
-            //                     multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
-            //                 }
-            //             }
-            //             break;
-            //     }
-            //     return;
-            // }
+                switch (data.Direction) {
+                    case Direction.Left:
+                        for (let i = 0; i < data.TotalCount; i++) {
+                            const comTiled = TiledMap.getInstance().GetTiled(multiTiledBlocker.SelfTiled.Row, multiTiledBlocker.SelfTiled.Col - i);
+                            if (comTiled.IsValidTiled()) {
+                                multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
+                            }
+                        }
+                        break;
+                    case Direction.Up:
+                        for (let i = 0; i < data.TotalCount; i++) {
+                            const comTiled = TiledMap.getInstance().GetTiled(multiTiledBlocker.SelfTiled.Row - i, multiTiledBlocker.SelfTiled.Col);
+                            if (comTiled.IsValidTiled()) {
+                                multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
+                            }
+                        }
+                        break;
+                    case Direction.Right:
+                        for (let i = 0; i < data.TotalCount; i++) {
+                            const comTiled = TiledMap.getInstance().GetTiled(multiTiledBlocker.SelfTiled.Row, multiTiledBlocker.SelfTiled.Col + i);
+                            if (comTiled.IsValidTiled()) {
+                                multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
+                            }
+                        }
+                        break;
+                    case Direction.Down:
+                        for (let i = 0; i < data.TotalCount; i++) {
+                            const comTiled = TiledMap.getInstance().GetTiled(multiTiledBlocker.SelfTiled.Row + i, multiTiledBlocker.SelfTiled.Col);
+                            if (comTiled.IsValidTiled()) {
+                                multiTiledBlocker.GenerateMultiTiledComBlocker(comTiled, i);
+                            }
+                        }
+                        break;
+                }
+                return;
+            }
     
             for (let j = 0; j < multiTiledBlocker.AreaRow; j++) {
                 for (let k = 0; k < multiTiledBlocker.AreaCol; k++) {

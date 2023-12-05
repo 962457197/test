@@ -1,0 +1,7 @@
+{
+  "name": "match3-build",
+  "version": "0.0.1",
+  "description": "build-hooks",
+  "author": "Cocos Creator",
+  "main": "main.ts"
+}

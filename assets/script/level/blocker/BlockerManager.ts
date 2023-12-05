@@ -8,7 +8,7 @@
 import { Utils } from "../../tools/Utils";
 import { BornEffect, Tiled } from "../tiledmap/Tiled";
 import { TiledMap } from "../tiledmap/TiledMap";
-import { Blocker , BaseBlocker, LineBlocker, SquareBlocker, AreaBlocker, SameColorBlocker, ObstacleBlocker, ButterCookiesComBlocker, MultiTiledBlocker, ButterCookiesBlocker} from "./Blocker";
+import { Blocker , BaseBlocker, LineBlocker, SquareBlocker, AreaBlocker, SameColorBlocker, ObstacleBlocker, ButterCookiesComBlocker, MultiTiledBlocker, ButterCookiesBlocker, DynamicRemoveComBlocker, SawmillBlocker} from "./Blocker";
 
 
 export enum BlockerID
@@ -202,7 +202,7 @@ export enum BlockerID
     // safe_d_id               = 213,
     // safe_e_id               = 214,
     
-    // sawmill_id              = 215,
+    sawmill_id              = 215,
     // roman_column_id         = 216,
     
     // ivy_a_id                = 217,
@@ -282,11 +282,11 @@ export enum BlockerClassType
     // WrappedBread,
     // Bread,
     // Blinds,
-    // DynamicRemoveCom,
+    DynamicRemoveCom,
     // OrangeJamJar,
     // GrapeJuice,
     // Safe,
-    // Sawmill,
+    Sawmill,
     // RomanColumn,
     // Ivy,
 }
@@ -390,6 +390,14 @@ export class BlockerManager {
                     return baseblocker;
                 }
                 return new ButterCookiesComBlocker(id);
+            case BlockerClassType.DynamicRemoveCom:
+                var baseblocker = this.PopBlocker(BlockerClassType.DynamicRemoveCom);
+                if (null != baseblocker)
+                {
+                    baseblocker.Reborn(id, parentId);
+                    return baseblocker;
+                }
+                return new DynamicRemoveComBlocker(id);
             default:
                 break;
         }
@@ -470,6 +478,14 @@ export class BlockerManager {
                     return baseblocker;
                 }
                 return new ButterCookiesBlocker(id);
+            case BlockerID.sawmill_id:
+                var baseblocker = this.PopBlocker(BlockerClassType.Sawmill);
+                if (null != baseblocker)
+                {
+                    baseblocker.Reborn(id, parentId);
+                    return baseblocker;
+                }
+                return new SawmillBlocker(id);
             default:
                 var baseblocker = this.PopBlocker(BlockerClassType.Base);
                 if (null != baseblocker)

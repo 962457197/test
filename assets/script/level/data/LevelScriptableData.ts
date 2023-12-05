@@ -1623,7 +1623,7 @@ class BlindBlockData extends LevelBaseData {
     // }
   }
   
-  class SawmillAndRomanBlockData extends LevelBaseData {
+  export class SawmillAndRomanBlockData extends LevelBaseData {
     TotalCount: number;
     Direction: number;
     Index: number;

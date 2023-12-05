@@ -16,14 +16,15 @@ import { BlockLayer, BlockSubType, BlockType, BlockZIndex, BlockerClassType, Blo
 import { ColorManager } from "./ColorManager";
 import { EffectType } from "../effect/EffectController";
 import { StateFactory } from "../fsm/StateFactory";
-import { Direction } from "../data/LevelScriptableData";
-import { TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
+import { Direction, SawmillAndRomanBlockData } from "../data/LevelScriptableData";
+import { Timer, TimerData, TimerManager, TimerType } from "../../tools/TimerManager";
 import { FallingManager } from "../drop/FallingManager";
 import { FSAdpater, FSStateType } from "../fsm/FSBase";
 import ButterCookiesCom from "./ButterCookiesCom";
 import BaseBlockDestroyCom from "./BaseBlockDestroyCom";
 import { EffectZIndex } from "../effect/EffectBase";
 import { AudioManager } from "../../tools/AudioManager";
+import SawmillBlockerCom from "./SawmillBlockerCom";
 
 export class Blocker {
 
@@ -45,14 +46,30 @@ export class Blocker {
     TableData: BlockerData = null;
     Color: number = 0;
     SelfTiled: Tiled = null;
-    MarkMatch: boolean = false;
+    m_markMatch: boolean = false;
+    get MarkMatch(): boolean
+    {
+        return this.m_markMatch;
+    }
+    set MarkMatch(value: boolean)
+    {
+        this.m_markMatch = value;
+    }
     CrushState: boolean = false;
     Marked: boolean = false;
     Falling: boolean = false;
     IsSwitching: boolean = false;
     IsAlreadyCheckMatch: boolean = false;
     MatchGuid: number = 0;
-    MatchEffectType: EffectType = EffectType.None;
+    m_matchEffectType: EffectType = EffectType.None;
+    get MatchEffectType(): EffectType
+    {
+        return this.m_matchEffectType;
+    }
+    set MatchEffectType(value: EffectType)
+    {
+        this.m_matchEffectType = value;
+    }
     IsTriggerEffect: boolean = false;
     IsTabDestroy: boolean = false;
 
@@ -370,6 +387,16 @@ export class Blocker {
     IsBoxingGlove()
     {
         return false;
+    }
+
+    IsRomanColumn()
+    {
+        return false;
+    }
+
+    IsSawmill()
+    {
+        return SawmillBlocker.IsSawmillBlocker(this.ID);
     }
 
     IsNotTriggerMatched()
@@ -1062,7 +1089,7 @@ export class MultiTiledBlocker extends Blocker {
 }
 
 class MultiTiledComBlocker extends Blocker {
-    protected m_entity: MultiTiledBlocker;
+    protected m_entity: MultiTiledBlocker = null;
     get Entity(): MultiTiledBlocker {
         return this.m_entity;
     }
@@ -1108,8 +1135,8 @@ class MultiTiledComBlocker extends Blocker {
     }
 
     private Reset(): void {
-        // this.IsShow = true;
-        // this.IsForbidCom = false;
+        this.IsShow = true;
+        this.IsForbidCom = false;
         this.IsDestroyObj = false;
         this.TableData = Game.GetBlockData(this.ID);
         this.m_prefabName = "MultiTiledComBlock";
@@ -1240,23 +1267,23 @@ export class ButterCookiesComBlocker extends MultiTiledDestroyableComBlocker {
 
     ClassType: BlockerClassType = BlockerClassType.ButterCookiesCom;
 
-    // get MatchEffectType(): EffectType {
-    //     return this.m_entity?.MatchEffectType || EffectType.None;
-    // }
-    // set MatchEffectType(value: EffectType) {
-    //     if (this.m_entity) {
-    //         this.m_entity.MatchEffectType = value;
-    //     }
-    // }
+    get MatchEffectType(): EffectType {
+        return this.m_entity?.MatchEffectType || EffectType.None;
+    }
+    set MatchEffectType(value: EffectType) {
+        if (this.m_entity) {
+            this.m_entity.MatchEffectType = value;
+        }
+    }
 
-    // get MarkMatch(): boolean {
-    //     return this.m_entity?.MarkMatch || false;
-    // }
-    // set MarkMatch(value: boolean) {
-    //     if (this.m_entity) {
-    //         this.m_entity.MarkMatch = value;
-    //     }
-    // }
+    get MarkMatch(): boolean {
+        return this.m_entity?.MarkMatch || false;
+    }
+    set MarkMatch(value: boolean) {
+        if (this.m_entity) {
+            this.m_entity.MarkMatch = value;
+        }
+    }
 
     public DecrHP(): void {
         this.m_entity?.DecrHP();
@@ -1295,6 +1322,8 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
     protected OnCreated(): void {
         super.OnCreated();
         this.m_selfCom = this.m_blocker.getComponent(ButterCookiesCom);
+        this.m_selfCom.node.zIndex = BlockZIndex.Middle;
+
         this.InitCurrentHpOffsetIndex();
         this.Reset();
     }
@@ -1426,5 +1455,340 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
     // public DecrNeedTargetCount(): boolean {
     //     return LevelManager.Instance.Map.CheckCollect(this, this.m_currentDestroyCookiesPos);
     // }
+}
+
+export class DynamicRemoveComBlocker extends MultiTiledDestroyableComBlocker {
+    constructor(id: number) {
+        super(id);
+    }
+
+    ClassType: BlockerClassType = BlockerClassType.DynamicRemoveCom;
+
+    get IsSquareTargetSameEntity(): boolean {
+        return false;
+    }
+
+    // GetSquareTargetPosition(): Vector3 {
+    //     return this.SelfTiled.position;
+    // }
+
+    get MatchEffectType(): EffectType {
+        return this.m_entity?.MatchEffectType ?? EffectType.None;
+    }
+
+    set MatchEffectType(value: EffectType) {
+        if (this.m_entity !== null) {
+            this.m_entity.MatchEffectType = value;
+        }
+    }
+
+    get MarkMatch(): boolean {
+        return this.m_entity?.MarkMatch ?? false;
+    }
+
+    set MarkMatch(value: boolean) {
+        if (this.m_entity != null) {
+            this.m_entity.MarkMatch = value;
+        }
+    }
+
+    DecrHP(): void {
+        this.m_entity?.DecrHP();
+    }
+
+    DecrHpJudgeGuid(isSameColor: boolean, guid: number): void {
+        if (isSameColor || (this.m_entity?.CheckCanAddDestroy(guid) ?? false)) {
+            this.DecrHP();
+            this.Destroy(this.SelfTiled);
+        }
+    }
+
+    RecycleCom(): void {
+        super.RecycleCom();
+        this.RemoveCom(false);
+    }
+
+    CheckMatchAndFalling(): void {
+        this.SelfTiled.CheckTriggerFall();
+
+        const topBlocker = this.SelfTiled.TopBlocker();
+        if (this.SelfTiled.CanMoveBlocker !== null && (topBlocker === null || topBlocker.TableData.Data.SubType !== BlockSubType.HideMiddle)) {
+            this.DelayCheck(0);
+        }
+    }
+
+    CheckCanAddDestroy(guid: number): boolean {
+        return this.m_entity?.CheckCanAddDestroy(guid) ?? false;
+    }
+
+    Destroy(tiled: Tiled): Blocker | null {
+        if (this.IsForbidCom) {
+            return null;
+        }
+
+        return super.Destroy(tiled);
+    }
+}
+
+export class SawmillBlocker extends MultiTiledBlocker {
+    private static readonly SIGNAL_TILED_HEIGHT: number = 116.3;
+    private static readonly SAWMILL_ONE_COMP_OPEN_TIME: number = 0.55;
+    private static readonly SIGNAL_TIME_BACK_DISTANCE: number = SawmillBlocker.SIGNAL_TILED_HEIGHT / SawmillBlocker.SAWMILL_ONE_COMP_OPEN_TIME;
+    private static readonly WOOD_TRANS_Y_ORIGION: number = -977;
+    
+    private m_selfMono: SawmillBlockerCom | null = null;
+    private m_playComAniLoopTimer: Timer | null = null;
+    private m_direction: Direction = Direction.None;
+    private m_fixTimeLessHeight: number = 0;
+    private m_signalOpenTime: number = 0;
+    private m_totalUsefulCompTime: number = -1;
+    private m_targetIndex: number = 0;
+    private m_sawmillComBlockerList: DynamicRemoveComBlocker[] = [];
+    private m_curCompTime: number = 0;
+    private m_curIsPlayLoopSound: boolean = false;
+
+    constructor(id: number) {
+        super(id);
+    }
+
+    ClassType: BlockerClassType = BlockerClassType.Sawmill;
+
+    private readonly ROOT_ROTATE_ANGLE_UP: cc.Vec3 = new cc.Vec3(180, 0, 90);
+    private readonly ROOT_ROTATE_ANGLE_DOWN: cc.Vec3 = new cc.Vec3(180, 180, 90);
+    private readonly ROOT_ROTATE_ANGLE_LEFT: cc.Vec3 = new cc.Vec3(180, 0, 0);
+    private readonly ROOT_ROTATE_ANGLE_RIGHT: cc.Vec3 = cc.Vec3.ZERO;
+
+    protected OnCreated(): void {
+        super.OnCreated();
+        this.m_selfMono = this.m_blockerCom as SawmillBlockerCom;
+        this.m_selfMono.node.zIndex = BlockZIndex.Middle;
+
+        switch (this.m_direction) {
+            case Direction.Up:
+                this.m_selfMono.RootBone.eulerAngles = this.ROOT_ROTATE_ANGLE_UP;
+                break;
+            case Direction.Down:
+                this.m_selfMono.RootBone.eulerAngles = this.ROOT_ROTATE_ANGLE_DOWN;
+                break;
+            case Direction.Left:
+                this.m_selfMono.RootBone.eulerAngles = this.ROOT_ROTATE_ANGLE_LEFT;
+                break;
+            case Direction.Right:
+                this.m_selfMono.RootBone.eulerAngles = this.ROOT_ROTATE_ANGLE_RIGHT;
+                break;
+        }
+
+        const localPosition1 = this.m_selfMono.SawmillSpriteTrans.position;
+        this.m_selfMono.SawmillSpriteTrans.position = new cc.Vec3(
+            localPosition1.x,
+            SawmillBlocker.WOOD_TRANS_Y_ORIGION + SawmillBlocker.SIGNAL_TILED_HEIGHT * this.CurHp,
+            localPosition1.z
+        );
+
+        let spacePos = this.m_selfMono.TopRootTrans.parent.convertToNodeSpaceAR(this.SelfTiled.WorldPosition);
+        this.m_selfMono.TopRootTrans.setPosition(spacePos);
+
+        this.m_totalUsefulCompTime = this.CurHp;
+    }
+
+    public SetMultiTiledBlockerData(): void {
+        super.SetMultiTiledBlockerData();
+        let data: SawmillAndRomanBlockData = new SawmillAndRomanBlockData();
+        for (let i = 0; i < TiledMap.getInstance().SawmillBlockDatas.length; i++) {
+            if (TiledMap.getInstance().SawmillBlockDatas[i].Index === this.SelfTiled.Guid) {
+                data = TiledMap.getInstance().SawmillBlockDatas[i];
+                this.m_direction = data.Direction;
+                this.CurHp = data.TotalCount - 1;
+                break;
+            }
+        }
+
+        switch (this.m_direction) {
+            case Direction.Down:
+                this.m_areaRow = data.TotalCount;
+                this.m_areaCol = 1;
+                break;
+            case Direction.Left:
+                this.m_areaCol = data.TotalCount;
+                this.m_areaRow = 1;
+                break;
+            case Direction.Right:
+                this.m_areaCol = data.TotalCount;
+                this.m_areaRow = 1;
+                break;
+            case Direction.Up:
+                this.m_areaRow = data.TotalCount;
+                this.m_areaCol = 1;
+                break;
+        }
+    }
+
+    public GenerateMultiTiledComBlocker(tiled: Tiled, index: number): void {
+        const comblocker = BlockerManager.getInstance().CreateFactoryCom(BlockerClassType.DynamicRemoveCom, this.ID);
+        if (comblocker != null) {
+            (comblocker as MultiTiledComBlocker).InitCom(this, tiled, index);
+            tiled.AddBlocker(comblocker);
+        }
+
+        this.m_sawmillComBlockerList.push(comblocker as DynamicRemoveComBlocker);
+    }
+
+    public OnDestroyObj(tiled: Tiled, isQuit: boolean = false): void {
+        if (this.m_playComAniLoopTimer !== null) {
+            TimerManager.Instance.ForceStopTimer(this.m_playComAniLoopTimer, this);
+            this.m_playComAniLoopTimer = null;
+        }
+
+        this.ResetParam();
+        this.m_selfMono = null;
+        super.OnDestroyObj(tiled, isQuit);
+    }
+
+    public DestroyCom(com: MultiTiledComBlocker): Blocker {
+        if (com.IsForbidCom || this.m_totalUsefulCompTime <= 0) {
+            return this;
+        }
+
+        this.m_totalUsefulCompTime--;
+        if (this.m_totalUsefulCompTime === 0) {
+            this.ChangeRemainComBlockToNoTarget();
+        }
+        if (this.CurHp < 0) {
+            this.CurHp = 0;
+        }
+
+        this.m_curCompTime++;
+        if (this.m_curCompTime > 1) {
+            this.PlayLoopAnim();
+            if (!this.m_curIsPlayLoopSound) {
+                this.m_curIsPlayLoopSound = true;
+                // AudiosManager.Instance.PlayLoopSoundLimit(this.Audio_Match_LOOP_SOUND);
+            }
+        } else {
+            this.PlayEndAnim();
+            // AudiosManager.Instance.StopLoopSound();
+            this.m_curIsPlayLoopSound = false;
+            // AudiosManager.Instance.PlayLimitSound(this.Audio_Match_END_SOUND);
+        }
+        
+        this.m_markMatch = false;
+        if (this.m_playComAniLoopTimer == null) {
+            FallingManager.Instance.AddDelayCount();
+            this.PlayCrushParticle(false);
+            this.m_sawmillComBlockerList[this.m_sawmillComBlockerList.length - 1].IsForbidCom = true;
+            this.m_sawmillComBlockerList[this.m_sawmillComBlockerList.length - 1].IsTabDestroy = true;
+            // this.m_sawmillComBlockerList[this.m_sawmillComBlockerList.length - 1].CheckBlockSquareStateChange(SquareBlockStateChangeType.Destroy);
+
+            let timeData = new TimerData();
+            timeData.objthis = this;
+            timeData.type = TimerType.enConditionLoop;
+            timeData.condition = this.DelayDestroyCondition.bind(this);
+            timeData.body = this.DelayDestroyBody.bind(this);
+            timeData.keep = this.DelayDestroyKeep.bind(this);
+            timeData.end = this.AnimEndDestroy.bind(this);
+            this.m_playComAniLoopTimer = TimerManager.Instance.CreateTimer(timeData);
+        }
+
+        return this;
+    }
+
+    private DelayDestroyCondition(): boolean {
+        this.m_signalOpenTime += TimerManager.Instance.GetDeltaTime();
+        const localPosition1 = this.m_selfMono.SawmillSpriteTrans.position;
+            this.m_selfMono.SawmillSpriteTrans.position = new cc.Vec3(
+                localPosition1.x,
+                localPosition1.y - SawmillBlocker.SIGNAL_TIME_BACK_DISTANCE * TimerManager.Instance.GetDeltaTime(),
+                localPosition1.z
+            );
+
+        return true;
+    }
+
+    private RemoveComp(): void {
+        this.m_sawmillComBlockerList[this.m_sawmillComBlockerList.length - 1].IsDestroyObj = true;
+        this.m_sawmillComBlockerList[this.m_sawmillComBlockerList.length - 1].RemoveCom(false);
+        this.m_sawmillComBlockerList[this.m_sawmillComBlockerList.length - 1].CheckMatchAndFalling();
+        this.m_sawmillComBlockerList.pop();
+    }
+
+    private DelayDestroyBody(): void {
+        if (this.m_signalOpenTime >= SawmillBlocker.SAWMILL_ONE_COMP_OPEN_TIME) {
+            this.RemoveComp();
+            this.m_signalOpenTime = 0;
+            this.m_curCompTime--;
+            if (this.m_curCompTime > 0) {
+                this.PlayCrushParticle(false);
+                this.m_sawmillComBlockerList[this.m_sawmillComBlockerList.length - 1].IsForbidCom = true;
+                this.m_sawmillComBlockerList[this.m_sawmillComBlockerList.length - 1].IsTabDestroy = true;
+                // this.m_sawmillComBlockerList[this.m_sawmillComBlockerList.length - 1].CheckBlockSquareStateChange(SquareBlockStateChangeType.Destroy);
+
+                if (this.m_curCompTime === 1) {
+                    this.PlayEndAnim();
+                    // AudiosManager.Instance.StopLoopSound();
+                    this.m_curIsPlayLoopSound = false;
+                    // AudiosManager.Instance.PlayLimitSound(this.Audio_Match_END_SOUND);
+                }
+            }
+        }
+    }
+
+    private DelayDestroyKeep(): boolean {
+        if (this.SelfTiled !== null) {
+            return this.m_curCompTime > 0;
+        }
+        return false;
+    }
+
+    private ResetParam(): void {
+        this.m_totalUsefulCompTime = -1;
+        this.m_curCompTime = 0;
+        this.m_sawmillComBlockerList = [];
+        this.m_selfMono = null;
+    }
+
+    private AnimEndDestroy(): void {
+        // AudiosManager.Instance.StopLoopSound();
+        FallingManager.Instance.RemoveDelayCount();
+        this.m_playComAniLoopTimer = null;
+        if (this.m_totalUsefulCompTime <= 0) {
+            // AudiosManager.Instance.PlayOneShot(this.Audio_Match_Destroy_SOUND);
+            this.PlayCrushParticle(true);
+            for (let i = this.m_sawmillComBlockerList.length - 1; i >= 0; i--) {
+                this.RemoveComp();
+            }
+            this.Destroy(this.SelfTiled);
+        }
+    }
+
+    private ChangeRemainComBlockToNoTarget(): void {
+        for (let i = this.m_sawmillComBlockerList.length - 1; i >= 0; i--) {
+            this.m_sawmillComBlockerList[i].IsTabDestroy = true;
+            this.m_sawmillComBlockerList[i].IsForbidCom = true;
+            // this.m_sawmillComBlockerList[i].CheckBlockSquareStateChange(SquareBlockStateChangeType.Destroy);
+        }
+    }
+
+    private PlayCrushParticle(isEnd: boolean = false): void {
+        // const effectName: string = isEnd ? GCResPath.SawmillDestroyParticle : GCResPath.SawmillWoodCrushParticle;
+        // Utils.PlayParticle(effectName, this.m_blocker.transform.position, 1.5);
+    }
+
+    public RealDestroyCom(com: MultiTiledDestroyableComBlocker): void {
+        this.DestroyCom(com);
+    }
+
+    public static IsSawmillBlocker(id: number): boolean {
+        return id === BlockerID.sawmill_id;
+    }
+
+    PlayLoopAnim()
+    {
+        this.m_selfMono.Anim.play("ele_anim_sawmill_loop");
+    }
+
+    PlayEndAnim()
+    {
+        this.m_selfMono.Anim.play("ele_anim_sawmill_end");
+    }
 }
 

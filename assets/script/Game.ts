@@ -21,6 +21,7 @@ import { FSM } from './level/fsm/FSBase';
 import { UIManager } from './ui/UIManager';
 import { MatchTipsManager } from './tools/MatchTipsManager';
 import { AudioManager } from './tools/AudioManager';
+import { BuildConfig } from './table/BuildConfig';
 
 export enum GameState
 {
@@ -66,6 +67,7 @@ export default class Game extends cc.Component {
     @property
     TiledMapScale: number = 0;
 
+    static m_buildConfig: BuildConfig = new BuildConfig();
     static m_blockTable: BlockTable = new BlockTable();
     static m_iconTable: IconTable = new IconTable();
     static LoadingAssetCount: number = 0;
@@ -77,8 +79,6 @@ export default class Game extends cc.Component {
         cc.view.resizeWithBrowserSize(true);
 
         TiledMap.getInstance().m_effectRoot = this.effectRoot;
-        this.TiledMap.scale = this.TiledMapScale;
-        TiledMap.getInstance().TiledMapScale = this.TiledMapScale;
 
         Game.LoadingAssetCount++;
         cc.resources.load("table/" + BlockTable.NAME, cc.JsonAsset, (err, jsonAsset: any) =>{
@@ -93,12 +93,21 @@ export default class Game extends cc.Component {
             Game.m_iconTable.Load(data.json);
             Game.LoadingAssetCount--;
         });
-        
-        Game.LoadingAssetCount++;
-        cc.resources.load("level/000001", cc.JsonAsset, (err, data: any) =>{
 
-            this.m_levelData = data.json;
+        Game.LoadingAssetCount++;
+        cc.resources.load("table/" + BuildConfig.NAME, cc.JsonAsset, (err, data: any) =>{
+            
+            Game.m_buildConfig = data.json;
             Game.LoadingAssetCount--;
+
+            this.TiledMap.scale = Game.m_buildConfig.TiledMapScale;
+
+            Game.LoadingAssetCount++;
+            cc.resources.load("level/" + Game.m_buildConfig.BuildLevelId, cc.JsonAsset, (err, data: any) =>{
+
+                this.m_levelData = data.json;
+                Game.LoadingAssetCount--;
+            });
         });
 
         // cc.resources.load("audio/audio_music_gameplay", cc.AudioClip, null, (err, clip: any) =>{

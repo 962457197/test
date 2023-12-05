@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "EntryTiled",
+    "_name": "EntryBlockRoot",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -101,7 +101,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "92e57a2b-2bb5-4a32-b131-73df640d9b1b"
+      "__uuid__": "d44d9581-d8d1-4285-a8ed-968e00f70778"
     },
     "fileId": "",
     "sync": false
