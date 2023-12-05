@@ -1,0 +1,159 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "common_hand",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.4166666666666667,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "paths": {
+      "Dynamic/Icon": {
+        "props": {
+          "position": [
+            {
+              "frame": 0,
+              "value": [
+                165.882,
+                -75.317,
+                0
+              ]
+            },
+            {
+              "frame": 0.15,
+              "value": [
+                11.204,
+                -88.206,
+                0
+              ]
+            },
+            {
+              "frame": 0.3,
+              "value": [
+                165.882,
+                -75.317,
+                0
+              ]
+            }
+          ],
+          "angle": [
+            {
+              "frame": 0,
+              "value": -30
+            },
+            {
+              "frame": 0.15,
+              "value": 30
+            },
+            {
+              "frame": 0.3,
+              "value": -30
+            }
+          ]
+        }
+      },
+      "Dynamic/Add_light": {
+        "props": {
+          "position": [
+            {
+              "frame": 0,
+              "value": [
+                -47.74,
+                -48.935,
+                0
+              ]
+            },
+            {
+              "frame": 0.15,
+              "value": [
+                -47.74,
+                -48.935,
+                0
+              ]
+            },
+            {
+              "frame": 0.21666666666666667,
+              "value": [
+                -1.706,
+                -24.793,
+                0
+              ]
+            },
+            {
+              "frame": 0.3,
+              "value": [
+                55.38,
+                -8.424,
+                0
+              ]
+            },
+            {
+              "frame": 0.4166666666666667,
+              "value": [
+                151.133,
+                -8.424,
+                0
+              ]
+            }
+          ],
+          "scale": [
+            {
+              "frame": 0.15,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 0,
+                "y": 1
+              }
+            },
+            {
+              "frame": 0.21666666666666667,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1.7,
+                "y": 1
+              }
+            },
+            {
+              "frame": 0.3,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 3,
+                "y": 1
+              }
+            },
+            {
+              "frame": 0.4166666666666667,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1.5,
+                "y": 1
+              }
+            }
+          ],
+          "opacity": [
+            {
+              "frame": 0.2833333333333333,
+              "value": 255
+            },
+            {
+              "frame": 0.4166666666666667,
+              "value": 0
+            }
+          ],
+          "angle": [
+            {
+              "frame": 0.15,
+              "value": -160
+            },
+            {
+              "frame": 0.3,
+              "value": -180
+            }
+          ]
+        }
+      }
+    }
+  },
+  "events": []
+}
