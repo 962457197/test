@@ -109,15 +109,15 @@ def integrate(projectRootPath, channel):
         htmlStr = htmlStr.replace(engineMatchKey, engineStr, 1)
     #resources
     resStr = getResMapScript(resPath)
-    if channel == 'common':
-        htmlStr = htmlStr.replace(resMapMatchKey, resStr, 1)
-    elif channel == 'adwords':
-        jsContent = jsContent + resStr + "\n"
-    else:
+    if channel == 'facebook':
         save_js_path = save_root + "js/"
         if not os.path.exists(save_js_path):
             os.makedirs(save_js_path)
         writeToPath(save_js_path + 'res.js', resStr)
+    elif channel == 'adwords':
+        jsContent = jsContent + resStr + "\n"
+    else:
+        htmlStr = htmlStr.replace(resMapMatchKey, resStr, 1)
     #settings
     settingsStr = read_in_chunks(settingScrPath)
     if channel == 'adwords':
@@ -126,7 +126,9 @@ def integrate(projectRootPath, channel):
         htmlStr = htmlStr.replace(settingMatchKey, settingsStr, 1)
     #project
     projectStr = read_in_chunks(projectScrPath)
-    if channel == 'adwords':
+    if channel == 'facebook':
+        htmlStr = htmlStr.replace(projectMatchKey, projectStr, 1)
+    elif channel == 'adwords':
         jsContent = jsContent + projectStr + "\n"
     else:
         htmlStr = htmlStr.replace(projectMatchKey, projectStr, 1)
