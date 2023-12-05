@@ -84,6 +84,8 @@ def addPlistSupport(mainStr):
 def integrate(projectRootPath, channel):
     if channel == 'facebook':
         htmlPath = projectRootPath + '/build/web-mobile/'+"index_facebook.html"
+    elif channel == 'adwords':
+        htmlPath = projectRootPath + '/build/web-mobile/'+"index_adwords.html"
     else:
         htmlPath = projectRootPath + '/build/web-mobile/index.html'
     save_root = './build/'+channel + '/'
@@ -96,30 +98,48 @@ def integrate(projectRootPath, channel):
     projectScrPath = projectRootPath + '/build/web-mobile/assets/main/index.js'
     resPath = projectRootPath + '/build/web-mobile/assets'
     indexInternalScrPath = projectRootPath + '/build/web-mobile/assets/internal/index.js'
-
+    jsContent = ""
     htmlStr = read_in_chunks(htmlPath)
-    settingsStr = read_in_chunks(settingScrPath)
-    htmlStr = htmlStr.replace(settingMatchKey, settingsStr, 1)
-
-    projectStr = read_in_chunks(projectScrPath)
-    htmlStr = htmlStr.replace(projectMatchKey, projectStr, 1)
-
-    mainStr = read_in_chunks(mainScrPath)
-    mainStr = addPlistSupport(mainStr)
-    htmlStr = htmlStr.replace(mainMatchKey, mainStr, 1)
-
+    #cocosengine
     engineStr = read_in_chunks(engineScrPath)
     engineStr = fixEngineError(engineStr)
-    htmlStr = htmlStr.replace(engineMatchKey, engineStr, 1)
-
+    if channel == 'adwords':
+        jsContent = jsContent + engineStr + "\n"
+    else:
+        htmlStr = htmlStr.replace(engineMatchKey, engineStr, 1)
+    #resources
     resStr = getResMapScript(resPath)
     if channel == 'common':
         htmlStr = htmlStr.replace(resMapMatchKey, resStr, 1)
+    elif channel == 'adwords':
+        jsContent = jsContent + resStr + "\n"
     else:
         save_js_path = save_root + "js/"
         if not os.path.exists(save_js_path):
             os.makedirs(save_js_path)
         writeToPath(save_js_path + 'res.js', resStr)
+    #settings
+    settingsStr = read_in_chunks(settingScrPath)
+    if channel == 'adwords':
+        jsContent = jsContent + settingsStr + "\n"
+    else:
+        htmlStr = htmlStr.replace(settingMatchKey, settingsStr, 1)
+    #project
+    projectStr = read_in_chunks(projectScrPath)
+    if channel == 'adwords':
+        jsContent = jsContent + projectStr + "\n"
+    else:
+        htmlStr = htmlStr.replace(projectMatchKey, projectStr, 1)
+     #main
+    mainStr = read_in_chunks(mainScrPath)
+    mainStr = addPlistSupport(mainStr)
+    if channel == 'adwords':
+        jsContent = jsContent + mainStr + "\n"
+    else:
+        htmlStr = htmlStr.replace(mainMatchKey, mainStr, 1)
+
+    if channel == 'adwords':
+        writeToPath(save_root+"all.js", jsContent)
 
     writeToPath(newHtmlPath, htmlStr)
 

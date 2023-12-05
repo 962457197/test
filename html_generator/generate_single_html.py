@@ -9,17 +9,22 @@ workdir = os.getcwd()
 projectRootPath = workdir + "/.."
 resPath = projectRootPath + '/build/web-mobile/assets'
 
+channels = ['adwords', 'facebook', 'common']
 def generate_html(channel, need2TinifyPic):
     if need2TinifyPic:
         print("=================== Start to Compress All Pictures ====================")
         tinify_png.tinifyPic(resPath)
 
     print("=================== Start to Integrate Res into Html ====================")
-    integrate_res_in_html.integrate(projectRootPath, channel)
+    if channel == 'all':
+        for chnnl in channels:
+            integrate_res_in_html.integrate(projectRootPath, chnnl)
+    else:
+        integrate_res_in_html.integrate(projectRootPath, channel)
 
 if __name__ == '__main__':
     need2TinifyPic = False
-    channel = "common"
+    channel = "all"
     # 创建解析器对象
     parser = argparse.ArgumentParser()
     # 添加命令行参数
