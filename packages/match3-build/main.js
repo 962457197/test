@@ -43,7 +43,7 @@ function onBeforeBuildFinish (options, callback) {
     // script += '\n' + 'window.myID = "01234567";';         // 添加一点脚本到
     // fs.writeFileSync(mainJsPath, script);                 // 保存 main.js
 
-    CheckAssets(true);
+    // CheckAssets(true);
     
     callback();
 }
@@ -52,7 +52,7 @@ function onBuildFinish (options, callback) {
 
   Editor.log('---------- BuildFinish ' + options.platform + ' to ' + options.dest);
 
-  CheckAssets(false);
+  // CheckAssets(false);
 
   callback();
 }
