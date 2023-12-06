@@ -3,5 +3,10 @@
   "version": "0.0.1",
   "description": "build-hooks",
   "author": "Cocos Creator",
-  "main": "main.js"
+  "main": "main.js",
+  "main-menu": {
+    "扩展/MoveAssets": {
+      "message": "match3-build:move-assets"
+    }
+  }
 }

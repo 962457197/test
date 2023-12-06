@@ -1313,6 +1313,10 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
         super(id);
     }
 
+    protected InitPrefabName(): void {
+        this.m_prefabName = "other/" + this.TableData.Data.PerfabName;   
+    }
+
     static IsButterCookies(id: number): boolean {
         return id === BlockerID.butter_cookies_a_id
             || id === BlockerID.butter_cookies_b_id
@@ -1406,7 +1410,7 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
             {
                 TiledMap.getInstance().CheckNeedDecrTargetCount(BlockerID.butter_cookies_a_id);
                 
-                cc.resources.load("prefab/effect/ButterCookiesDestroy", (err, data: any) =>{
+                cc.resources.load("prefab/effect/other/ButterCookiesDestroy", (err, data: any) =>{
                     var effect = cc.instantiate(data);
         
                     effect.setParent(TiledMap.getInstance().m_effectRoot);
@@ -1439,7 +1443,7 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
     PlayParticle()
     {
         let pos = this.WorldPosition;
-        cc.resources.load("prefab/effect/ButterCookiesBoxDestroy", (err, data: any) =>{
+        cc.resources.load("prefab/effect/other/ButterCookiesBoxDestroy", (err, data: any) =>{
             let effect = cc.instantiate(data);
 
             effect.setParent(TiledMap.getInstance().m_effectRoot);
