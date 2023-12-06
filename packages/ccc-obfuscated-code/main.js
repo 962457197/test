@@ -19,7 +19,7 @@ let presets = null;
  */
 function saveConfig(config) {
   let projectPath = Editor.Project.path || Editor.projectPath;
-  let configDirPath = Path.join(projectPath, '/local/');
+  let configDirPath = Path.join(projectPath, '/settings/');
   if (!Fs.existsSync(configDirPath)) Fs.mkdirSync(configDirPath);
   let configFilePath = Path.join(configDirPath, 'ccc-obfuscated-code.json');
   let object = {};
@@ -41,7 +41,7 @@ function saveConfig(config) {
  */
 function getConfig() {
   let projectPath = Editor.Project.path || Editor.projectPath;
-  let configFilePath = Path.join(projectPath, '/local/ccc-obfuscated-code.json');
+  let configFilePath = Path.join(projectPath, '/settings/ccc-obfuscated-code.json');
   let config = null;
   if (Fs.existsSync(configFilePath)) {
     config = JSON.parse(Fs.readFileSync(configFilePath, 'utf8'));

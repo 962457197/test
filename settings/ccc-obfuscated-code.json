@@ -1,0 +1,43 @@
+{
+  "auto": true,
+  "files": [
+    "assets/main/index.js"
+  ],
+  "options": {
+    "compact": true,
+    "controlFlowFlattening": true,
+    "controlFlowFlatteningThreshold": 0.3,
+    "deadCodeInjection": true,
+    "deadCodeInjectionThreshold": 0.1,
+    "debugProtection": false,
+    "debugProtectionInterval": false,
+    "disableConsoleOutput": true,
+    "domainLock": [],
+    "identifierNamesGenerator": "hexadecimal",
+    "identifiersDictionary": [],
+    "identifiersPrefix": "",
+    "inputFileName": "",
+    "log": false,
+    "renameGlobals": false,
+    "reservedNames": [],
+    "reservedStrings": [],
+    "rotateStringArray": false,
+    "seed": 0,
+    "selfDefending": true,
+    "shuffleStringArray": false,
+    "sourceMap": false,
+    "sourceMapBaseUrl": "",
+    "sourceMapFileName": "",
+    "sourceMapMode": "separate",
+    "splitStrings": true,
+    "splitStringsChunkLength": 10,
+    "stringArray": true,
+    "stringArrayEncoding": true,
+    "stringArrayThreshold": 0.75,
+    "target": "browser",
+    "transformObjectKeys": false,
+    "unicodeEscapeSequence": false
+  },
+  "preset": "mid",
+  "useAbsPath": false
+}
