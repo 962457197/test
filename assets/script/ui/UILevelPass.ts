@@ -43,8 +43,9 @@ export default class UILevelPass extends cc.Component {
         }
         
         try {
-            mraid.open(url);
+            // mraid.open(url);
             // window.FBPlayableOnCTAClick();
+            window.ExitApiCTAClick();
         } catch (error) {
             cc.error("mraid.open error ");
         }

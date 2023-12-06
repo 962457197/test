@@ -141,7 +141,10 @@ def integrate(projectRootPath, channel):
         htmlStr = htmlStr.replace(mainMatchKey, mainStr, 1)
 
     if channel == 'adwords':
-        writeToPath(save_root+"all.js", jsContent)
+        save_js_path = save_root + "js/"
+        if not os.path.exists(save_js_path):
+            os.makedirs(save_js_path)
+        writeToPath(save_js_path + 'adwords.js', jsContent)
 
     writeToPath(newHtmlPath, htmlStr)
 
