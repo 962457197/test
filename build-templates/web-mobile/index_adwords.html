@@ -177,11 +177,11 @@ p.footer {
   </div>
   <!-- //adwordsCTA -->
   <script type="text/javascript" charset="utf-8">
-    window.ExitApiCTAClick = () => { 
+    window.OnCTAClick = (url) => { 
       (typeof ExitApi === 'undefined') ?
         alert('ExitApi.exit error!') : ExitApi.exit();
     }
-    </script>
+  </script>
   <script src="js/adwords.js" charset="utf-8"></script>
   <!-- <script type="text/javascript" charset="utf-8">
     var loadHostedHtml = function() {
