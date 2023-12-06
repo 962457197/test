@@ -1,5 +1,5 @@
 {
-  "MyVersion": 29,
+  "MyVersion": 30,
   "customizeItemAction": false,
   "levelNum": 1,
   "limitType": 0,
@@ -7013,5 +7013,6 @@
   "SawmillList": [],
   "RomanColumnList": [],
   "BoxingGloveBlockerDataList": [],
-  "IvyPathGroupIdx": 0
+  "IvyPathGroupIdx": 0,
+  "GuidePos": "8,8;8,9"
 }
