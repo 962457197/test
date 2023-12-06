@@ -78,6 +78,11 @@ export class TiledMap {
         return this.m_lvlData.RomanColumnList;
     }
 
+    get GuidePos()
+    {
+        return this.m_lvlData.GuidePos;
+    }
+
     public OnCreate(levelData: LevelScriptableData, tiledMapRoot: cc.Node, tiledRoot: cc.Node, blockerRoot: cc.Node): void 
     {
         this.InitLevelData(levelData);
@@ -135,6 +140,8 @@ export class TiledMap {
                 (this.TiledArray[idx] as NormalTiled).GenerateBlocker();
             }
         }
+
+        this.ConvertGuidePos();
     }
 
     InitLevelData(levelData: LevelScriptableData) {
@@ -162,6 +169,26 @@ export class TiledMap {
         this.m_squareTargetTileds.length = 0;
         this.m_squareTargetTileds.push(...this.m_lvlData.squareTargetList);
         this.InitTotalTargetCount();
+    }
+
+    GuideStartTiled: Tiled = null;
+    GuideEndTiled: Tiled = null;
+
+    ConvertGuidePos()
+    {
+        let guidePosStr = TiledMap.getInstance().GuidePos;
+        if (guidePosStr != null)
+        {
+            let splitStr: string[] = guidePosStr.split(';');
+            if (splitStr.length >= 2)
+            {
+                let startRowColStr: string[] = splitStr[0].split(',');
+                let endRowColStr: string[] = splitStr[1].split(',');
+
+                this.GuideStartTiled = TiledMap.getInstance().GetTiled(parseInt(startRowColStr[0]), parseInt(startRowColStr[1]));
+                this.GuideEndTiled = TiledMap.getInstance().GetTiled(parseInt(endRowColStr[0]), parseInt(endRowColStr[1]));
+            }
+        }
     }
 
     GetSquareTargetTiled() : Tiled
@@ -1031,5 +1058,22 @@ export class TiledMap {
                 break;
             }
         }
+    }
+
+    GetComposeDir(oriTiledGuid: number, otherTiledGuid: number) : Direction
+    {
+        if (oriTiledGuid == -1 || otherTiledGuid == -1)
+        {
+            return Direction.None;
+        }
+        let oriTiledRow = Math.floor(oriTiledGuid / TiledMap.MAX_COL);
+        let oriTiledCol = oriTiledGuid % TiledMap.MAX_COL;
+        let otherTiledRow =  Math.floor(otherTiledGuid / TiledMap.MAX_COL);
+        let otherTiledCol = otherTiledGuid %TiledMap. MAX_COL;
+        
+        if (oriTiledRow > otherTiledRow) return Direction.Up;
+        if (oriTiledRow < otherTiledRow) return Direction.Down;
+        if (oriTiledCol > otherTiledCol) return Direction.Left;
+        return Direction.Right;
     }
 }

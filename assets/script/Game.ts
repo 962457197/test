@@ -64,8 +64,9 @@ export default class Game extends cc.Component {
 
     static CC_SIZE_MULTI = 100;
     // static GROUP_BLOCK = "block";
-    @property
-    TiledMapScale: number = 0;
+    
+    // @property
+    // TiledMapScale: number = 0;
 
     static m_buildConfig: BuildConfig = new BuildConfig();
     static m_blockTable: BlockTable = new BlockTable();
@@ -165,6 +166,7 @@ export default class Game extends cc.Component {
         {
             if (Game.LoadingAssetCount <= 0)
             {
+                UIManager.Instance.OpenLevelGuide();
                 MatchTipsManager.Instance.OnBeginCheckTiledMap();
 
                 Game.m_gameState = GameState.Play;

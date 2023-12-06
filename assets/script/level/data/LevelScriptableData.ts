@@ -145,6 +145,7 @@ export class LevelScriptableData
     public RomanColumnList: SawmillAndRomanBlockData[] = [];
     public BoxingGloveBlockerDataList: BoxingGloveBlockData[] = [];
     public IvyPathGroupIdx: number = 0;
+    public GuidePos: string = "";
 
     // public Reset(): void {
     //     this.MyVersion = 0;

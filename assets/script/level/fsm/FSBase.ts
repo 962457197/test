@@ -124,6 +124,7 @@ export class FSM extends FSBase
 
     OnBeginDrag(row: number, col: number, tiled: Tiled, direction: Direction)
     {
+        UIManager.Instance.CloseLevelGuide();
         MatchTipsManager.Instance.StopMatchTipsAnimation();
 
         let fsprepare = StateFactory.Instance.Create(FSStateType.enPrepare);
@@ -140,6 +141,7 @@ export class FSM extends FSBase
 
     OnDoubleClick(row: number, col: number)
     {
+        UIManager.Instance.CloseLevelGuide();
         MatchTipsManager.Instance.StopMatchTipsAnimation();
 
         let fsprepare = StateFactory.Instance.Create(FSStateType.enPrepare);
