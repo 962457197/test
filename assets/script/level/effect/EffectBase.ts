@@ -610,7 +610,7 @@ export class EffectBaseCrush extends EffectBase {
             cc.resources.load("prefab/blocker/BaseBlock", (err, data: any) =>{
                 let effect: cc.Node = cc.instantiate(data);
                 let baseBlockerCom = effect.getComponent(BaseBlockerCom);
-                cc.resources.load("texture/" + Game.GetIconName(blockers[i].TableData.Data.IconId), cc.SpriteFrame, (err, data: any) =>
+                cc.resources.load("icon/" + Game.GetIconName(blockers[i].TableData.Data.IconId), cc.SpriteFrame, (err, data: any) =>
                 {
                     baseBlockerCom.Icon.spriteFrame = data;
                 });

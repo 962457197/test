@@ -19,7 +19,7 @@ export default class BaseBlockerCom extends BlockerCom {
 
     RefreshIcon(id: number)
     {
-        cc.resources.load("texture/" + Game.GetIconName(id), cc.SpriteFrame, (err, data: any) =>
+        cc.resources.load("icon/" + Game.GetIconName(id), cc.SpriteFrame, (err, data: any) =>
         {
             this.Icon.spriteFrame = data;
         });
