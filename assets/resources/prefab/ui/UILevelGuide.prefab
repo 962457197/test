@@ -922,18 +922,16 @@
       "__id__": 11
     },
     "_enabled": true,
-    "_defaultClip": {
-      "__uuid__": "5bd423c3-42db-4832-b079-14eee50012e7"
-    },
+    "_defaultClip": null,
     "_clips": [
       {
-        "__uuid__": "5bd423c3-42db-4832-b079-14eee50012e7"
+        "__uuid__": "3db3da88-a664-4997-987c-011f72e736c9"
       },
       {
-        "__uuid__": "3db3da88-a664-4997-987c-011f72e736c9"
+        "__uuid__": "5bd423c3-42db-4832-b079-14eee50012e7"
       }
     ],
-    "playOnLoad": true,
+    "playOnLoad": false,
     "_id": ""
   },
   {
@@ -999,6 +997,9 @@
     },
     "CommonHand": {
       "__id__": 9
+    },
+    "CommonHandAnim": {
+      "__id__": 22
     },
     "_id": ""
   },

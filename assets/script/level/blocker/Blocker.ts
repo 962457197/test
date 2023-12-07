@@ -25,6 +25,8 @@ import BaseBlockDestroyCom from "./BaseBlockDestroyCom";
 import { EffectZIndex } from "../effect/EffectBase";
 import { AudioManager } from "../../tools/AudioManager";
 import SawmillBlockerCom from "./SawmillBlockerCom";
+import ObstacleBlockerCom from "./ObstacleBlockerCom";
+import GrassDestroyCom from "./GrassDestroyCom";
 
 export class Blocker {
 
@@ -674,7 +676,7 @@ export class ObstacleBlocker extends Blocker {
 
     ClassType: BlockerClassType = BlockerClassType.Obstacle;
 
-    m_baseBlockerCom: BaseBlockerCom;
+    m_selfMono: ObstacleBlockerCom;
 
     constructor(id: number) {
         super(id);
@@ -701,27 +703,68 @@ export class ObstacleBlocker extends Blocker {
 
     protected OnCreated(): void {
         super.OnCreated();
-        this.m_baseBlockerCom = this.m_blockerCom as BaseBlockerCom;
-        this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+        this.m_selfMono = this.m_blockerCom as ObstacleBlockerCom;
+        this.m_selfMono.RefreshIcon(this.TableData.Data.IconId);
 
         if (ObstacleBlocker.IsBottom(this.ID))
         {
             if (this.ID == BlockerID.bottom_c_id)
             {
-                this.m_baseBlockerCom.node.zIndex = BlockZIndex.Bottom + 2;
+                this.m_selfMono.node.zIndex = BlockZIndex.Bottom + 2;
             }
             else if (this.ID == BlockerID.bottom_b_id)
             {
-                this.m_baseBlockerCom.node.zIndex = BlockZIndex.Bottom + 1;
+                this.m_selfMono.node.zIndex = BlockZIndex.Bottom + 1;
             }
             else
             {
-                this.m_baseBlockerCom.node.zIndex = BlockZIndex.Bottom;
+                this.m_selfMono.node.zIndex = BlockZIndex.Bottom;
             }
         }
         else
         {
-            this.m_baseBlockerCom.node.zIndex = BlockZIndex.Middle;
+            this.m_selfMono.node.zIndex = BlockZIndex.Middle;
+        }
+    }
+
+    PlayParticle()
+    {
+        let pos = this.WorldPosition;
+        if (ObstacleBlocker.IsMovedOBBrick(this.ID))
+        {
+            AudioManager.Instance.PlaySource("other/Audio_Match_Donut");
+
+            cc.resources.load("prefab/effect/other/DonutDestroy", (err, data: any) =>{
+                let effect = cc.instantiate(data);
+    
+                effect.setParent(TiledMap.getInstance().m_effectRoot);
+                let spacePos = effect.parent.convertToNodeSpaceAR(pos);
+                effect.setPosition(spacePos);
+    
+                setTimeout(function () {
+                    effect.destroy();
+                  }.bind(this), 1500);
+            });
+        }
+        else
+        {
+            AudioManager.Instance.PlaySource("other/Audio_Match_Grass_b");
+
+            let id = this.ID;
+            cc.resources.load("prefab/effect/other/"+ "GrassDestroy", (err, data: any) =>{
+                let effect = cc.instantiate(data);
+    
+                effect.setParent(TiledMap.getInstance().m_effectRoot);
+                let spacePos = effect.parent.convertToNodeSpaceAR(pos);
+                effect.setPosition(spacePos);
+    
+                let effectCom: GrassDestroyCom = effect.getComponent(GrassDestroyCom);
+                effectCom.ChangeSpriteById(id);
+    
+                setTimeout(function () {
+                    effect.destroy();
+                  }.bind(this), 1500);
+            });
         }
     }
 
@@ -729,11 +772,13 @@ export class ObstacleBlocker extends Blocker {
     {
         if (this.m_parentId > 0)
         {
+            this.PlayParticle();
+
             this.ID = this.m_parentId;
             this.TableData = Game.GetBlockData(this.ID);
             this.m_parentId = this.TableData.Data.ParentId;
 
-            this.m_baseBlockerCom.RefreshIcon(this.TableData.Data.IconId);
+            this.m_selfMono.RefreshIcon(this.TableData.Data.IconId);
 
             if (this.CanMove() && !this.Occupy())
             {
@@ -1369,12 +1414,12 @@ export class ButterCookiesBlocker extends MultiTiledBlocker {
 
         this.RefreshDisplay();
         if (this.CurHp <= 0) {
-            AudioManager.Instance.PlaySource("Audio_Match_ButterCookies_Vanish");
+            AudioManager.Instance.PlaySource("other/Audio_Match_ButterCookies_Vanish");
 
             this.IsTabDestroy = true;
             super.Destroy(this.SelfTiled);
         } else {
-            AudioManager.Instance.PlaySource("Audio_Match_ButterCookies");
+            AudioManager.Instance.PlaySource("other/Audio_Match_ButterCookies");
             this.MarkMatch = false;
         }
 

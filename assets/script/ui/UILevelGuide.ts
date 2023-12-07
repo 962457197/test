@@ -28,38 +28,32 @@ export default class UILevelGuide extends cc.Component {
     @property(cc.Node)
     CommonHand: cc.Node = null;
 
+    @property(cc.Animation)
+    CommonHandAnim :cc.Animation = null;
+
     start () {
         this.Adpater();
 
         if (TiledMap.getInstance().GuideStartTiled != null && TiledMap.getInstance().GuideEndTiled != null)
         {
-            this.Mask.width = Tiled.WIDTH * Game.m_buildConfig.TiledMapScale * 2;
-            this.Mask.height = Tiled.HEIGHT *  Game.m_buildConfig.TiledMapScale;
-
             let direction: Direction = TiledMap.getInstance().GetComposeDir(TiledMap.getInstance().GuideStartTiled.Guid, TiledMap.getInstance().GuideEndTiled.Guid);
-            if (direction == Direction.Up)
+            if (direction == Direction.Down)
             {
-                this.Root.angle = 90;
-                let localPos = this.Mask.parent.convertToNodeSpaceAR(new cc.Vec2(TiledMap.getInstance().GuideStartTiled.WorldPosition.x, TiledMap.getInstance().GuideStartTiled.WorldPosition.y + (Tiled.HEIGHT * Game.m_buildConfig.TiledMapScale) / 2));
-                this.Mask.setPosition(localPos);
-            }
-            else if (direction == Direction.Down)
-            {
-                this.Root.angle = -90;
+                this.Mask.width = Tiled.WIDTH * Game.m_buildConfig.TiledMapScale 
+                this.Mask.height = Tiled.HEIGHT *  Game.m_buildConfig.TiledMapScale * 2;
+
                 let localPos = this.Mask.parent.convertToNodeSpaceAR(new cc.Vec2(TiledMap.getInstance().GuideStartTiled.WorldPosition.x, TiledMap.getInstance().GuideStartTiled.WorldPosition.y - (Tiled.HEIGHT * Game.m_buildConfig.TiledMapScale) / 2));
                 this.Mask.setPosition(localPos);
-            }
-            else if (direction == Direction.Left)
-            {
-                this.Root.angle = 0;
-                let localPos = this.Mask.parent.convertToNodeSpaceAR(new cc.Vec2(TiledMap.getInstance().GuideStartTiled.WorldPosition.x - (Tiled.WIDTH * Game.m_buildConfig.TiledMapScale) / 2, TiledMap.getInstance().GuideStartTiled.WorldPosition.y));
-                this.Mask.setPosition(localPos);
+                this.CommonHandAnim.play("common_hand_row");
             }
             else
             {
+                this.Mask.width = Tiled.WIDTH * Game.m_buildConfig.TiledMapScale * 2;
+                this.Mask.height = Tiled.HEIGHT *  Game.m_buildConfig.TiledMapScale;
+
                 let localPos = this.Mask.parent.convertToNodeSpaceAR(new cc.Vec2(TiledMap.getInstance().GuideStartTiled.WorldPosition.x + (Tiled.WIDTH * Game.m_buildConfig.TiledMapScale) / 2, TiledMap.getInstance().GuideStartTiled.WorldPosition.y));
                 this.Mask.setPosition(localPos);
-                this.Root.angle = 0;
+                this.CommonHandAnim.play("common_hand");
             }
         }
 

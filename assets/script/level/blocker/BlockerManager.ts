@@ -321,7 +321,7 @@ export enum BlockLayer
 
 export enum BlockZIndex
 {
-    Bottom = 1000,
+    Bottom = 0,
     MiddleB = 1500,
     Middle = 2000,
     Top    = 3000,

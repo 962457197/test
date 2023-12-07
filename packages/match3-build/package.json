@@ -5,8 +5,11 @@
   "author": "Cocos Creator",
   "main": "main.js",
   "main-menu": {
-    "扩展/MoveAssets": {
+    "扩展/MoveAssets/ResetAndMove": {
       "message": "match3-build:move-assets"
+    },
+    "扩展/MoveAssets/Reset": {
+      "message": "match3-build:reset-assets"
     }
   }
 }

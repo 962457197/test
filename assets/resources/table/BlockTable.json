@@ -863,7 +863,7 @@
     },
     "4": {
       "ID": 4,
-      "PerfabName": "BaseBlock",
+      "PerfabName": "ObstacleBlock",
       "Layer": 2,
       "Type": 2,
       "SubType": 0,

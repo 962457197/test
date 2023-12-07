@@ -796,7 +796,7 @@ export class TiledMap {
     public DestroyTopAndMiddleBlockers(items: Blocker[]): void {
         this.m_destroyedTopBlockers.length = 0;
         for (let j = 0; j < items.length; j++) {
-            if (items[j].SelfTiled.DestroyTopAndMiddleBlockers(items[j].ID, true)) {
+            if (items[j] != null && items[j].SelfTiled != null && items[j].SelfTiled.DestroyTopAndMiddleBlockers(items[j].ID, true)) {
                 this.m_destroyedTopBlockers.push(items[j]);
             }
         }

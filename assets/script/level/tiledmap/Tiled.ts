@@ -1247,10 +1247,10 @@ export class Tiled {
                 if (this.m_blockerList[i] !== null) {
                     if ((effectType === EffectType.BaseCrush 
                         || this.IsSameColorBaseDestroy(effectType) 
-                        || (this.m_blockerList[i].NearMatch() && isCanTriggerNearMatch && !this.m_blockerList[i].IsTriggerEffect && !this.m_blockerList[i].IsSwitching) 
+                        || (this.m_blockerList[i].NearMatch() && isCanTriggerNearMatch && !this.m_blockerList[i].IsTriggerEffect && !this.m_blockerList[i].IsSwitching))
                         && this.m_blockerList[i].Occupy() 
                         && (this.m_blockerList[i].TableData.Data.Layer === BlockLayer.Middle || this.m_blockerList[i].TableData.Data.Layer === BlockLayer.Top || this.m_blockerList[i].IsBlinds()) 
-                        && this.m_blockerList[i].PassiveMatch())) {
+                        && this.m_blockerList[i].PassiveMatch()) {
 
                         const layer = this.m_blockerList[i].TableData.Data.Layer;
                         if (layer === BlockLayer.BelowBottom && index === -1) {

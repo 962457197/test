@@ -15,6 +15,7 @@ function CheckAssets(isStart)
 
     const prefabBlockerPath = "prefab/blocker/other/";
     const prefabEffectPath = "prefab/effect/other/";
+    const audioPath = "audio/other/";
     const levelPath = "level/";
     const texturePath = "icon/other/";
 
@@ -24,21 +25,53 @@ function CheckAssets(isStart)
 
         MoveFilesRecursive(srcAssetsPath + prefabBlockerPath, destAssetsPath + prefabBlockerPath, "", true);
         MoveFilesRecursive(srcAssetsPath + prefabEffectPath, destAssetsPath + prefabEffectPath, "", true);
+        MoveFilesRecursive(srcAssetsPath + audioPath, destAssetsPath + audioPath, "", true);
         MoveFilesRecursive(srcAssetsPath + texturePath, destAssetsPath + texturePath, "", true);
-
     }
     else
     {
-        const jsonPath = path.join(Editor.Project.path, 'assets/resources/table/BuildConfig.json');
-        const jsonData  = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+        const buildConfigJsonPath = path.join(Editor.Project.path, 'assets/resources/table/BuildConfig.json');
+        const buildConfigData  = JSON.parse(fs.readFileSync(buildConfigJsonPath, 'utf-8'));
         // Editor.log('jsondata = ' + jsonData.TiledMapScale);
 
-        const levelFilePath = levelPath + jsonData.BuildLevelId + ".json";
+        const levelFilePath = levelPath + buildConfigData.BuildLevelId + ".json";
         fs.renameSync(srcAssetsPath + levelFilePath, destAssetsPath + levelFilePath);
         fs.renameSync(srcAssetsPath + levelFilePath + ".meta", destAssetsPath + levelFilePath + ".meta");
 
-        for (let i = 0; i < jsonData.BuildAssets.length; i++) {
-          const element = jsonData.BuildAssets[i];
+        const levelData  = JSON.parse(fs.readFileSync(destAssetsPath + levelFilePath, 'utf-8'));
+
+        let assetsName = [];
+        for (let i = 0; i < levelData.tiledData.length; i++) {
+            const tiledData = levelData.tiledData[i];
+
+            for (let j = 0; j < tiledData.blockDataList.length; j++) {
+                const blockData = tiledData.blockDataList[j];
+                if (blockData.id == 182 || blockData.id == 183 || blockData.id == 184)
+                {
+                    if (assetsName.indexOf('buttercookies') == -1)
+                    {
+                        assetsName.push("buttercookies");
+                    }
+                }
+                else if (blockData.id == 5 || blockData.id == 15 || blockData.id == 16)
+                {
+                    if (assetsName.indexOf('grass') == -1)
+                    {
+                        assetsName.push("grass");
+                    }
+                }
+                else if (blockData.id == 4)
+                {
+                    if (assetsName.indexOf('donut') == -1)
+                    {
+                        assetsName.push("donut");
+                    }
+                }
+            }
+        }
+
+        for (let i = 0; i < assetsName.length; i++) {
+          const element = assetsName[i];
 
           if (element.length == 0)
           {
@@ -49,29 +82,10 @@ function CheckAssets(isStart)
 
           MoveFilesRecursive(srcAssetsPath + prefabBlockerPath, destAssetsPath + prefabBlockerPath, element, false);
           MoveFilesRecursive(srcAssetsPath + prefabEffectPath, destAssetsPath + prefabEffectPath, element, false);
+          MoveFilesRecursive(srcAssetsPath + audioPath, destAssetsPath + audioPath, element, false);
           MoveFilesRecursive(srcAssetsPath + texturePath, destAssetsPath + texturePath, element, false);
       }
     }
-
-    // Editor.assetdb.refresh('assets');
-
-
-    // const AssetDB = Editor.require('asset-db');
-
-    // // 获取资源管理器实例
-    // let assetdb = AssetDB.assetdb();
-
-    // // 要刷新的文件夹路径
-    // let folderPath = "assets";
-
-    // // 刷新文件夹
-    // assetdb.refresh(folderPath, (err) => {
-    //   if (err) {
-    //     console.error("刷新文件夹失败：" + err);
-    //   } else {
-    //     console.log("文件夹刷新成功");
-    //   }
-    // });
 }
 
 function onBeforeBuildFinish (options, callback) {
@@ -95,7 +109,7 @@ function onBuildFinish (options, callback) {
 
   CheckAssets(false);
 
-  RefreshAsset();
+  RefreshAsset(false);
 
   callback();
 }
@@ -109,11 +123,11 @@ function MoveFilesRecursive(sourceDir, destDir, prefabName, isAll)
   items.forEach(item => {
     let sourcePath = path.join(sourceDir, item);
     let stats = fs.statSync(sourcePath);
-    //Editor.log('sourcePath = ' + sourcePath + ' stats.isFile() = ' + stats.isFile() + ' item.includes(prefabName) = ' + item.includes(prefabName) + " stats " + stats + " item = " + item);
+    //Editor.log('sourcePath = ' + sourcePath + ' stats.isFile() = ' + stats.isFile() + ' item.includes(prefabName) = ' + item.toLowerCase().includes(prefabName.toLowerCase()) + " stats " + stats + " item = " + item);
     if (stats.isDirectory()) {
       // 如果是目录，则递归其内容
       MoveFilesRecursive(sourcePath, destDir);
-    } else if (stats.isFile() && !item.includes('Readme') && (prefabName.length != 0 && item.includes(prefabName) || isAll)) {
+    } else if (stats.isFile() && !item.includes('Readme') && (prefabName.length != 0 && item.toLowerCase().includes(prefabName.toLowerCase()) || isAll)) {
 
       // // 检查是否为文件且符合名字条件
       // let destPath = path.join(destDir, item);
@@ -138,14 +152,22 @@ function MoveFilesRecursive(sourceDir, destDir, prefabName, isAll)
           Editor.error(`Failed to move: ${sourcePath} -> ${destFilePath}, Error: ${err}`);
         }
     }
-    
+
   });
 }
 
-function RefreshAsset()
+function RefreshAsset(isStart)
 {
-  Editor.assetdb.refresh("db://assets/art");
-  Editor.assetdb.refresh("db://assets/resources");
+    if (isStart)
+    {
+        Editor.assetdb.refresh("db://assets/art");
+        Editor.assetdb.refresh("db://assets/resources");
+    }
+    else
+    {
+        Editor.assetdb.refresh("db://assets/resources");
+        Editor.assetdb.refresh("db://assets/art");
+    }
 }
 
 module.exports = {
@@ -167,10 +189,21 @@ module.exports = {
           CheckAssets(false);
           CheckAssets(true);
 
-          RefreshAsset();
+          RefreshAsset(true);
 
           Editor.log("move-assets done !!!");
 
-      }
+      },
+
+      'reset-assets'() {
+        //do some work
+        Editor.log("reset-assets start !!!");
+
+        CheckAssets(false);
+        RefreshAsset(false);
+
+        Editor.log("reset-assets done !!!");
+
+    }
   }
 };

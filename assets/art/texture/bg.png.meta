@@ -11,7 +11,7 @@
   "height": 1280,
   "platformSettings": {},
   "subMetas": {
-    "Bg": {
+    "bg": {
       "ver": "1.0.4",
       "uuid": "2b4cc096-32d8-4d3a-8414-6161a7defaf8",
       "rawTextureUuid": "440d392e-f2aa-41ef-8d46-db239cc9b007",

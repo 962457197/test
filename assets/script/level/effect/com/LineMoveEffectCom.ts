@@ -96,6 +96,7 @@ export default class LineMoveEffectCom extends cc.Component {
         this.m_isStart = true;
         this.m_currentTimer = 0.02;
         this.m_offsetIndex = 0;
+        this.OnCheckMatch(this.m_offsetIndex);
     }
 
     update (dt) {

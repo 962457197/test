@@ -374,7 +374,7 @@ export class FallingManager {
     
     private ExecuteSlantFalling(emptyTiled: Tiled): void {
         const preTiled: Tiled | null = emptyTiled.OnGetSlantTiled();
-        if (preTiled !== null && preTiled.CanMoveBlocker != null) {
+        if (preTiled != null && preTiled.CanMoveBlocker != null) {
             const anim: FallingAnimation = this.PopFallingAnim();
             anim.Init(preTiled, emptyTiled, this.OnFallingEnd.bind(this), this.OnFallingInterrupt.bind(this));
             this.m_anims.push(anim);

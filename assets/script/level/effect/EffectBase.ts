@@ -835,6 +835,15 @@ export class EffectSquareAreaCrush extends EffectAreaBase
 
         AudioManager.Instance.PlaySource("Audio_Match_AreaCrusher");
 
+        cc.resources.load("prefab/effect/AreaEffect", (err, data: any) =>{
+            var effect = cc.instantiate(data);
+
+            effect.setParent(TiledMap.getInstance().m_effectRoot);
+            let spacePos = effect.parent.convertToNodeSpaceAR(this.m_orign.WorldPosition);
+            effect.setPosition(spacePos);
+
+            effect.zIndex = EffectZIndex.Layer2;
+        });
     }
 
     public Finish(): void {
@@ -2189,6 +2198,7 @@ export class EffectSameColorAndSameColor extends EffectBase
     public Finish(): void {
         super.Finish();
 
+        this.m_Data.IsSuccess = true;
         FSM.getInstance().MovingCanMatch = true;
         TiledMap.getInstance().SameColorTriggeringCount--;
 
