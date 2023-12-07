@@ -167,8 +167,6 @@ export default class Game extends cc.Component {
             if (Game.LoadingAssetCount <= 0)
             {
                 UIManager.Instance.OpenLevelGuide();
-                MatchTipsManager.Instance.OnBeginCheckTiledMap();
-
                 Game.m_gameState = GameState.Play;
             }
             return;

@@ -54,7 +54,7 @@ export class UIManager
     {
         if (this.m_uiLevelGuide != null)
         {
-            this.m_uiLevelGuide.node.destroy();
+            this.m_uiLevelGuide.Close();
             this.m_uiLevelGuide = null;
         }
     }

@@ -53,8 +53,8 @@ export class MatchTipsManager {
     m_AutoTimer: any;
     m_StopMatchTipsTimer: any;
     m_DirectionTipsTimer: any;
-    m_TipsBlockers: Blocker[];
-    m_MatchTipsData: MatchTipsData;
+    m_TipsBlockers: Blocker[] = [];
+    m_MatchTipsData: MatchTipsData = new MatchTipsData();
     m_specialTileds: Tiled[] = [];
     m_checkBlockers: Blocker[] = [];
 
@@ -63,6 +63,10 @@ export class MatchTipsManager {
             return;
         }
         this.m_IsTipsing = true;
+
+        this.m_MatchMap = {};
+        this.m_MatchItems = [];
+        this.m_TipsBlockers = [];
 
         for (let i = 0; i < TiledMap.getInstance().TiledArray.length; i++) {
             const orign = TiledMap.getInstance().TiledArray[i];

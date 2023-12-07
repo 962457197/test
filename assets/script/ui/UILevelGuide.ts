@@ -55,10 +55,37 @@ export default class UILevelGuide extends cc.Component {
                 this.Mask.setPosition(localPos);
                 this.CommonHandAnim.play("common_hand");
             }
+
+            if (TiledMap.getInstance().GuideStartTiled.CanMoveBlocker != null)
+            {
+                TiledMap.getInstance().GuideStartTiled.CanMoveBlocker.PlayMatchTipsAnimation(Direction.None);
+            }
+            if (TiledMap.getInstance().GuideEndTiled.CanMoveBlocker != null)
+            {
+                TiledMap.getInstance().GuideEndTiled.CanMoveBlocker.PlayMatchTipsAnimation(Direction.None);
+            }
         }
 
         this.Bg.setPosition(-this.Mask.position.x, -this.Mask.position.y);
         this.CommonHand.setPosition(this.Mask.position.x - Tiled.WIDTH / 2, this.Mask.position.y);
+    }
+
+    Close()
+    {
+        this.StopGuideTips();
+        this.node.destroy();
+    }
+
+    StopGuideTips()
+    {
+        if (TiledMap.getInstance().GuideStartTiled != null && TiledMap.getInstance().GuideStartTiled.CanMoveBlocker != null)
+        {
+            TiledMap.getInstance().GuideStartTiled.CanMoveBlocker.StopAnimation();
+        }
+        if (TiledMap.getInstance().GuideEndTiled != null && TiledMap.getInstance().GuideEndTiled.CanMoveBlocker != null)
+        {
+            TiledMap.getInstance().GuideEndTiled.CanMoveBlocker.StopAnimation();
+        }
     }
 
     Adpater()
