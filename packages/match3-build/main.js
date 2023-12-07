@@ -99,6 +99,8 @@ function onBeforeBuildFinish (options, callback) {
     CheckAssets(false);
 
     CheckAssets(true);
+
+    RefreshAsset(true);
     
     callback();
 }

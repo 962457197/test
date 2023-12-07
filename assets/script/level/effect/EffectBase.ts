@@ -617,6 +617,7 @@ export class EffectBaseCrush extends EffectBase {
 
                 effect.active = true;
                 effect.setParent(TiledMap.getInstance().m_blockerRoot);
+                effect.zIndex = BlockZIndex.Middle;
                 effect.setPosition(blkPosition);
 
                 cc.tween(effect)

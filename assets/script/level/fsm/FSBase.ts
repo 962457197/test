@@ -216,12 +216,17 @@ export class FSM extends FSBase
         return TiledMap.getInstance().UseStep >= 3 || TiledMap.getInstance().TotalTargetCount <= 0;
     }
 
-    OnUpdate()
+    m_fallTime = 3;
+    OnUpdate(dt)
     {
-        // if (this.IsGameEnd() && FallingManager.Instance.IsStopFalling())
-        // {
-        //     UIManager.Instance.OpenLevelPass();
-        // }
+        if (this.IsGameEnd() && this.m_fallTime >= 0)
+        {
+            this.m_fallTime -= dt;
+            if (this.m_fallTime <= 0)
+            {
+                UIManager.Instance.OpenLevelPass();
+            }
+        }
     }
 }
 
