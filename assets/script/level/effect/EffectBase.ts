@@ -1817,22 +1817,6 @@ export class EffectSameColorBase extends EffectSameColorInterface {
 
     public Start(): void {
         super.Start();
-
-        if (this.m_srcBlocker != null)
-        {
-            this.m_mostId = this.m_srcBlocker.Color;
-        }
-        else
-        {
-            this.m_mostId = TiledMap.getInstance().GetMostBaseID();
-        }
-        if (this.m_orign.CanMoveBlocker != null)
-        {
-            this.m_orign.CanMoveBlocker.Color = this.m_mostId;
-            this.m_orign.CanMoveBlocker.SetActive(false);
-        }
-
-
     }
 
     MatchCheck()
@@ -1904,6 +1888,21 @@ export class EffectSameColorBase extends EffectSameColorInterface {
 
     public Play(): void {
         super.Play();
+
+        if (this.m_srcBlocker != null)
+        {
+            this.m_mostId = this.m_srcBlocker.Color;
+        }
+        else
+        {
+            this.m_mostId = TiledMap.getInstance().GetMostBaseID();
+        }
+        if (this.m_orign.CanMoveBlocker != null)
+        {
+            this.m_orign.CanMoveBlocker.Color = this.m_mostId;
+            this.m_orign.CanMoveBlocker.SetActive(false);
+        }
+        
         this.MatchCheck();
         this.CreateEffect();
     }
