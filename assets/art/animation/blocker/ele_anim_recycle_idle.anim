@@ -1,0 +1,184 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "ele_anim_recycle_idle",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 3.6666666666666665,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "paths": {
+      "Dynamic": {
+        "props": {
+          "position": [],
+          "scale": [],
+          "angle": []
+        }
+      },
+      "Dynamic/UI_Gameplay_collectA": {
+        "props": {
+          "position": [
+            {
+              "frame": 0,
+              "value": [
+                0,
+                39.565,
+                0
+              ]
+            },
+            {
+              "frame": 1.8333333333333333,
+              "value": [
+                0,
+                -0.329,
+                0
+              ]
+            },
+            {
+              "frame": 3.6666666666666665,
+              "value": [
+                0,
+                -41.813,
+                0
+              ]
+            }
+          ],
+          "scale": [
+            {
+              "frame": 0,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1.1,
+                "y": 1.1
+              }
+            },
+            {
+              "frame": 1.8333333333333333,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1.2,
+                "y": 1.2
+              }
+            },
+            {
+              "frame": 3.6666666666666665,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1.1,
+                "y": 1.1
+              }
+            }
+          ],
+          "opacity": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 1.8333333333333333,
+              "value": 204
+            },
+            {
+              "frame": 3.6666666666666665,
+              "value": 0
+            }
+          ]
+        }
+      },
+      "Dynamic/UI_Gameplay_collectB": {
+        "props": {
+          "position": [
+            {
+              "frame": 0,
+              "value": [
+                0,
+                1.798,
+                0
+              ]
+            },
+            {
+              "frame": 1.8333333333333333,
+              "value": [
+                0,
+                -16.856,
+                0
+              ],
+              "curve": "constant"
+            },
+            {
+              "frame": 1.8666666666666667,
+              "value": [
+                0,
+                22.522,
+                0
+              ]
+            },
+            {
+              "frame": 3.6666666666666665,
+              "value": [
+                0,
+                1.798,
+                0
+              ]
+            }
+          ],
+          "opacity": [
+            {
+              "frame": 0,
+              "value": 204
+            },
+            {
+              "frame": 1.8333333333333333,
+              "value": 0
+            },
+            {
+              "frame": 1.8666666666666667,
+              "value": 0
+            },
+            {
+              "frame": 3.6666666666666665,
+              "value": 204
+            }
+          ],
+          "scale": [
+            {
+              "frame": 0,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1.1,
+                "y": 1.1
+              }
+            },
+            {
+              "frame": 1.8333333333333333,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1.2,
+                "y": 1.2
+              },
+              "curve": "constant"
+            },
+            {
+              "frame": 1.8666666666666667,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1,
+                "y": 1
+              }
+            },
+            {
+              "frame": 3.6666666666666665,
+              "value": {
+                "__type__": "cc.Vec2",
+                "x": 1.1,
+                "y": 1.1
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "events": []
+}
